@@ -40,7 +40,7 @@ jspm_packages
 profile-*
 
 # env
-.env
+# .env
 
 # mac files
 .DS_Store
