@@ -11,10 +11,14 @@ services:
       # En network_mode: host, le container partage la stack réseau de l'hôte,
       # donc localhost dans le container = localhost sur l'hôte = Ollama joignable.
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://localhost:11434}
-      # Forcé ici plutôt que de dépendre du chargement de backend/.env (non committé,
-      # peut être absent/désynchronisé sur l'hôte) : sans ça fastify-cli retombe
-      # sur son port par défaut 3000 au lieu de 8420.
+      # Tout ce bloc est forcé ici plutôt que de dépendre du chargement de backend/.env
+      # (non committé, peut être absent/désynchronisé sur l'hôte) : sans ça fastify-cli
+      # retombe sur son port par défaut 3000, le CORS plugin rejette toute requête
+      # (origin undefined), et les appels Ollama partent sans nom de modèle.
       PORT: ${PORT:-8420}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8421}
+      OLLAMA_GENERATION_MODEL: ${OLLAMA_GENERATION_MODEL:-mistral:latest}
+      OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-snowflake-arctic-embed:335m}
   frontend:
     build: ./frontend
     container_name: boby42-frontend
