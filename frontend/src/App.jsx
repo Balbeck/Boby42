@@ -30,23 +30,25 @@ function App() {
         )}
 
         {hasStarted && (
-          <div ref={containerRef} className="flex flex-col divide-y divide-chat-border/60 pt-10 pb-10">
-            {exchanges.map((exchange) => (
-              <Message
-                key={exchange.id}
-                question={exchange.question}
-                answer={exchange.answer}
-                loading={exchange.loading}
-              />
-            ))}
-            <div className="pt-8">
-              <ChatInput
-                onSend={sendQuestion}
-                onStop={stopGeneration}
-                isSending={isSending}
-                autoFocus
-              />
-              <Disclaimer />
+          <div ref={containerRef} className="flex flex-col pt-10 pb-10">
+            <div className="flex flex-col divide-y divide-chat-border/60">
+              {exchanges.map((exchange) => (
+                <Message
+                  key={exchange.id}
+                  question={exchange.question}
+                  answer={exchange.answer}
+                  loading={exchange.loading}
+                />
+              ))}
+              <div className="pt-8">
+                <ChatInput
+                  onSend={sendQuestion}
+                  onStop={stopGeneration}
+                  isSending={isSending}
+                  autoFocus
+                />
+                <Disclaimer />
+              </div>
             </div>
             <div ref={bottomRef} />
           </div>
