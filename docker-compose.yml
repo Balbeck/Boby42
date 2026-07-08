@@ -2,18 +2,15 @@ services:
   backend:
     build: ./backend
     container_name: boby42-backend
-    ports:
-      - "8420:8420"
+    network_mode: host
     volumes:
       - ./backend:/app
       - backend_node_modules:/app/node_modules
     environment:
-      # Ollama tourne nativement sur la machine hôte (hors Docker), pas comme service de ce compose.
-      # localhost dans backend/.env viserait le container lui-même ; on force donc l'accès à l'hôte.
-      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
+      # Ollama n'écoute que sur 127.0.0.1 sur l'hôte (config partagée 42AI, on n'y touche pas).
+      # En network_mode: host, le container partage la stack réseau de l'hôte,
+      # donc localhost dans le container = localhost sur l'hôte = Ollama joignable.
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://localhost:11434}
   frontend:
     build: ./frontend
     container_name: boby42-frontend
@@ -24,7 +21,6 @@ services:
       - frontend_node_modules:/app/node_modules
     depends_on:
       - backend
-
 volumes:
   backend_node_modules:
   frontend_node_modules:
