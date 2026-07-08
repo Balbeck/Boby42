@@ -8,5 +8,11 @@ export default defineConfig({
   server: {
     port: 8421,
     allowedHosts: ['42gpt.42ai.net'],
+    proxy: {
+      // Le backend tourne en network_mode: host sur la machine hôte ; ce container
+      // partage donc la même stack réseau (voir docker-compose.yml) et localhost:8420
+      // le joint directement, sans passer par un second tunnel Cloudflare.
+      '/chat': 'http://localhost:8420',
+    },
   },
 })
