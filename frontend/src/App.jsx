@@ -4,7 +4,7 @@ import Message from './components/Message'
 import { useChat } from './hooks/useChat'
 
 function App() {
-  const { exchanges, sendQuestion } = useChat()
+  const { exchanges, sendQuestion, stopGeneration, isSending } = useChat()
   const hasStarted = exchanges.length > 0
 
   return (
@@ -16,7 +16,12 @@ function App() {
               🎋 Bonjour 🌞
             </h1>
             <div className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2">
-              <ChatInput onSend={sendQuestion} autoFocus />
+              <ChatInput
+                onSend={sendQuestion}
+                onStop={stopGeneration}
+                isSending={isSending}
+                autoFocus
+              />
               <Disclaimer />
             </div>
           </div>
@@ -33,7 +38,12 @@ function App() {
               />
             ))}
             <div className="pt-8">
-              <ChatInput onSend={sendQuestion} autoFocus />
+              <ChatInput
+                onSend={sendQuestion}
+                onStop={stopGeneration}
+                isSending={isSending}
+                autoFocus
+              />
               <Disclaimer />
             </div>
           </div>

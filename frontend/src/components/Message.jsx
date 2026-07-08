@@ -7,8 +7,8 @@ const STEP_DELAY = 500
 
 function textForStep(step) {
   if (step < 6) return PHRASE_1 + DOTS[step % 3]
-  if (step === 6) return ''
-  return PHRASE_2 + DOTS[(step - 7) % 3]
+  if (step < 9) return DOTS[(step - 6) % 3]
+  return PHRASE_2 + DOTS[(step - 9) % 3]
 }
 
 function LoadingIndicator() {
