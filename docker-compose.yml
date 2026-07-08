@@ -11,6 +11,10 @@ services:
       # En network_mode: host, le container partage la stack réseau de l'hôte,
       # donc localhost dans le container = localhost sur l'hôte = Ollama joignable.
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://localhost:11434}
+      # Forcé ici plutôt que de dépendre du chargement de backend/.env (non committé,
+      # peut être absent/désynchronisé sur l'hôte) : sans ça fastify-cli retombe
+      # sur son port par défaut 3000 au lieu de 8420.
+      PORT: ${PORT:-8420}
   frontend:
     build: ./frontend
     container_name: boby42-frontend
