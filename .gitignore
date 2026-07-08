@@ -9,17 +9,17 @@ build/
 **/build/
 
 # Env
-.env
-.env.*
-!.env.example
-**/.env
-**/.env.*
-!**/.env.example
-# TEMP: .env committed so `git pull` on the host always has the right PORT/OLLAMA_BASE_URL
-# without relying on a manually-created file. Revert (re-ignore) once the host has its own
-# persistent .env provisioning.
-!backend/.env
-!frontend/.env
+# .env
+# .env.*
+# !.env.example
+# **/.env
+# **/.env.*
+# !**/.env.example
+# # TEMP: .env committed so `git pull` on the host always has the right PORT/OLLAMA_BASE_URL
+# # without relying on a manually-created file. Revert (re-ignore) once the host has its own
+# # persistent .env provisioning.
+# !backend/.env
+# !frontend/.env
 
 # Logs
 *.log
