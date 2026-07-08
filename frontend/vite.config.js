@@ -7,5 +7,6 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 8421,
+    allowedHosts: ['42gpt.42ai.net'],
   },
 })
