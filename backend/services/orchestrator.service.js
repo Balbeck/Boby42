@@ -3,7 +3,7 @@
 const { generateAnswer } = require('./ollama.service')
 const { retrieve } = require('./retriever.service')
 
-const NO_DOCUMENTS_ANSWER = "🤔 Je n'ai malheuresement aucune information à ce sujet dans mes datas.\nJe vous conseille la https://meta.intra.42.fr/articles/read-the-french-manual-of-42paris.\nVous y trouverez peut-être votre réponse !"
+const NO_DOCUMENTS_ANSWER = "🤔 Je n'ai malheuresement aucune information à ce sujet dans mes datas.\nJe vous conseille la https://ft42.notion.site/rtfm-stud .\nVous y trouverez peut-être votre réponse !"
 
 /**
  * Builds the RAG prompt: question + retrieved documents as context.
