@@ -33,3 +33,10 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+.gitignore
+CLAUDE.md
+**/CLAUDE.md
+.claude/
+**/.claude/
+README.md
