@@ -39,6 +39,9 @@ jspm_packages
 # 0x
 profile-*
 
+# env
+.env
+
 # mac files
 .DS_Store
 

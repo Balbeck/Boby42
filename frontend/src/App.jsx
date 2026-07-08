@@ -29,6 +29,7 @@ function App() {
                 key={exchange.id}
                 question={exchange.question}
                 answer={exchange.answer}
+                loading={exchange.loading}
               />
             ))}
             <div className="pt-8">
