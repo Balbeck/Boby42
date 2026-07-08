@@ -16,7 +16,7 @@ services:
       # retombe sur son port par défaut 3000, le CORS plugin rejette toute requête
       # (origin undefined), et les appels Ollama partent sans nom de modèle.
       PORT: ${PORT:-8420}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8421}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://42gpt.42ai.net}
       OLLAMA_GENERATION_MODEL: ${OLLAMA_GENERATION_MODEL:-mistral:latest}
       OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-snowflake-arctic-embed:335m}
   frontend:
