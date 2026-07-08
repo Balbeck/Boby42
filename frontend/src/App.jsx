@@ -1,10 +1,12 @@
 import ChatInput from './components/ChatInput'
 import Disclaimer from './components/Disclaimer'
 import Message from './components/Message'
+import { useAutoScroll } from './hooks/useAutoScroll'
 import { useChat } from './hooks/useChat'
 
 function App() {
   const { exchanges, sendQuestion, stopGeneration, isSending } = useChat()
+  const { containerRef, bottomRef } = useAutoScroll()
   const hasStarted = exchanges.length > 0
 
   return (
@@ -28,7 +30,7 @@ function App() {
         )}
 
         {hasStarted && (
-          <div className="flex flex-col divide-y divide-chat-border/60 pt-10 pb-10">
+          <div ref={containerRef} className="flex flex-col divide-y divide-chat-border/60 pt-10 pb-10">
             {exchanges.map((exchange) => (
               <Message
                 key={exchange.id}
@@ -46,6 +48,7 @@ function App() {
               />
               <Disclaimer />
             </div>
+            <div ref={bottomRef} />
           </div>
         )}
       </div>

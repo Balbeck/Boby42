@@ -16,14 +16,14 @@ module.exports = async function (fastify, opts) {
   fastify.post('/chat', { schema }, async function (request, reply) {
     const { question } = request.body
 
-    let answer
+    let answer, sources
     try {
-      answer = await getAnswer(question)
+      ({ answer, sources } = await getAnswer(question))
     } catch (err) {
       request.log.error(err)
       return reply.badGateway('Failed to get an answer from Ollama')
     }
 
-    return { answer, sources: [] }
+    return { answer, sources }
   })
 }

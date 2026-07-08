@@ -1,0 +1,122 @@
+{
+  "documents": [
+    {
+      "filename": "/LLMWiki/documents/L_incubateur de 42 Paris/L_incubateur de 42 Paris.md",
+      "questions": [
+        "Qu'est-ce que l'incubateur de 42 Paris ?",
+        "Où est situé l'incubateur de 42 Paris ?",
+        "Qui peut candidater à l'incubateur de 42 Paris ?",
+        "Tous les cofondateurs doivent-ils être issus de 42 pour candidater à l'incubateur ?",
+        "Quelle est la durée du programme d'incubation ?",
+        "Peut-on participer à l'incubateur à distance ?",
+        "Peut-on avoir une activité professionnelle en parallèle de l'incubateur ?",
+        "Quels sont les critères d'évaluation des candidatures à l'incubateur ?",
+        "Comment candidater à l'incubateur de 42 Paris ?",
+        "Combien coûte le programme d'incubation de 42 Paris ?",
+        "L'incubateur de 42 prend-il des parts dans les startups ?",
+        "Y a-t-il un Demo Day à la fin du programme ?",
+        "Peut-on candidater plusieurs fois à l'incubateur ?",
+        "Que comprend l'accompagnement proposé par l'incubateur ?",
+        "Peut-on rejoindre l'incubateur de 42 si l'on est déjà dans un autre incubateur ?",
+        "Que se passe-t-il après les 9 mois de programme ?",
+        "Y a-t-il un suivi alumni après l'incubation ?",
+        "Peut-on être dans le programme de 42 et un autre programme de STATION F en même temps ?",
+        "À quel stade doit être le projet pour candidater à l'incubateur ?",
+        "Je suis étudiant de 42 en alternance, puis-je candidater à l'incubateur ?"
+      ]
+    },
+    {
+      "filename": "/LLMWiki/documents/Titres RNCP/Titres RNCP.md",
+      "questions": [
+        "Quels sont les titres RNCP proposés par 42 Paris ?",
+        "Les titres RNCP de 42 sont-ils obligatoires pour valider le cursus ?",
+        "Faut-il le baccalauréat pour obtenir un titre RNCP à 42 ?",
+        "Quel est le niveau du titre RNCP niveau 6 de 42 Paris (équivalence diplôme) ?",
+        "Quel est le niveau du titre RNCP niveau 7 de 42 Paris (équivalence diplôme) ?",
+        "Comment obtenir un titre RNCP à 42 Paris ?",
+        "Quel niveau 42 faut-il atteindre pour obtenir le titre niveau 6 ?",
+        "Quel niveau 42 faut-il atteindre pour obtenir le titre niveau 7 ?",
+        "Quels sont les prérequis pédagogiques pour valider le titre niveau 6 ?",
+        "Quels sont les prérequis pédagogiques pour valider le titre niveau 7 ?",
+        "Quelles sont les spécialisations disponibles pour le titre RNCP niveau 6 ?",
+        "Quelles sont les spécialisations disponibles pour le titre RNCP niveau 7 ?",
+        "Qu'est-ce que la VAE et comment y accéder pour un titre RNCP à 42 ?",
+        "Quelles expériences professionnelles sont nécessaires pour valider un titre RNCP ?",
+        "Peut-on faire le parcours RNCP en alternance à 42 Paris ?",
+        "Quelles sont les dates des sessions du jury de certification en 2026 ?",
+        "Comment s'inscrire à une session du jury de certification RNCP ?",
+        "De quoi est composé le jury de certification RNCP à 42 ?",
+        "Peut-on cumuler le titre niveau 6 et le titre niveau 7 ?",
+        "Les titres RNCP de 42 sont-ils reconnus à l'international ?",
+        "Comment suivre son avancement dans le parcours RNCP ?",
+        "Est-ce que l'obtention d'un titre RNCP donne automatiquement le statut Alumni ?"
+      ]
+    },
+    {
+      "filename": "/LLMWiki/documents/Visiter le campus/Visiter le campus.md",
+      "questions": [
+        "Quels sont les horaires de visite autorisés au campus de 42 Paris ?",
+        "Peut-on faire visiter le campus de 42 Paris à des amis ou de la famille ?",
+        "Quelle est la durée maximale d'une visite au campus de 42 Paris ?",
+        "Combien de visiteurs externes peut-on emmener lors d'une visite à 42 Paris ?",
+        "Les mineurs peuvent-ils visiter le campus de 42 Paris ?",
+        "Un candidat en piscine peut-il faire visiter le campus ?",
+        "Un alumni peut-il accéder au campus de 42 Paris ?",
+        "Quelles sont les règles d'accès pour les alumni au campus ?",
+        "Comment organiser une visite si l'on est étudiant d'un autre campus 42 ?",
+        "Comment venir télétravailler à 42 Paris depuis un autre campus 42 ?",
+        "Quel est le délai pour demander l'accès au télétravail depuis 42 Paris ?",
+        "Les étudiants 'close' peuvent-ils accéder au campus pour une visite ?",
+        "Quelle est l'adresse du campus principal de 42 Paris ?",
+        "Le campus de 42 Paris est-il accessible aux personnes à mobilité réduite ?",
+        "Qui contacter pour des besoins d'accessibilité au campus de 42 Paris ?"
+      ]
+    },
+    {
+      "filename": "/LLMWiki/documents/Wi-Fi/Wi-Fi.md",
+      "questions": [
+        "Comment se connecter au Wi-Fi de 42 Paris ?",
+        "Quel est le nom du réseau Wi-Fi de 42 Paris (SSID) ?",
+        "Quels sont les paramètres de connexion au Wi-Fi de 42 Paris ?",
+        "Quelle méthode EAP utiliser pour se connecter au Wi-Fi de 42 Paris ?",
+        "Comment se connecter au Wi-Fi de 42 Paris sur iPhone ou macOS ?",
+        "Comment se connecter au Wi-Fi de 42 Paris sur Android ?",
+        "Comment se connecter au Wi-Fi de 42 Paris sur Windows ?",
+        "Comment configurer le Wi-Fi de 42 Paris en ligne de commande sur Linux ?",
+        "Comment se connecter au Wi-Fi si je suis sur 42 Next ?",
+        "Quel est le code d'accès au Wi-Fi pour les étudiants sur 42 Next ?",
+        "Où trouver le mot de passe pour se connecter au Wi-Fi de 42 Paris ?"
+      ]
+    },
+    {
+      "filename": "/LLMWiki/documents/Work Experience/Work Experience.md",
+      "questions": [
+        "Qu'est-ce que le projet Work Experience à 42 Paris ?",
+        "Quels sont les différents projets Work Experience disponibles à 42 Paris ?",
+        "Quelles sont les conditions d'éligibilité au projet Work Experience I ?",
+        "Quelles sont les conditions d'éligibilité au projet Work Experience II ?",
+        "Peut-on faire un stage en full télétravail dans le cadre d'un Work Experience ?",
+        "Peut-on faire un stage à l'étranger dans le cadre d'un Work Experience ?",
+        "Quel est le délai de traitement d'une convention de stage à 42 Paris ?",
+        "Peut-on commencer un stage avant la signature de la convention ?",
+        "Comment créer une convention de stage à 42 Paris ?",
+        "Peut-on transformer un CDI ou CDD en Work Experience ?",
+        "Peut-on valoriser une mission freelance dans le cadre d'un Work Experience ?",
+        "Quelle est la durée minimale d'un stage pour le projet Work Experience I ?",
+        "Quelle est la durée requise pour le projet Work Experience II ?",
+        "Peut-on faire un stage de moins de 4 mois à 42 Paris ?",
+        "Quels sont les avantages auxquels j'ai droit en tant que stagiaire ?",
+        "Quelle est la rémunération minimale légale pour un stage en France ?",
+        "Peut-on faire un stage non rémunéré à 42 Paris ?",
+        "Comment mettre fin à un stage de manière anticipée ?",
+        "Gagne-t-on de l'XP si le stage se termine avant la date prévue ?",
+        "Peut-on cumuler un stage et un contrat de travail dans la même entreprise ?",
+        "Quelles sont les évaluations obligatoires pour valider un projet Work Experience ?",
+        "Que faire si l'entreprise annule le stage après la création du projet Work Experience ?",
+        "Que faire en cas de problème ou de litige avec l'entreprise d'accueil ?",
+        "Que faire si mon tuteur de stage change en cours de stage ?",
+        "Quelles sont mes obligations en tant que stagiaire dans le cadre du Work Experience ?"
+      ]
+    }
+  ]
+}
