@@ -1,4 +1,5 @@
 import ChatInput from './components/ChatInput'
+import Disclaimer from './components/Disclaimer'
 import Message from './components/Message'
 import { useChat } from './hooks/useChat'
 
@@ -10,14 +11,14 @@ function App() {
     <div className="flex min-h-svh justify-center bg-chat-bg">
       <div className="flex w-full max-w-2xl flex-col px-4">
         {!hasStarted && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-8 pb-32">
-            <h1 className="text-3xl font-medium text-chat-text">
+          <div className="relative flex-1">
+            <h1 className="absolute top-[25%] left-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center text-3xl font-medium text-chat-text">
               🎋 Bonjour 🌞
             </h1>
-            <h1 className="text-2xl font-medium text-chat-text">
-              🤖 Je suis Boby votre assistant 42
-            </h1>
-            <ChatInput onSend={sendQuestion} autoFocus />
+            <div className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2">
+              <ChatInput onSend={sendQuestion} autoFocus />
+              <Disclaimer />
+            </div>
           </div>
         )}
 
@@ -32,6 +33,7 @@ function App() {
             ))}
             <div className="pt-8">
               <ChatInput onSend={sendQuestion} autoFocus />
+              <Disclaimer />
             </div>
           </div>
         )}
