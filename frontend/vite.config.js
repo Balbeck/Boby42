@@ -12,7 +12,13 @@ export default defineConfig({
       // Le backend tourne en network_mode: host sur la machine hôte ; ce container
       // partage donc la même stack réseau (voir docker-compose.yml) et localhost:8420
       // le joint directement, sans passer par un second tunnel Cloudflare.
+
+      // * * * [ Prod ] * * *
       '/chat': 'http://localhost:8420',
+
+      // // // * * * [ Dev ]
+      // '/chat': 'http://host.docker.internal:8420',
+
     },
   },
 })

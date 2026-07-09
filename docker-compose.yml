@@ -2,7 +2,16 @@ services:
   backend:
     build: ./backend
     container_name: boby42-backend
+
+    # * * * [ Prod ] * * * (machine 42AI, Linux : network_mode host = vrai localhost partagé)
     network_mode: host
+
+    # # # * * * [ Dev ] * * * (Docker Desktop Mac : "host" ne partage que le réseau de la VM
+    # ports:
+    #   - "8420:8420"
+    # # # interne, jamais le vrai localhost du Mac -> on publie les ports classiquement)
+
+
     volumes:
       - ./backend:/app
       - backend_node_modules:/app/node_modules
@@ -10,7 +19,16 @@ services:
       # Ollama n'écoute que sur 127.0.0.1 sur l'hôte (config partagée 42AI, on n'y touche pas).
       # En network_mode: host, le container partage la stack réseau de l'hôte,
       # donc localhost dans le container = localhost sur l'hôte = Ollama joignable.
+
+
+      # * * * [ Prod ] * * *
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://localhost:11434}
+
+      # # # * * * [ Dev ] * * * (pas de network_mode host -> localhost dans le container
+      # OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      # # # = le container lui-même ; host.docker.internal = le vrai Mac, où tourne Ollama)
+
+
       # Tout ce bloc est forcé ici plutôt que de dépendre du chargement de backend/.env
       # (non committé, peut être absent/désynchronisé sur l'hôte) : sans ça fastify-cli
       # retombe sur son port par défaut 3000, le CORS plugin rejette toute requête
@@ -19,6 +37,7 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:-https://42gpt.42ai.net}
       OLLAMA_GENERATION_MODEL: ${OLLAMA_GENERATION_MODEL:-mistral:latest}
       OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-snowflake-arctic-embed:335m}
+
   frontend:
     build: ./frontend
     container_name: boby42-frontend
@@ -26,7 +45,17 @@ services:
     # comme le backend : le proxy Vite (vite.config.js) joint localhost:8420 pour
     # relayer /chat côté serveur, sans passer par un second tunnel Cloudflare
     # (seul le frontend est exposé publiquement via le tunnel, sur localhost:8421).
+
+
+    # * * * [ Prod ] * * *
     network_mode: host
+
+    # # # * * * [ Dev ] * * * (Docker Desktop Mac : idem backend, on publie le port pour
+    # ports:
+    #   - "8421:8421"
+    # # # que le navigateur sur le Mac puisse atteindre le serveur Vite du container)
+
+
     volumes:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules
