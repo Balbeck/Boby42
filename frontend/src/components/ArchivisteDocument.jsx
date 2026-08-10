@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 /**
  * Un document trouvé, replié par défaut. Le contenu n'est chargé (via onExpand)
@@ -44,9 +46,9 @@ export default function ArchivisteDocument({ document, onExpand }) {
           {document.loading ? (
             <div className="text-sm italic text-chat-text-muted">Chargement...</div>
           ) : (
-            <pre className="overflow-x-auto whitespace-pre-wrap break-words font-sans text-sm text-chat-text">
-              {document.content}
-            </pre>
+            <div className="prose prose-invert prose-sm max-w-none prose-a:text-chat-green">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{document.content}</ReactMarkdown>
+            </div>
           )}
         </div>
       )}
