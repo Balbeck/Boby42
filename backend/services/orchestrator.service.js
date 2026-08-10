@@ -39,9 +39,10 @@ RÉPONSE :`
  * Orchestrates the RAG + LLM flow for a given question.
  *
  * @param {string} question
- * @returns {Promise<{answer: string, sources: {name: string, path: string, score: number}[]}>}
+ * @param {{includeContent?: boolean}} [options]
+ * @returns {Promise<{answer: string, sources: {name: string, path: string, score: number, content?: string}[]}>}
  */
-async function getAnswer(question) {
+async function getAnswer(question, { includeContent = false } = {}) {
   const documents = await retrieve(question)
 
   if (documents.length === 0) {
@@ -50,7 +51,9 @@ async function getAnswer(question) {
 
   const prompt = buildPrompt(question, documents)
   const answer = await generateAnswer(prompt)
-  const sources = documents.map(({ name, path, score }) => ({ name, path, score }))
+  const sources = documents.map(({ name, path, score, content }) =>
+    includeContent ? { name, path, score, content } : { name, path, score }
+  )
 
   return { answer, sources }
 }
