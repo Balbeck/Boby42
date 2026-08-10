@@ -3,6 +3,7 @@
  * @property {string} id
  * @property {string} question
  * @property {string} answer
+ * @property {Source[]} [sources]
  * @property {boolean} loading
  */
 
@@ -11,6 +12,7 @@
  * @property {string} name
  * @property {string} path
  * @property {number} score
+ * @property {string} [content]
  */
 
 /**

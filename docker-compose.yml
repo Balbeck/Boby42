@@ -3,13 +3,13 @@ services:
     build: ./backend
     container_name: boby42-backend
 
-    # * * * [ Prod ] * * * (machine 42AI, Linux : network_mode host = vrai localhost partagé)
-    network_mode: host
+    # # * * * [ Prod ] * * * (machine 42AI, Linux : network_mode host = vrai localhost partagé)
+    # network_mode: host
 
-    # # # * * * [ Dev ] * * * (Docker Desktop Mac : "host" ne partage que le réseau de la VM
-    # ports:
-    #   - "8420:8420"
-    # # # interne, jamais le vrai localhost du Mac -> on publie les ports classiquement)
+    # # * * * [ Dev ] * * * (Docker Desktop Mac : "host" ne partage que le réseau de la VM
+    ports:
+      - "8420:8420"
+    # # interne, jamais le vrai localhost du Mac -> on publie les ports classiquement)
 
 
     volumes:
@@ -21,12 +21,12 @@ services:
       # donc localhost dans le container = localhost sur l'hôte = Ollama joignable.
 
 
-      # * * * [ Prod ] * * *
-      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://localhost:11434}
+      # # * * * [ Prod ] * * *
+      # OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://localhost:11434}
 
-      # # # * * * [ Dev ] * * * (pas de network_mode host -> localhost dans le container
-      # OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
-      # # # = le container lui-même ; host.docker.internal = le vrai Mac, où tourne Ollama)
+      # # * * * [ Dev ] * * * (pas de network_mode host -> localhost dans le container
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      # # = le container lui-même ; host.docker.internal = le vrai Mac, où tourne Ollama)
 
 
       # Tout ce bloc est forcé ici plutôt que de dépendre du chargement de backend/.env
@@ -47,13 +47,13 @@ services:
     # (seul le frontend est exposé publiquement via le tunnel, sur localhost:8421).
 
 
-    # * * * [ Prod ] * * *
-    network_mode: host
+    # # * * * [ Prod ] * * *
+    # network_mode: host
 
-    # # # * * * [ Dev ] * * * (Docker Desktop Mac : idem backend, on publie le port pour
-    # ports:
-    #   - "8421:8421"
-    # # # que le navigateur sur le Mac puisse atteindre le serveur Vite du container)
+    # # * * * [ Dev ] * * * (Docker Desktop Mac : idem backend, on publie le port pour
+    ports:
+      - "8421:8421"
+    # # que le navigateur sur le Mac puisse atteindre le serveur Vite du container)
 
 
     volumes:

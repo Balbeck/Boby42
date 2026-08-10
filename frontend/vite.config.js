@@ -13,11 +13,21 @@ export default defineConfig({
       // partage donc la même stack réseau (voir docker-compose.yml) et localhost:8420
       // le joint directement, sans passer par un second tunnel Cloudflare.
 
-      // * * * [ Prod ] * * *
-      '/chat': 'http://localhost:8420',
+      // // * * * [ Prod ] * * *
+      // '/chat': 'http://localhost:8420',
+      // '/archiviste': {
+      //   target: 'http://localhost:8420',
+      //   // '/archiviste' est à la fois une route React Router (page) et un endpoint API :
+      //   // ne proxyfier que les POST, laisser Vite servir la page pour les GET (navigation directe).
+      //   bypass: (req) => (req.method !== 'POST' ? req.url : undefined),
+      // },
 
-      // // // * * * [ Dev ]
-      // '/chat': 'http://host.docker.internal:8420',
+      // // * * * [ Dev ]
+      '/chat': 'http://host.docker.internal:8420',
+      '/archiviste': {
+        target: 'http://host.docker.internal:8420',
+        bypass: (req) => (req.method !== 'POST' ? req.url : undefined),
+      },
 
     },
   },
