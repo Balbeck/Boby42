@@ -5,7 +5,7 @@ import { useAutoScroll } from './hooks/useAutoScroll'
 import { useArchiviste } from './hooks/useArchiviste'
 
 function ArchivisteApp() {
-  const { exchanges, sendQuestion, stopGeneration, isSending } = useArchiviste()
+  const { exchanges, sendQuestion, stopGeneration, isSending, loadDocument } = useArchiviste()
   const { containerRef, bottomRef } = useAutoScroll()
   const hasStarted = exchanges.length > 0
 
@@ -36,9 +36,10 @@ function ArchivisteApp() {
                 <ArchivisteMessage
                   key={exchange.id}
                   question={exchange.question}
-                  answer={exchange.answer}
-                  sources={exchange.sources}
+                  documents={exchange.documents}
                   loading={exchange.loading}
+                  error={exchange.error}
+                  onLoadDocument={(doc) => loadDocument(exchange.id, doc)}
                 />
               ))}
               <div className="pt-8">

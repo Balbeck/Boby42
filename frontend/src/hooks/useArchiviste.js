@@ -1,10 +1,28 @@
 import { useCallback, useRef, useState } from 'react'
-import { sendMessage } from '../services/archivisteApi'
+import { search, fetchDocument } from '../services/archivisteApi'
 
-/** @import { Exchange } from '../types/types.js' */
+/** @import { ArchivisteExchange, ArchivisteDocument } from '../types/types.js' */
+
+/**
+ * @param {ArchivisteExchange[]} exchanges
+ * @param {string} exchangeId
+ * @param {string} docName
+ * @param {Partial<ArchivisteDocument>} patch
+ */
+function patchDocument(exchanges, exchangeId, docName, patch) {
+  return exchanges.map((exchange) => {
+    if (exchange.id !== exchangeId) return exchange
+    return {
+      ...exchange,
+      documents: exchange.documents.map((doc) =>
+        doc.name === docName ? { ...doc, ...patch } : doc,
+      ),
+    }
+  })
+}
 
 export function useArchiviste() {
-  /** @type {[Exchange[], Function]} */
+  /** @type {[ArchivisteExchange[], Function]} */
   const [exchanges, setExchanges] = useState([])
   const [isSending, setIsSending] = useState(false)
   const abortControllerRef = useRef(null)
@@ -19,26 +37,25 @@ export function useArchiviste() {
     const controller = new AbortController()
     abortControllerRef.current = controller
 
-    setExchanges((prev) => [
-      ...prev,
-      { id, question: trimmed, answer: '', sources: [], loading: true },
-    ])
+    setExchanges((prev) => [...prev, { id, question: trimmed, documents: [], loading: true }])
     setIsSending(true)
 
     try {
-      const { answer, sources } = await sendMessage(trimmed, { signal: controller.signal })
+      const { documents } = await search(trimmed, { signal: controller.signal })
+      const sorted = [...documents]
+        .sort((a, b) => b.score - a.score)
+        .map((doc) => ({ ...doc, loading: false, loaded: false }))
+
       setExchanges((prev) =>
         prev.map((exchange) =>
-          exchange.id === id ? { ...exchange, answer, sources, loading: false } : exchange,
+          exchange.id === id ? { ...exchange, documents: sorted, loading: false } : exchange,
         ),
       )
     } catch (err) {
       if (err.name === 'AbortError') return
       setExchanges((prev) =>
         prev.map((exchange) =>
-          exchange.id === id
-            ? { ...exchange, answer: `Erreur : ${err.message}`, loading: false }
-            : exchange,
+          exchange.id === id ? { ...exchange, loading: false, error: err.message } : exchange,
         ),
       )
     } finally {
@@ -59,5 +76,29 @@ export function useArchiviste() {
     abortControllerRef.current = null
   }, [])
 
-  return { exchanges, sendQuestion, stopGeneration, isSending }
+  /**
+   * @param {string} exchangeId
+   * @param {ArchivisteDocument} doc
+   */
+  const loadDocument = useCallback(async (exchangeId, doc) => {
+    if (doc.loaded || doc.loading) return
+
+    setExchanges((prev) => patchDocument(prev, exchangeId, doc.name, { loading: true }))
+
+    try {
+      const { content } = await fetchDocument(doc.url)
+      setExchanges((prev) =>
+        patchDocument(prev, exchangeId, doc.name, { content, loading: false, loaded: true }),
+      )
+    } catch (err) {
+      setExchanges((prev) =>
+        patchDocument(prev, exchangeId, doc.name, {
+          loading: false,
+          content: `Erreur : ${err.message}`,
+        }),
+      )
+    }
+  }, [])
+
+  return { exchanges, sendQuestion, stopGeneration, isSending, loadDocument }
 }

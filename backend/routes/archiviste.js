@@ -1,6 +1,6 @@
 'use strict'
 
-const { getAnswer } = require('../services/orchestrator.service')
+const { retrieve } = require('../services/retriever.service')
 
 const schema = {
   body: {
@@ -16,14 +16,23 @@ module.exports = async function (fastify, opts) {
   fastify.post('/archiviste', { schema }, async function (request, reply) {
     const { question } = request.body
 
-    let answer, sources
+    let documents
     try {
-      ({ answer, sources } = await getAnswer(question, { includeContent: true }))
+      documents = await retrieve(question)
     } catch (err) {
       request.log.error(err)
-      return reply.badGateway('Failed to get an answer from Ollama')
+      return reply.badGateway('Failed to search the document base')
     }
 
-    return { answer, sources }
+    const results = documents.map(({ name, score }) => {
+      const cleanName = name.replace(/\.md$/, '')
+      return {
+        name: cleanName,
+        score,
+        url: `/archiviste/documents/${encodeURIComponent(cleanName)}`
+      }
+    })
+
+    return { count: results.length, documents: results }
   })
 }
