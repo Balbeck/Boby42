@@ -1,6 +1,7 @@
 import ChatInput from './components/ChatInput'
 import Disclaimer from './components/Disclaimer'
 import Message from './components/Message'
+import PageSwitcher from './components/PageSwitcher'
 import { useAutoScroll } from './hooks/useAutoScroll'
 import { useChat } from './hooks/useChat'
 
@@ -11,6 +12,9 @@ function App() {
 
   return (
     <div className="flex min-h-svh justify-center bg-chat-bg">
+      <div className="fixed top-4 left-4 z-20">
+        <PageSwitcher />
+      </div>
       <div className="flex w-full max-w-2xl flex-col px-4">
         {!hasStarted && (
           <div className="relative flex-1">

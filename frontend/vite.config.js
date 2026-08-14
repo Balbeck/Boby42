@@ -14,14 +14,17 @@ export default defineConfig({
     port: Number(process.env.FRONTEND_PORT),
     allowedHosts: (process.env.VITE_ALLOWED_HOSTS || '').split(',').filter(Boolean),
     proxy: {
-      '/chat': backendTarget,
       '/BaseDocumentaire': backendTarget,
       '/archiviste/documents': backendTarget,
+      // '/chat' and '/archiviste' (no suffix) are each both a React Router
+      // page and a POST-only API endpoint: only proxy POST, let Vite serve
+      // the page for GET (direct navigation / refresh).
+      '/chat': {
+        target: backendTarget,
+        bypass: (req) => (req.method !== 'POST' ? req.url : undefined),
+      },
       '/archiviste': {
         target: backendTarget,
-        // '/archiviste' (no suffix) is both a React Router page and an API
-        // endpoint: only proxy POST, let Vite serve the page for GET
-        // (direct navigation / refresh).
         bypass: (req) => (req.method !== 'POST' ? req.url : undefined),
       },
     },

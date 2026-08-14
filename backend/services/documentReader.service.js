@@ -29,31 +29,27 @@ function resolveNotionDir(language) {
 }
 
 /**
- * Lists the names of all documents available on disk (one folder per document).
- * Used as a whitelist to validate document names coming from request params.
+ * Lists the names of all documents available on disk (data/documents/Notion/,
+ * one flat .md file per document). Used as a whitelist to validate document
+ * names coming from request params. Delegates to listBaseDocumentaireNames
+ * with the 'origin' language, stripping the .md extension to match this
+ * legacy route's name-without-extension contract.
  *
  * @returns {Promise<string[]>}
  */
 async function listDocumentNames() {
-  const entries = await fs.readdir(DOCUMENTS_ROOT, { withFileTypes: true })
-  return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name)
+  const names = await listBaseDocumentaireNames('origin')
+  return names.map((name) => name.replace(/\.md$/, ''))
 }
 
 /**
- * Reads a document's raw markdown content by name.
+ * Reads a document's raw markdown content by name (no .md extension).
  *
  * @param {string} name
  * @returns {Promise<{name: string, content: string} | null>} null if name isn't a known document
  */
 async function readDocumentByName(name) {
-  const knownNames = await listDocumentNames()
-  if (!knownNames.includes(name)) {
-    return null
-  }
-
-  const filePath = path.join(DOCUMENTS_ROOT, name, `${name}.md`)
-  const content = await fs.readFile(filePath, 'utf-8')
-  return { name, content }
+  return readBaseDocumentaireDocument('origin', `${name}.md`)
 }
 
 /**
