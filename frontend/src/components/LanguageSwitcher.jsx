@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 const LANGUAGES = [
   { code: 'fr', flag: '🇫🇷', label: 'Fr' },
-  { code: 'en', flag: '🇬🇧', label: 'Eng' },
+  { code: 'en', flag: '🇬🇧', label: 'En' },
 ]
 
 /**
@@ -64,9 +64,8 @@ export default function LanguageSwitcher({ language, onChange }) {
               role="option"
               aria-selected={lang.code === language}
               onClick={() => handleSelect(lang.code)}
-              className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm whitespace-nowrap transition-colors hover:bg-chat-surface-2 ${
-                lang.code === language ? 'text-chat-green' : 'text-chat-text'
-              }`}
+              className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm whitespace-nowrap transition-colors hover:bg-chat-surface-2 ${lang.code === language ? 'text-chat-green' : 'text-chat-text'
+                }`}
             >
               <span>{lang.flag}</span>
               <span>{lang.label}</span>

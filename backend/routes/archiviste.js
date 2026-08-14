@@ -5,16 +5,17 @@ const { retrieve } = require('../services/retriever.service')
 const schema = {
   body: {
     type: 'object',
-    required: ['question'],
+    required: ['question', 'language'],
     properties: {
-      question: { type: 'string', minLength: 1 }
+      question: { type: 'string', minLength: 1 },
+      language: { type: 'string', enum: ['fr', 'en'] }
     }
   }
 }
 
 module.exports = async function (fastify, opts) {
   fastify.post('/archiviste', { schema }, async function (request, reply) {
-    const { question } = request.body
+    const { question, language } = request.body
 
     let documents
     try {
@@ -29,7 +30,7 @@ module.exports = async function (fastify, opts) {
       return {
         name: cleanName,
         score,
-        url: `/archiviste/documents/${encodeURIComponent(cleanName)}`
+        url: `/BaseDocumentaire/${language}/Notion/${encodeURIComponent(cleanName)}.md`
       }
     })
 

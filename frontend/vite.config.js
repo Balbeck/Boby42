@@ -15,6 +15,7 @@ export default defineConfig({
     allowedHosts: (process.env.VITE_ALLOWED_HOSTS || '').split(',').filter(Boolean),
     proxy: {
       '/chat': backendTarget,
+      '/BaseDocumentaire': backendTarget,
       '/archiviste/documents': backendTarget,
       '/archiviste': {
         target: backendTarget,
