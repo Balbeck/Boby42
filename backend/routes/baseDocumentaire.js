@@ -7,7 +7,7 @@ const schema = {
     type: 'object',
     required: ['language', 'name'],
     properties: {
-      language: { type: 'string', enum: ['fr', 'en'] },
+      language: { type: 'string', enum: ['fr', 'en', 'origin'] },
       name: { type: 'string', minLength: 1 }
     }
   }

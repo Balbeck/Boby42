@@ -8,7 +8,7 @@ const schema = {
     required: ['question', 'language'],
     properties: {
       question: { type: 'string', minLength: 1 },
-      language: { type: 'string', enum: ['fr', 'en'] }
+      language: { type: 'string', enum: ['fr', 'en', 'origin'] }
     }
   }
 }

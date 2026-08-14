@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 
 const LANGUAGES = [
-  { code: 'fr', flag: '🇫🇷', label: 'Fr' },
-  { code: 'en', flag: '🇬🇧', label: 'En' },
+  { code: 'fr', flag: '🇫🇷', label: 'Français' },
+  { code: 'en', flag: '🇬🇧', label: 'English' },
+  { code: 'origin', flag: '🌏', label: 'Origin' },
 ]
 
 /**

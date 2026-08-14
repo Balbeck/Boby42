@@ -14,14 +14,17 @@ const MIN_SCORE = 0.85 // min cosine similarity to keep a result
 
 /**
  * Resolves a vector store filepath (e.g. "/LLMWiki/documents/Wi-Fi/Wi-Fi.md")
- * to the actual document path on disk (e.g. "<data>/documents/Wi-Fi/Wi-Fi.md").
+ * to the actual document path on disk (e.g. "<data>/documents/Notion/Wi-Fi.md").
+ * The vector store still carries the old per-doc-folder layout inherited from
+ * the ingestion tool; the real files now live flat under documents/Notion/,
+ * so only the filename is kept, not the LLMWiki/documents/<Name>/ prefix.
  *
  * @param {string} filepath
  * @returns {string}
  */
 function resolveDocumentPath (filepath) {
-  const relative = filepath.replace(/^\/?LLMWiki\/?/, '')
-  return path.join(DOCUMENTS_ROOT, relative)
+  const filename = path.basename(filepath)
+  return path.join(DOCUMENTS_ROOT, 'documents', 'Notion', filename)
 }
 
 /**
