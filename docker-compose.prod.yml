@@ -1,0 +1,9 @@
+# Prod overlay (42AI host, Linux). Ollama on the host only listens on
+# 127.0.0.1:11434, so both services need network_mode: host to reach it and
+# each other via "localhost" — no ports: mapping needed/allowed alongside it.
+services:
+  backend:
+    network_mode: host
+
+  frontend:
+    network_mode: host

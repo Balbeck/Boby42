@@ -1,0 +1,12 @@
+# Local Mac overlay (Docker Desktop). network_mode: host would only reach
+# Docker Desktop's internal VM, never the Mac's real localhost — so ports are
+# published instead, and containers reach the Mac itself via
+# host.docker.internal (set as BACKEND_HOST / OLLAMA_BASE_URL in .env.localMac).
+services:
+  backend:
+    ports:
+      - "${PORT:-8420}:${PORT:-8420}"
+
+  frontend:
+    ports:
+      - "${FRONTEND_PORT:-8421}:${FRONTEND_PORT:-8421}"

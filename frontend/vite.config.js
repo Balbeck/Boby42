@@ -2,38 +2,27 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
+// BACKEND_HOST + PORT come from the container environment (see docker-compose.yml
+// and .env.localMac / .env.prod) — "localhost" in prod (network_mode: host),
+// "host.docker.internal" in local Mac dev (Docker Desktop's own network namespace).
+const backendTarget = `http://${process.env.BACKEND_HOST}:${process.env.PORT}`
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    port: 8421,
-    allowedHosts: ['42gpt.42ai.net'],
+    port: Number(process.env.FRONTEND_PORT),
+    allowedHosts: (process.env.VITE_ALLOWED_HOSTS || '').split(',').filter(Boolean),
     proxy: {
-      // Le backend tourne en network_mode: host sur la machine hôte ; ce container
-      // partage donc la même stack réseau (voir docker-compose.yml) et localhost:8420
-      // le joint directement, sans passer par un second tunnel Cloudflare.
-
-      // // * * * [ Prod ] * * *
-      // '/chat': 'http://localhost:8420',
-      // // Déclaré avant '/archiviste' : plus spécifique, donc toujours proxyfié
-      // // (GET /archiviste/documents/:name est un vrai appel API, pas une navigation).
-      // '/archiviste/documents': 'http://localhost:8420',
-      // '/archiviste': {
-      //   target: 'http://localhost:8420',
-      //   // '/archiviste' (sans suffixe) est à la fois une route React Router (page) et un
-      //   // endpoint API : ne proxyfier que les POST, laisser Vite servir la page pour les GET
-      //   // (navigation directe / refresh).
-      //   bypass: (req) => (req.method !== 'POST' ? req.url : undefined),
-      // },
-
-      // // * * * [ Dev ]
-      '/chat': 'http://host.docker.internal:8420',
-      '/archiviste/documents': 'http://host.docker.internal:8420',
+      '/chat': backendTarget,
+      '/archiviste/documents': backendTarget,
       '/archiviste': {
-        target: 'http://host.docker.internal:8420',
+        target: backendTarget,
+        // '/archiviste' (no suffix) is both a React Router page and an API
+        // endpoint: only proxy POST, let Vite serve the page for GET
+        // (direct navigation / refresh).
         bypass: (req) => (req.method !== 'POST' ? req.url : undefined),
       },
-
     },
   },
 })
