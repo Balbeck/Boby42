@@ -28,7 +28,7 @@ export function useArchiviste() {
   const abortControllerRef = useRef(null)
   const pendingIdRef = useRef(null)
 
-  const sendQuestion = useCallback(async (question) => {
+  const sendQuestion = useCallback(async (question, language) => {
     const trimmed = question.trim()
     if (!trimmed) return
 
@@ -41,7 +41,7 @@ export function useArchiviste() {
     setIsSending(true)
 
     try {
-      const { documents } = await search(trimmed, { signal: controller.signal })
+      const { documents } = await search(trimmed, language, { signal: controller.signal })
       const sorted = [...documents]
         .sort((a, b) => b.score - a.score)
         .map((doc) => ({ ...doc, loading: false, loaded: false }))
@@ -79,14 +79,15 @@ export function useArchiviste() {
   /**
    * @param {string} exchangeId
    * @param {ArchivisteDocument} doc
+   * @param {string} language - 'fr' | 'en'
    */
-  const loadDocument = useCallback(async (exchangeId, doc) => {
+  const loadDocument = useCallback(async (exchangeId, doc, language) => {
     if (doc.loaded || doc.loading) return
 
     setExchanges((prev) => patchDocument(prev, exchangeId, doc.name, { loading: true }))
 
     try {
-      const { content } = await fetchDocument(doc.url)
+      const { content } = await fetchDocument(doc.url, language)
       setExchanges((prev) =>
         patchDocument(prev, exchangeId, doc.name, { content, loading: false, loaded: true }),
       )
