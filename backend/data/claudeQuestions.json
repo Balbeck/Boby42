@@ -2,7 +2,7 @@
   "documents": [
     {
       "filename": "/data/documents/Alternance.md",
-      "questions": [
+      "metaContexte": [
         "Comment savoir si je suis éligible à l'alternance à 42 Paris ?",
         "Quelles sont les démarches à faire avant de contacter une entreprise pour une alternance ?",
         "Quel formulaire dois-je remplir avant de commencer mes démarches d'alternance ?",
@@ -41,12 +41,29 @@
         "Quelles sont les 4 situations possibles de rupture de contrat d'apprentissage ?",
         "Quels sont les droits de l'apprenti pendant son contrat (protection sociale, congés payés, transports) ?",
         "Quels sont les devoirs de l'apprenti pendant son contrat d'alternance ?",
-        "Où trouver des offres d'alternance et des ressources pour les alternants de 42 Paris ?"
+        "Où trouver des offres d'alternance et des ressources pour les alternants de 42 Paris ?",
+        "Alternance",
+        "L'alternance à 42 Paris permet d'être salarié d'une entreprise tout en poursuivant sa formation, dans le cadre d'un contrat d'apprentissage ou de professionnalisation menant à un titre RNCP niveau 6 ou niveau 7.",
+        "L'éligibilité à l'alternance dépend de trois éléments : le niveau pédagogique atteint, la situation administrative de l'étudiant (ressortissant EEE ou titre de séjour adapté) et la durée de contrat visée, un an ou deux ans.",
+        "Le rythme de l'alternance alterne deux semaines en entreprise et une semaine de formation à l'école, pour un total de 600 heures de présentiel annuel réparties sur 85 jours pour les titres RNCP 39783 et 39774.",
+        "En cas de rupture de contrat d'apprentissage, le campus s'engage à permettre à l'apprenti de poursuivre sa formation pendant 6 mois et à l'aider à trouver un nouvel employeur.",
+        "La formation en alternance est intégralement financée par l'OPCO de l'entreprise d'accueil, tandis que la rémunération minimale de l'alternant est encadrée par la loi sans plafond maximal.",
+        "L'apprenti bénéficie des mêmes droits que les autres salariés de l'entreprise : protection sociale, congés payés, prise en charge partielle des frais de transport et capitalisation de ses trimestres de retraite.",
+        "contrat d'apprentissage",
+        "contrat de professionnalisation",
+        "titre RNCP",
+        "OPCO",
+        "Work Experience",
+        "rupture de contrat",
+        "période d'essai",
+        "rémunération",
+        "jury de certification",
+        "Responsable Alternance"
       ]
     },
     {
       "filename": "/data/documents/Associations _ Clubs étudiants.md",
-      "questions": [
+      "metaContexte": [
         "Quelles associations et clubs étudiants existent à 42 Paris ?",
         "Comment contacter une association ou un club étudiant à 42 Paris ?",
         "Où trouver la liste des associations et clubs étudiants de 42 Paris ?",
@@ -61,12 +78,25 @@
         "Comment savoir si un club étudiant correspond à mon domaine d'intérêt en informatique ?",
         "Est-ce que je peux créer ma propre association étudiante à 42 Paris ?",
         "Les clubs étudiants de 42 Paris couvrent-ils aussi des causes sociales ou militantes ?",
-        "Qui gère la coordination des associations étudiantes à 42 Paris ?"
+        "Qui gère la coordination des associations étudiantes à 42 Paris ?",
+        "Associations _ Clubs étudiants",
+        "Les associations et clubs étudiants de 42 Paris permettent de mettre un pied dans l'entrepreneuriat, d'explorer plus en profondeur un domaine de l'informatique, ou de faire entendre sa voix pour une cause.",
+        "La liste complète des associations et clubs étudiants du campus, ainsi que leurs informations de contact, est centralisée dans une page dédiée de l'intranet.",
+        "associations étudiantes",
+        "clubs étudiants",
+        "entrepreneuriat",
+        "domaines de l'informatique",
+        "42 Paris",
+        "cause",
+        "liste des clubs",
+        "campus",
+        "contact",
+        "communauté étudiante"
       ]
     },
     {
       "filename": "/data/documents/Badge perdu.md",
-      "questions": [
+      "metaContexte": [
         "Que faire si j'ai perdu mon badge d'accès à 42 Paris ?",
         "Que faire si j'ai oublié ma carte d'accès à 42 Paris ?",
         "Dois-je avoir ma carte d'accès sur moi en permanence sur le campus ?",
@@ -86,12 +116,25 @@
         "Pour obtenir le remboursement, il faut fournir le numéro de transaction figurant sur le reçu SumUp reçu par e-mail lors du paiement initial de la carte.",
         "Le badge perdu concerne-t-il aussi les cartes de la Piscine 42 ou des events ?",
         "Un étudiant en Piscine qui perd sa carte peut-il se faire rembourser ?",
-        "Que faire de l'agent d'accueil si les portes du Bocal sont fermées ?"
+        "Que faire de l'agent d'accueil si les portes du Bocal sont fermées ?",
+        "Badge perdu",
+        "En cas de perte ou d'oubli de la carte d'accès, l'étudiant doit se rendre au Bocal pendant les horaires d'ouverture pour obtenir une nouvelle carte, temporaire ou définitive, contre des frais de 5€ payables par carte bancaire.",
+        "Un remboursement est possible uniquement pour les cartes Piscine ou Event si la carte perdue est rapportée, en fournissant le numéro de transaction visible sur le reçu SumUp reçu par e-mail lors du paiement.",
+        "carte d'accès",
+        "Badge perdu",
+        "Bocal",
+        "carte Piscine",
+        "carte Event",
+        "frais de 5€",
+        "remboursement",
+        "numéro de transaction",
+        "reçu SumUp",
+        "agent d'accueil"
       ]
     },
     {
       "filename": "/data/documents/Certificat de scolarité _ Plan de formation.md",
-      "questions": [
+      "metaContexte": [
         "Comment obtenir mon certificat de scolarité à 42 Paris ?",
         "Où trouver son certificat de scolarité sur l'Intra ou le LMS ?",
         "Le certificat de scolarité est généré automatiquement dès que l'inscription administrative est validée, et se trouve directement sur le profil personnel du LMS.",
@@ -109,12 +152,26 @@
         "Les demandes de plan de formation se font via un formulaire en ligne, et les envois sont automatisés chaque mardi.",
         "Qui contacter pour une demande liée au certificat de scolarité qui ne rentre pas dans les cas standards ?",
         "Pour toute autre demande concernant le certificat de scolarité ou le plan de formation, il est possible de prendre rendez-vous avec l'ADM via un lien de calendrier dédié.",
-        "Un certificat de scolarité peut-il être obtenu sans inscription administrative validée ?"
+        "Un certificat de scolarité peut-il être obtenu sans inscription administrative validée ?",
+        "Certificat de scolarité _ Plan de formation",
+        "Le certificat de scolarité est généré automatiquement dès validation de l'inscription administrative et disponible directement sur le profil personnel du LMS, à condition de renouveler son inscription chaque année.",
+        "Le plan de formation sur deux ans sans mention de titre RNCP est accessible aux étudiants en Common Core, tandis que les plans avec mention RNCP niveau 6 ou 7 sont réservés à ceux ayant validé l'intégralité du tronc commun et au moins un projet du titre visé.",
+        "Les demandes de plan de formation se font via un formulaire en ligne dédié, avec un envoi automatisé chaque mardi ; toute autre demande passe par un rendez-vous avec l'ADM.",
+        "certificat de scolarité",
+        "plan de formation",
+        "inscription administrative",
+        "LMS",
+        "titre RNCP niveau 6",
+        "titre RNCP niveau 7",
+        "Common Core",
+        "tronc commun",
+        "formulaire",
+        "ADM"
       ]
     },
     {
       "filename": "/data/documents/Changer de campus.md",
-      "questions": [
+      "metaContexte": [
         "Comment demander un transfert vers un autre campus 42 ?",
         "Peut-on changer de campus 42 avant d'avoir terminé le Common Core ?",
         "Seuls les étudiants ayant terminé leur Common Core peuvent poursuivre leur cursus dans un autre campus du réseau 42.",
@@ -129,12 +186,26 @@
         "L'étudiant est responsable de gérer lui-même toute la logistique du transfert, comme le visa, le transport et le logement, même si le campus d'accueil peut parfois proposer de l'aide.",
         "Le campus d'accueil peut-il aider pour le logement ou le visa lors d'un transfert ?",
         "Faut-il l'accord du campus actuel avant de contacter le campus souhaité pour un transfert ?",
-        "Comment se passe la clôture des projets locaux lors d'un changement de campus ?"
+        "Comment se passe la clôture des projets locaux lors d'un changement de campus ?",
+        "Changer de campus",
+        "Les étudiants ayant terminé leur Common Core peuvent demander un transfert vers un autre campus du réseau 42, sous réserve de l'accord de l'équipe pédagogique du campus actuel puis de celle du campus d'accueil.",
+        "Le transfert impose de clôturer tous les projets locaux, sauvegarder son répertoire personnel, et de ne pas être en cours de Work Experience (stage ou alternance) à la date de transfert choisie.",
+        "L'étudiant est responsable de gérer lui-même toute la logistique du transfert, visa, transport et logement compris, même si le campus d'accueil peut proposer de l'aide sur ces sujets.",
+        "changer de campus",
+        "Common Core",
+        "transfert",
+        "équipe pédagogique",
+        "réseau 42",
+        "42network.org",
+        "Work Experience",
+        "répertoire local",
+        "visa",
+        "logement"
       ]
     },
     {
       "filename": "/data/documents/Common Core.md",
-      "questions": [
+      "metaContexte": [
         "Qu'est-ce que le Common Core à 42 et quel est son objectif ?",
         "Le Common Core est la première partie du cursus 42, découpée en plusieurs milestones composées de projets pratiques et d'examens réguliers, visant à valider le socle technique commun.",
         "Comment sont organisées les milestones du Common Core, à partir de quel projet ?",
@@ -154,12 +225,27 @@
         "Les retrys visant à obtenir plus d'XP ou les bonus sur les projets de groupe du tronc commun ne sont plus autorisés à cause de tentatives de triche.",
         "Que faire si un projet à 3 personnes ou plus est bloqué par un coéquipier en retard sur la milestone précédente ?",
         "Pour valider un projet de groupe sans attendre un coéquipier en retard, il faut prévenir la pédagogie en amont, sinon le retry avec d'autres personnes ne sera pas autorisé.",
-        "Qui contacter en cas de doute sur les règles des projets de groupe du Common Core ?"
+        "Qui contacter en cas de doute sur les règles des projets de groupe du Common Core ?",
+        "Common Core",
+        "Le Common Core est la première partie du cursus 42, structurée en milestones combinant projets pratiques et examens réguliers, visant à valider le socle technique commun à tous les étudiants.",
+        "Les projets de groupe doivent être réalisés collectivement selon les règles de l'énoncé : travailler seul, dépasser le nombre de coéquipiers autorisé, ou rendre un projet avec quelqu'un n'ayant pas contribué sont considérés comme de la triche.",
+        "En cas de coéquipier inactif ou de blocage par une personne en retard sur une milestone précédente, il faut prévenir l'équipe pédagogique en amont du black hole pour trouver une solution.",
+        "Les retrys sur les projets de groupe du tronc commun visant à obtenir plus d'XP ou les bonus ne sont plus autorisés suite à de nombreuses tentatives de triche.",
+        "Common Core",
+        "milestones",
+        "Libft",
+        "Holygraph",
+        "projet de groupe",
+        "triche",
+        "black hole",
+        "retry",
+        "examens",
+        "42 Next"
       ]
     },
     {
       "filename": "/data/documents/Comportements inappropriés _ Social Report.md",
-      "questions": [
+      "metaContexte": [
         "Comment signaler un comportement inapproprié à 42 Paris ?",
         "Quelle adresse mail contacter en cas de harcèlement ou d'agression sur le campus ?",
         "Qu'est-ce que le Social Report à 42 Paris ?",
@@ -179,12 +265,26 @@
         "Toutes les informations reçues via le Social Report sont traitées de manière strictement confidentielle, et seules les personnes habilitées accèdent aux signalements.",
         "Qui contacter en cas de tensions entre étudiants à 42 Paris ?",
         "Qui est la référente mixité à 42 Paris ?",
-        "Qui est le directeur de 42 Paris responsable de la réception des signalements Social Report ?"
+        "Qui est le directeur de 42 Paris responsable de la réception des signalements Social Report ?",
+        "Comportements inappropriés _ Social Report",
+        "Le Social Report (social-report@42paris.fr) est un canal confidentiel permettant aux étudiants, au staff ou aux intervenants de signaler un comportement inapproprié, une agression, un harcèlement ou toute situation impactant le bien-être de la communauté.",
+        "Les signalements ne sont reçus que par un nombre restreint de personnes désignées (direction générale, direction du campus, référente mixité, coordination pédagogique) afin de garantir la confidentialité.",
+        "Le traitement d'un signalement suit plusieurs étapes : réception et évaluation de l'urgence, analyse et identification des personnes impliquées, prise de contact éventuelle et recueil de témoignages, puis mise en place d'actions comme la médiation ou une sanction disciplinaire.",
+        "Social Report",
+        "comportement inapproprié",
+        "harcèlement",
+        "signalement",
+        "confidentialité",
+        "référente mixité",
+        "médiation",
+        "sanction disciplinaire",
+        "témoignages anonymisés",
+        "sécurité"
       ]
     },
     {
       "filename": "/data/documents/Coup de pouce alimentaire.md",
-      "questions": [
+      "metaContexte": [
         "Existe-t-il une aide alimentaire pour les étudiants de 42 Paris ?",
         "Qu'est-ce que MyFood42 à 42 Paris ?",
         "Une distribution alimentaire MyFood42 est organisée chaque semaine sur le campus de 42 Paris pour les étudiants qui en ressentent le besoin.",
@@ -199,12 +299,24 @@
         "MyFood42 a-t-elle lieu directement sur le campus de 42 Paris ?",
         "Comment savoir quand a lieu la prochaine distribution MyFood42 ?",
         "L'équipe Inclusion de 42 Paris propose-t-elle d'autres formes de soutien social en plus de MyFood42 ?",
-        "Est-ce gratuit de participer à la distribution alimentaire MyFood42 ?"
+        "Est-ce gratuit de participer à la distribution alimentaire MyFood42 ?",
+        "Coup de pouce alimentaire",
+        "MyFood42 est une distribution alimentaire organisée chaque semaine sur le campus de 42 Paris pour les étudiants qui en ressentent le besoin, accessible en contactant simplement l'équipe Inclusion.",
+        "MyFood42",
+        "distribution alimentaire",
+        "équipe Inclusion",
+        "campus",
+        "aide alimentaire",
+        "chaque semaine",
+        "inclusion@42paris.fr",
+        "besoin",
+        "soutien social",
+        "42 Paris"
       ]
     },
     {
       "filename": "/data/documents/Days-Off_Freeze.md",
-      "questions": [
+      "metaContexte": [
         "Quelle est la différence entre les Days-Off et le Freeze à 42 ?",
         "Combien de jours off reçoit-on chaque mois et comment fonctionne la Day Off Bank ?",
         "Au début de chaque mois, un étudiant reçoit 2 jours off cumulables dans sa Day Off Bank, pour un total de 25 jours par an, comparable à des congés payés.",
@@ -229,12 +341,26 @@
         "Quelles sont les règles de freeze pour les étudiants entrés avant novembre 2024 ?",
         "Les étudiants entrés avant novembre 2024 peuvent se freezer 6 mois maximum sur tout leur cursus, avec +90 jours après validation de Libft et +90 jours après validation du Cercle 3.",
         "Qu'est-ce que le freeze médical et comment en bénéficier ?",
-        "Les arrêts maladie envoyés à la Pédago ou à l'ADM (pour les SFP/GEN) peuvent faire l'objet d'un freeze médical spécifique, en dehors du quota habituel de jours de freeze."
+        "Les arrêts maladie envoyés à la Pédago ou à l'ADM (pour les SFP/GEN) peuvent faire l'objet d'un freeze médical spécifique, en dehors du quota habituel de jours de freeze.",
+        "Days-Off_Freeze",
+        "Les Days-Off permettent d'obtenir 2 jours cumulables par mois, soit 25 jours par an, utilisables à partir du 4e mois de cursus, chaque jour posé repoussant automatiquement la date de fin de milestone et du Common Core.",
+        "Le Freeze (intra V2/V3), distinct des Days-Off, se demande via freeze.42.fr avec une durée de 7 à 90 jours, une anticipation minimale de 7 jours calendaires, et un refus automatique après 24 mois d'ancienneté.",
+        "Les règles de freeze varient selon la date d'entrée : les étudiants entrés à partir de novembre 2025 gagnent 15 jours par cercle validé avec un maximum de 6 occurrences, tandis que ceux entrés avant novembre 2024 disposent de 6 mois de freeze cumulés sur tout le cursus.",
+        "Un freeze médical spécifique, hors quota habituel, peut être accordé sur présentation d'un arrêt maladie transmis à la Pédago ou à l'ADM pour les étudiants SFP/GEN.",
+        "Days-Off",
+        "Day Off Bank",
+        "Freeze",
+        "freeze.42.fr",
+        "période de carence",
+        "freeze médical",
+        "PACE 22",
+        "arrêt maladie",
+        "Cercle 3"
       ]
     },
     {
       "filename": "/data/documents/Demande de congés SFP.md",
-      "questions": [
+      "metaContexte": [
         "Comment fonctionnent les congés pour un étudiant SFP à 42 Paris ?",
         "Les congés SFP ont-ils un impact sur les deadlines du cursus 42 ?",
         "Les congés SFP n'ont pas d'impact pédagogique sur le cursus 42 ni sur le calcul des deadlines par milestones, ils impactent uniquement le nombre d'heures à réaliser dans le mois.",
@@ -253,12 +379,26 @@
         "En cas d'arrêt de travail, le SFP doit transmettre son arrêt à France Travail sous 48 heures maximum et remplir le formulaire d'absence de 42 Paris pour justifier son absence auprès de la pédagogie.",
         "Quelles sont les deux obligations impératives en cas d'arrêt maladie pour un SFP ?",
         "Un étudiant non-SFP peut-il utiliser ce dispositif de congés ?",
-        "Un étudiant qui n'est pas SFP ou qui souhaite poser des jours repoussant les deadlines du cursus doit se référer à l'article dédié aux congés classiques, différent des congés SFP."
+        "Un étudiant qui n'est pas SFP ou qui souhaite poser des jours repoussant les deadlines du cursus doit se référer à l'article dédié aux congés classiques, différent des congés SFP.",
+        "Demande de congés SFP",
+        "Les congés SFP sont réservés aux étudiants ayant le statut de Stagiaire de la Formation Professionnelle, sans impact sur le cursus ou les deadlines de milestones, mais réduisant le nombre d'heures à réaliser dans le mois.",
+        "Le quota annuel est de 35 jours par année civile, avec une règle de 2 semaines consécutives maximum par session de congés et un délai de 6 mois avant de pouvoir reprendre 2 semaines d'affilée.",
+        "Toute demande doit être soumise au plus tard 24h avant le début de l'absence via un formulaire dédié ; les demandes rétroactives ne sont pas acceptées.",
+        "En cas d'arrêt maladie, le SFP doit transmettre son arrêt à France Travail sous 48h et remplir le formulaire d'absence de 42 Paris pour justifier son absence auprès de la pédagogie.",
+        "congés SFP",
+        "Stagiaire de la Formation Professionnelle",
+        "quota annuel",
+        "règle des 2 semaines",
+        "formulaire",
+        "France Travail",
+        "arrêt maladie",
+        "dropout",
+        "pédagogie"
       ]
     },
     {
       "filename": "/data/documents/Discord_ Slack _ Emails.md",
-      "questions": [
+      "metaContexte": [
         "Comment rejoindre le serveur Discord de 42 Paris ?",
         "On rejoint le serveur Discord de 42 Paris en se connectant sur discord.42paris.fr.",
         "À quoi servent les channels #staff sur le Discord de 42 Paris ?",
@@ -277,12 +417,26 @@
         "Qu'est-ce que le Towel Times ?",
         "Le Towel Times est la newsletter interne hebdomadaire de 42 Paris, envoyée chaque lundi, contenant les nouvelles importantes, le listing des prochains événements et la disponibilité des espaces du campus pour les deux semaines suivantes.",
         "À quelle fréquence 42 Paris envoie-t-il sa newsletter interne aux étudiants ?",
-        "Pourquoi est-il important de lire ses emails et ses messages Discord/Slack à 42 Paris ?"
+        "Pourquoi est-il important de lire ses emails et ses messages Discord/Slack à 42 Paris ?",
+        "Discord_ Slack _ Emails",
+        "Le serveur Discord de 42 Paris (discord.42paris.fr) permet d'échanger avec le staff via les channels #staff, à condition d'avoir d'abord demandé aux autres étudiants, et de signaler tout problème de workstation avec son nom complet, par exemple f0r1s1.",
+        "Le workspace Slack 42beyondthecode permet d'échanger avec les étudiants de tout le réseau 42, en créant un compte avec son adresse mail étudiante et son login comme nom complet.",
+        "Les communications importantes de 42 Paris sont envoyées par email, complétées par le Towel Times, la newsletter interne hebdomadaire envoyée chaque lundi avec les actualités, les événements à venir et la disponibilité des espaces du campus.",
+        "Discord",
+        "Slack",
+        "42beyondthecode",
+        "Towel Times",
+        "channels #staff",
+        "discord.42paris.fr",
+        "newsletter",
+        "workstation",
+        "Règlement Intérieur",
+        "login"
       ]
     },
     {
       "filename": "/data/documents/Discovery_ Piscines_ rentrées_ _ les dates importantes.md",
-      "questions": [
+      "metaContexte": [
         "Où trouver les dates des principaux événements impactant la vie du campus 42 Paris ?",
         "Où consulter les prévisions de disponibilité des clusters chaque semaine (Towel Times) ?",
         "Quels clusters sont concernés par les travaux électriques de rénovation en 2026 (F0, F1, F2) ?",
@@ -299,12 +453,26 @@
         "Quelle est la date de démarrage des travaux électriques du cluster F0 ?",
         "Quelle est la date de démarrage des travaux électriques du cluster F1 ?",
         "Les travaux de rénovation électrique de F0, F1 et F2 comprennent le retrait des câbles électriques et ethernet existants, le remplacement de l'armoire électrique et un re-câblage complet avant test et remise en service, pour une durée d'environ 4 semaines par étage.",
-        "La liste des dates fournie ici n'est pas exhaustive et évolue régulièrement : il est recommandé de consulter le Towel Times chaque lundi pour les prévisions détaillées de disponibilité des clusters."
+        "La liste des dates fournie ici n'est pas exhaustive et évolue régulièrement : il est recommandé de consulter le Towel Times chaque lundi pour les prévisions détaillées de disponibilité des clusters.",
+        "Discovery_ Piscines_ rentrées_ _ les dates importantes",
+        "Un programme de rénovation électrique complète des clusters F0, F1 et F2 se déroule entre avril et juin 2026, cluster par cluster, avec environ 4 semaines de travaux par étage et une fin estimée au 26 juin.",
+        "La rentrée de printemps 2026 est prévue le 20 avril, suivie de plusieurs sessions de Piscines Discovery en mai et juin dans les clusters F0, F1 et F1B.",
+        "Les Piscines d'été 2026 se déroulent en trois sessions entre fin juin et début octobre, réparties sur les clusters F0, F1, F1B et ponctuellement F2 en août en raison de la faible fréquentation du campus.",
+        "travaux électriques",
+        "clusters F0 F1 F2",
+        "rénovation",
+        "rentrée printemps 2026",
+        "Piscines Discovery",
+        "Piscines d'été",
+        "Towel Times",
+        "câblage",
+        "armoire électrique",
+        "disponibilité des clusters"
       ]
     },
     {
       "filename": "/data/documents/Exams.md",
-      "questions": [
+      "metaContexte": [
         "Quels sont les horaires des examens à 42 Paris ?",
         "Les examens à 42 Paris ont lieu le mardi matin de 10h à 13h et le jeudi après-midi de 16h à 19h ; les inscriptions ouvrent le vendredi de la semaine précédente.",
         "Quels documents dois-je présenter pour entrer en salle d'examen ?",
@@ -331,12 +499,26 @@
         "Que faire si j'ai oublié un objet dans la salle d'examen ?",
         "Les cartes d'étudiant oubliées en salle d'examen sont récupérables au Bocal, les autres objets sont déposés aux objets trouvés.",
         "Puis-je regarder l'écran d'un autre candidat pendant l'examen ?",
-        "Que dois-je faire en fin de session d'examen (chaise, clavier, brouillon) ?"
+        "Que dois-je faire en fin de session d'examen (chaise, clavier, brouillon) ?",
+        "Exams",
+        "Les examens ont lieu le mardi matin de 10h à 13h et le jeudi après-midi de 16h à 19h, avec inscription ouverte dès le vendredi précédent, présentation obligatoire de la carte d'étudiant et aucune tolérance de retard une fois l'épreuve commencée.",
+        "Sur le bureau, seuls sont autorisés 3 feuilles vierges maximum, un stylo, des mouchoirs, des boules quiès et des médicaments sans boîte ; téléphones, montres et écouteurs sont strictement interdits sur soi.",
+        "Toute communication, objet interdit, appareil électronique allumé, usurpation d'identité, tricherie visuelle ou brouillon non vierge entraîne automatiquement au moins une exclusion de l'examen.",
+        "En cas de problème technique ou de question pendant l'épreuve, il faut se lever et attendre en silence qu'un tuteur vienne, sans jamais circuler librement dans la salle.",
+        "examens",
+        "carte d'étudiant",
+        "objets interdits",
+        "brouillon",
+        "usurpation d'identité",
+        "tricherie visuelle",
+        "exclusion",
+        "TIG",
+        "salle d'examen"
       ]
     },
     {
       "filename": "/data/documents/Forty 2.md",
-      "questions": [
+      "metaContexte": [
         "Qu'est-ce que Forty 2 et où se trouve ce campus d'été de 42 Paris ?",
         "Forty 2 est le campus d'été de 42 Paris installé au Fort des Saumonards sur l'île d'Oléron, à 100 mètres de la plage, proposant des séjours de 4 à 15 jours entre avril et octobre.",
         "Comment réserver un séjour à Forty2 et sur quel site ?",
@@ -366,12 +548,27 @@
         "Les chiens guides et animaux d'assistance sont-ils autorisés à Forty2 ?",
         "Comment s'inscrire pour un séjour à Forty2 et sous quel délai la réponse arrive-t-elle ?",
         "Que faut-il amener avec soi pour un séjour à Forty2 (serviette, crème solaire, tongs) ?",
-        "Comment contacter l'équipe Forty2 pour poser une question ?"
+        "Comment contacter l'équipe Forty2 pour poser une question ?",
+        "Forty 2",
+        "Forty2 est le campus d'été de 42 Paris installé au Fort des Saumonards sur l'île d'Oléron, à 100 mètres de la plage, proposant des séjours de 4 à 15 jours entre avril et octobre, réservables sur book.forty2.fr.",
+        "Le Fort des Saumonards, construit à partir de 1810 sous Napoléon pour compléter les défenses navales avec Fort Boyard, a successivement servi de bagne, squat et colonie de vacances avant d'être racheté par 42 en 2018.",
+        "Les séjours incluent le transport depuis La Rochelle, tous les repas préparés par le chef, un lit en dortoir non-mixte parmi plus de 200 lits, l'accès à 4 clusters équipés de 150 iMac, et des activités comme le beach-volley ou la salle rétro gaming de 450m².",
+        "Une participation financière d'environ 42€ par jour est demandée (168€ pour 4 jours, 294€ pour une semaine, 589€ pour deux semaines), et le site est accessible aux personnes en situation de handicap avec cabines PMR réservables par email.",
+        "Forty2",
+        "Fort des Saumonards",
+        "île d'Oléron",
+        "book.forty2.fr",
+        "dortoirs non-mixtes",
+        "clusters",
+        "navette La Rochelle",
+        "PMR",
+        "salle rétro gaming",
+        "beach-volley"
       ]
     },
     {
       "filename": "/data/documents/Inscription administrative.md",
-      "questions": [
+      "metaContexte": [
         "Comment faire mon inscription administrative à 42 Paris ?",
         "Que se passe-t-il si je ne fais pas mon inscription administrative ?",
         "L'inscription administrative est obligatoire chaque année : sans dossier validé, les accès au campus et au LMS/Intra sont automatiquement coupés.",
@@ -395,12 +592,25 @@
         "Dois-je envoyer un mail pour connaître l'état de mon dossier d'inscription administrative ?",
         "Chaque dossier d'inscription administrative est vérifié manuellement par l'équipe, et une notification automatique est envoyée dès que le statut change (validé, refusé, en attente), sans besoin d'envoyer de mail de relance.",
         "Quelle est la conséquence sur l'accès au campus si mon dossier d'inscription n'est pas validé ?",
-        "Comment obtenir une attestation de droits Ameli en tant qu'étudiant français ?"
+        "Comment obtenir une attestation de droits Ameli en tant qu'étudiant français ?",
+        "Inscription administrative",
+        "L'inscription administrative est obligatoire chaque année : sans dossier validé, les accès au campus et au LMS/Intra sont automatiquement coupés, la date limite étant généralement fin octobre ou début novembre.",
+        "Le justificatif de sécurité sociale demandé dépend du profil de l'étudiant : attestation de droits Ameli pour les Français, Carte Européenne d'Assurance Maladie pour les ressortissants UE, assurance privée pour les étudiants hors UE, avis de situation France Travail pour les demandeurs d'emploi.",
+        "Les documents doivent dater de moins de 3 mois et être parfaitement lisibles ; chaque dossier est vérifié manuellement et une notification automatique est envoyée dès que le statut change, sans besoin de relancer par mail.",
+        "inscription administrative",
+        "attestation de droits Ameli",
+        "CEAM",
+        "assurance privée",
+        "France Travail",
+        "LMS",
+        "dossier",
+        "notification automatique",
+        "HEYME"
       ]
     },
     {
       "filename": "/data/documents/Kit de ressources des Relations Entreprises de 42 Paris.md",
-      "questions": [
+      "metaContexte": [
         "Qu'est-ce que le Kit de ressources des Relations Entreprises de 42 Paris ?",
         "Où trouver de l'aide pour préparer son CV à 42 Paris ?",
         "Le Kit de ressources des Relations Entreprises regroupe des conseils pratiques pour préparer son CV, rédiger une lettre de motivation, préparer ses entretiens et développer son réseau professionnel.",
@@ -415,12 +625,24 @@
         "Qui propose le Kit de ressources dédié à la réussite professionnelle des étudiants de 42 Paris ?",
         "Ce kit de ressources est destiné à accompagner les étudiants souhaitant décrocher leur stage, leur alternance ou leur premier emploi après 42.",
         "Où trouver des conseils pour améliorer la présentation de son parcours professionnel à 42 Paris ?",
-        "Le service des Relations Entreprises de 42 Paris propose-t-il un accompagnement pour la recherche de premier emploi ?"
+        "Le service des Relations Entreprises de 42 Paris propose-t-il un accompagnement pour la recherche de premier emploi ?",
+        "Kit de ressources des Relations Entreprises de 42 Paris",
+        "Le Kit de ressources des Relations Entreprises de 42 Paris regroupe les FAQ Stage et Alternance ainsi que des conseils pratiques pour préparer son CV, rédiger une lettre de motivation, préparer ses entretiens et développer son réseau professionnel.",
+        "Cette page accompagne pas à pas les étudiants cherchant un stage, une alternance ou un premier emploi, ou souhaitant simplement mieux présenter leur parcours.",
+        "Relations Entreprises",
+        "FAQ Stage",
+        "FAQ Alternance",
+        "CV",
+        "lettre de motivation",
+        "entretiens",
+        "réseau professionnel",
+        "premier emploi",
+        "réussite professionnelle"
       ]
     },
     {
       "filename": "/data/documents/L_incubateur de 42 Paris.md",
-      "questions": [
+      "metaContexte": [
         "Qu'est-ce que l'incubateur de 42 Paris ?",
         "Où est situé l'incubateur de 42 Paris ?",
         "Qui peut candidater à l'incubateur de 42 Paris ?",
@@ -451,12 +673,26 @@
         "Un étudiant SFP peut-il candidater à l'incubateur de 42 Paris ?",
         "Un étudiant SFP souhaitant candidater à l'incubateur doit le signaler au plus vite au moment de sa candidature afin d'étudier ensemble les modalités pratiques spécifiques à son statut.",
         "Comment l'incubateur 42 aide-t-il concrètement les startups à préparer une levée de fonds ?",
-        "L'incubateur 42 n'investit pas directement mais connecte les startups à son réseau d'investisseurs et à celui de STATION F (plus de 300 investisseurs), avec une newsletter de visibilité envoyée tous les deux mois."
+        "L'incubateur 42 n'investit pas directement mais connecte les startups à son réseau d'investisseurs et à celui de STATION F (plus de 300 investisseurs), avec une newsletter de visibilité envoyée tous les deux mois.",
+        "L_incubateur de 42 Paris",
+        "L'incubateur de 42 Paris, situé à STATION F, accompagne pendant 9 mois (renouvelables) les entrepreneurs issus du réseau 42 ayant validé leur Common Core, via workshops, coaching personnalisé et mise en relation avec l'écosystème d'investisseurs.",
+        "La candidature est ouverte en continu et accessible en solo, à condition qu'au moins un cofondateur soit issu de 42 et ait validé son Common Core ; l'intégration effective reste conditionnée à cette validation.",
+        "L'incubateur n'investit pas et ne prend pas de parts dans les startups accompagnées, mais facture des frais réduits de 100€HT par personne et par mois les 9 premiers mois, puis 250€HT en cas de renouvellement.",
+        "L'accompagnement à la levée de fonds passe par le réseau d'investisseurs de 42 et de STATION F, des interventions d'experts et un Demo Day final devant des investisseurs.",
+        "STATION F",
+        "incubateur",
+        "Common Core",
+        "cofondateur",
+        "Demo Day",
+        "levée de fonds",
+        "coaching",
+        "solo founder",
+        "alumni"
       ]
     },
     {
       "filename": "/data/documents/Le 42 Start-up Club.md",
-      "questions": [
+      "metaContexte": [
         "Qu'est-ce que le 42 Start-Up Club ?",
         "Combien de membres compte la communauté du 42 Start-Up Club ?",
         "Le 42 Start-Up Club est la communauté entrepreneuriale de 42 Paris animée par le staff, rassemblant plus de 525 personnes avec une newsletter mensuelle, un talk mensuel et une visite mensuelle de STATION F.",
@@ -473,12 +709,24 @@
         "La newsletter mensuelle du 42 Start-Up Club partage des bons plans et des ressources utiles aux entrepreneurs de la communauté.",
         "Le 42 Start-Up Club organise-t-il des visites de STATION F ?",
         "Comment devenir membre du 42 Start-Up Club via le formulaire dédié forms.42paris.fr ?",
-        "Le 42 Start-Up Club permet-il de découvrir l'univers de l'entrepreneuriat sans avoir de projet concret ?"
+        "Le 42 Start-Up Club permet-il de découvrir l'univers de l'entrepreneuriat sans avoir de projet concret ?",
+        "Le 42 Start-up Club",
+        "Le 42 Start-Up Club est la communauté entrepreneuriale de 42 Paris animée par le staff, rassemblant plus de 525 membres autour d'une newsletter mensuelle, d'un talk mensuel et d'une visite mensuelle de STATION F.",
+        "Ouvert à tous les étudiants et alumni ayant une startup, un projet ou simplement l'envie de découvrir l'entrepreneuriat, il suffit de remplir un formulaire en ligne pour en devenir membre.",
+        "42 Start-Up Club",
+        "communauté entrepreneuriale",
+        "STATION F",
+        "newsletter mensuelle",
+        "talk mensuel",
+        "formulaire",
+        "LinkedIn",
+        "alumni",
+        "entrepreneuriat"
       ]
     },
     {
       "filename": "/data/documents/Le bocal.md",
-      "questions": [
+      "metaContexte": [
         "Qu'est-ce que le Bocal à 42 Paris ?",
         "Où se trouve le Bocal sur le campus de 42 Paris ?",
         "Le Bocal, bureau du staff de 42 Paris, est situé au 1er étage du campus ; pour y accéder, il faut badger aux endroits indiqués et attendre derrière le bureau d'accueil.",
@@ -503,12 +751,25 @@
         "Il existe des référents dédiés joignables par mail : referent-handicap@42paris.fr, referent-mixite@42paris.fr et referent-harcelement@42paris.fr.",
         "Qui est Moulinette (Mou Mou) à 42 Paris ?",
         "Moulinette, surnommée Mou Mou, est le chat mascotte du campus qui fait ce qu'elle veut ; on peut la caresser mais jamais la déplacer, et il ne faut pas la nourrir.",
-        "Puis-je nourrir le chat du campus Moulinette ?"
+        "Puis-je nourrir le chat du campus Moulinette ?",
+        "Le bocal",
+        "Le Bocal, bureau du staff situé au 1er étage du campus, est ouvert du lundi au vendredi de 10h à 12h et de 14h à 18h, fermé le week-end.",
+        "Plusieurs équipes y travaillent : pédagogique, SI, Communication, 42i (inclusion), ADM, Relations Entreprises, Services Généraux et Cuisine, chacune joignable par un channel Discord/Slack et une adresse mail dédiés.",
+        "Des référents dédiés sont disponibles par mail pour le handicap, la mixité et le harcèlement, en complément des canaux d'équipe standards.",
+        "Bocal",
+        "équipe pédagogique",
+        "équipe SI",
+        "42i",
+        "Relations Entreprises",
+        "referent-handicap",
+        "referent-harcelement",
+        "Moulinette",
+        "horaires d'ouverture"
       ]
     },
     {
       "filename": "/data/documents/Le campus.md",
-      "questions": [
+      "metaContexte": [
         "Où se situe le campus de 42 Paris et quels sont ses horaires d'ouverture ?",
         "Le campus de 42 Paris, au 96 boulevard Bessières, comprend 7 étages et 1 sous-sol, et est ouvert 24h/24 et 7j/7.",
         "Quels sont les différents clusters de 42 Paris et à quel étage se trouvent-ils ?",
@@ -536,12 +797,26 @@
         "Que faire si on rencontre un problème lié au ménage ou au bâtiment à 42 Paris ?",
         "Pour tout problème lié au ménage ou au bâtiment, il faut poster un message sur le channel #staff-building sur Discord ou Slack.",
         "Que signifie la pancarte 'ménage en cours' devant les sanitaires ?",
-        "Où doivent être déposées les serviettes utilisées dans les sanitaires du campus ?"
+        "Où doivent être déposées les serviettes utilisées dans les sanitaires du campus ?",
+        "Le campus",
+        "Le campus de 42 Paris, au 96 boulevard Bessières, comprend 6 clusters (F0, F1, F1b, F2, F4, F6) répartis sur 7 étages et un sous-sol, ouvert 24h/24 et 7j/7.",
+        "En cluster, seule l'eau plate ou gazeuse non aromatisée est autorisée au sol, la nourriture et le branchement de matériel sans permission du staff sont interdits, et le cluster F4 est habituellement désigné comme silencieux.",
+        "En cas d'incendie, l'évacuation doit se faire rapidement par l'issue de secours la plus proche en suivant les éclairages directionnels verts, vers l'un des deux points de rassemblement dédiés.",
+        "Le campus dispose de zones fumeurs dédiées en terrasse et de sanitaires mixtes à tous les étages, avec des sanitaires genrés disponibles au 2ème étage.",
+        "clusters",
+        "F0 F1 F2 F4 F6",
+        "cluster silencieux",
+        "évacuation incendie",
+        "issue de secours",
+        "point de rassemblement",
+        "zones fumeurs",
+        "postes Flex",
+        "Règlement Intérieur"
       ]
     },
     {
       "filename": "/data/documents/Les bénévoles.md",
-      "questions": [
+      "metaContexte": [
         "Qui sont les bénévoles à 42 Paris et en quoi diffèrent-ils du staff ?",
         "Les bénévoles ne sont pas des membres du staff mais des étudiants donnant de leur temps pour le bon fonctionnement de l'école ; on les reconnaît car le mot 'staff' n'apparaît pas sur leurs t-shirts.",
         "Qui sont les tuteurs et quel rôle jouent-ils pendant les Piscines et les exams ?",
@@ -557,12 +832,25 @@
         "Comment reconnaître un bénévole d'un membre du staff à 42 Paris ?",
         "Les bénévoles bocal aident-ils uniquement à l'accueil ou peuvent-ils intervenir sur d'autres missions ?",
         "Les bénévoles bocal peuvent aider ponctuellement sur d'autres missions en plus de l'accueil, notamment pour répondre aux questions des candidats et étudiants.",
-        "Peut-on se porter volontaire directement au Bocal sans attendre un appel à candidature ?"
+        "Peut-on se porter volontaire directement au Bocal sans attendre un appel à candidature ?",
+        "Les bénévoles",
+        "Les bénévoles sont des étudiants, non membres du staff, qui donnent de leur temps pour le fonctionnement de l'école, répartis en plusieurs groupes : tuteurs, bénévoles bocal et comètes.",
+        "Les tuteurs surveillent les examens et corrigent les rushs pendant les Piscines, mais ne peuvent pas attribuer de TIG eux-mêmes ; ils remontent les situations problématiques au staff.",
+        "Pour devenir bénévole, il faut répondre à un appel à candidature relayé dans le Towel Times et sur Discord/Slack, ou se signaler directement au Bocal.",
+        "bénévoles",
+        "tuteurs",
+        "bénévoles bocal",
+        "comètes",
+        "TIG",
+        "Piscines",
+        "rushs",
+        "Towel Times",
+        "appel à candidature"
       ]
     },
     {
       "filename": "/data/documents/Les délégués.md",
-      "questions": [
+      "metaContexte": [
         "Qui sont les délégués de promotion à 42 Paris ?",
         "Comment devient-on délégué à 42 Paris ?",
         "Qui est la Représentante Générale des Étudiants actuelle à 42 Paris ?",
@@ -587,12 +875,26 @@
         "Le mandat d'un délégué peut prendre fin avant la date prévue en cas de blackhole, de sanction disciplinaire (exclusion temporaire) ou d'aluminisation ; le délégué suppléant devient alors automatiquement titulaire.",
         "Qui remplace le Représentant Général des étudiants si son mandat prend fin prématurément ?",
         "Un étudiant en freeze peut-il exercer un rôle de délégué ?",
-        "L'absorption par le Black Hole invalide automatiquement le rôle de délégué en cours."
+        "L'absorption par le Black Hole invalide automatiquement le rôle de délégué en cours.",
+        "Les délégués",
+        "Les délégués sont élus chaque année en janvier pour un mandat d'un an par les étudiants de leur promotion, et représentent les étudiants auprès du staff en remontant leurs avis et en servant de médiateurs.",
+        "Les élections des délégués de promotion se déroulent en ligne et anonymement au scrutin majoritaire à deux tours, tandis que le Représentant Général des étudiants est élu en présentiel par les délégués de promotion au scrutin à un tour.",
+        "Le mandat d'un délégué prend fin en cas de black hole, de sanction disciplinaire ou d'aluminisation, le délégué suppléant devenant alors automatiquement titulaire s'il existe.",
+        "Le Représentant Général des étudiants participe au conseil de perfectionnement annuel et diffuse ensuite les informations communiquées à ses pairs.",
+        "délégués",
+        "Représentant Général des étudiants",
+        "Représentant des Apprentis",
+        "conseil de perfectionnement",
+        "scrutin majoritaire",
+        "candidat suppléant",
+        "#delegates-general",
+        "black hole",
+        "mandat"
       ]
     },
     {
       "filename": "/data/documents/NOC42.md",
-      "questions": [
+      "metaContexte": [
         "Qu'est-ce que NOC42 et où se situent ces dortoirs de 42 Paris ?",
         "NOC42 désigne les dortoirs de 42 Paris situés au 89 boulevard Bessières, dans le bâtiment Bess, juste en face de l'école.",
         "Comment réserver une nuit à NOC42 et quel est le tarif ?",
@@ -609,12 +911,25 @@
         "Chaque lit de NOC42 est équipé d'un détecteur de fumée individuel au plafond qu'il est strictement interdit de toucher, démonter ou obstruer sous peine d'exclusion.",
         "Que faire de ses draps en quittant NOC42 le dernier jour de réservation ?",
         "En quittant NOC42, il faut retirer ses draps et les placer dans les chariots prévus à cet effet dans chaque dortoir.",
-        "Comment contacter l'équipe NOC42 en cas de question ?"
+        "Comment contacter l'équipe NOC42 en cas de question ?",
+        "NOC42",
+        "NOC42 désigne les dortoirs de 42 Paris situés au 89 boulevard Bessières, réservables à la nuit sur book.noc42.fr au tarif de 10€ hors taxe de séjour, pour un maximum de 120 nuits par étudiant sur tout le cursus.",
+        "L'espace commun Café Associatif au rez-de-chaussée propose micro-ondes, frigo, machine à café et fontaine à eau, mais il est interdit d'y cuisiner ; le frigo est vidé chaque vendredi.",
+        "Chaque lit dispose d'un détecteur de fumée individuel qu'il est strictement interdit de toucher, démonter ou obstruer, sous peine d'exclusion de NOC42.",
+        "NOC42",
+        "book.noc42.fr",
+        "dortoirs non-mixtes",
+        "Café Associatif",
+        "120 nuits",
+        "détecteur de fumée",
+        "badge d'accès",
+        "taxe de séjour",
+        "hello@noc42.fr"
       ]
     },
     {
       "filename": "/data/documents/Objets trouvés.md",
-      "questions": [
+      "metaContexte": [
         "J'ai perdu un objet à 42 Paris, où le chercher ?",
         "Où se trouve la zone objets trouvés à 42 Paris ?",
         "En cas d'objet perdu, trois endroits sont à vérifier : le salon Discord #lost-and-found, la zone objets trouvés à l'entrée du bâtiment à droite du poste de sécurité, ou le Bocal pour les objets de valeur.",
@@ -629,12 +944,24 @@
         "Les tuteurs apportent au poste de sécurité ou au Bocal les objets oubliés pendant un examen ou avant le nettoyage du cluster.",
         "La zone objets trouvés se situe-t-elle près de l'entrée du bâtiment 42 Paris ?",
         "Faut-il badger pour accéder à la zone objets trouvés ?",
-        "Le poste de sécurité intervient-il dans la gestion des objets trouvés à 42 Paris ?"
+        "Le poste de sécurité intervient-il dans la gestion des objets trouvés à 42 Paris ?",
+        "Objets trouvés",
+        "En cas d'objet perdu, trois endroits sont à vérifier : le salon Discord #lost-and-found, la zone objets trouvés à l'entrée du bâtiment près du poste de sécurité, ou le Bocal pour les objets de valeur comme smartphones ou bijoux.",
+        "Pour un objet trouvé, il faut poster un message dans #lost-and-found puis le déposer à la zone objets trouvés ou au Bocal si l'objet a de la valeur ; les Tuteurs apportent également les objets oubliés en salle d'examen à ces mêmes endroits.",
+        "objets trouvés",
+        "#lost-and-found",
+        "poste de sécurité",
+        "Bocal",
+        "objet de valeur",
+        "Tuteurs",
+        "smartphone",
+        "cluster",
+        "examen"
       ]
     },
     {
       "filename": "/data/documents/Perks.md",
-      "questions": [
+      "metaContexte": [
         "Qu'est-ce que les perks 42 Paris et à qui sont-ils réservés ?",
         "Les perks 42 Paris sont des avantages culture, tech et lifestyle réservés aux étudiants et alumni, régulièrement enrichis.",
         "Qui est Artistik Rezo, le partenaire culturel historique de 42 Paris ?",
@@ -650,12 +977,24 @@
         "Qu'est-ce que le Club Artistik Rezo et comment bénéficier de sorties culturelles gratuites ?",
         "L'abonnement au Club Artistik Rezo permet de bénéficier de sorties culturelles gratuites pour 2 personnes, avec inscription juste après la rentrée ou en janvier pour le renouvellement.",
         "Comment proposer une idée de partenariat lifestyle, culture ou tech/start-up à 42 Paris ?",
-        "Pour un perk lifestyle ou culture il faut contacter comm@42paris.fr, et pour un perk tech ou start-up relations-entreprises@42paris.fr."
+        "Pour un perk lifestyle ou culture il faut contacter comm@42paris.fr, et pour un perk tech ou start-up relations-entreprises@42paris.fr.",
+        "Perks",
+        "Les perks de 42 Paris regroupent des avantages exclusifs pour étudiants et alumni, notamment via le partenariat culturel avec Artistik Rezo donnant accès au musée Art 42, à des visites guidées mensuelles et à des spectacles gratuits au Théâtre 42.",
+        "L'abonnement au Club Artistik Rezo permet de bénéficier de sorties culturelles gratuites pour deux personnes, avec inscription possible à la rentrée ou en janvier chaque année.",
+        "perks",
+        "Artistik Rezo",
+        "Art 42",
+        "Théâtre 42",
+        "visites guidées",
+        "sorties culturelles",
+        "musée street art",
+        "partenariat",
+        "alumni"
       ]
     },
     {
       "filename": "/data/documents/Prendre rendez-vous avec l_ADM.md",
-      "questions": [
+      "metaContexte": [
         "Comment prendre rendez-vous avec l'équipe ADM à 42 Paris ?",
         "L'équipe ADM propose des créneaux de 15 minutes pour répondre de vive voix à toutes les questions administratives des étudiants.",
         "Où réserver un créneau de rendez-vous avec l'ADM de 42 Paris ?",
@@ -670,12 +1009,22 @@
         "Est-ce que je peux annuler ou changer mon créneau de rendez-vous avec l'ADM ?",
         "Les rendez-vous ADM remplacent-ils les mails à adm@42paris.fr ?",
         "Comment obtenir une réponse rapide à une question administrative complexe à 42 Paris ?",
-        "Où trouver le lien pour prendre rendez-vous avec l'équipe administrative de 42 Paris ?"
+        "Où trouver le lien pour prendre rendez-vous avec l'équipe administrative de 42 Paris ?",
+        "Prendre rendez-vous avec l_ADM",
+        "L'équipe ADM propose des créneaux de 15 minutes pour répondre de vive voix aux questions administratives, réservables via un lien de calendrier dédié.",
+        "rendez-vous ADM",
+        "créneaux 15 minutes",
+        "questions administratives",
+        "calendrier",
+        "ADM",
+        "de vive voix",
+        "administration",
+        "42 Paris"
       ]
     },
     {
       "filename": "/data/documents/Problème personnel.md",
-      "questions": [
+      "metaContexte": [
         "Qui contacter en cas de problème pédagogique lié au Black Hole, aux Freezes ou au Paced System ?",
         "Quel est l'email de l'équipe pédagogique pour un problème sur un projet ou un sujet ?",
         "Qui contacter pour un problème technique lié au réseau, aux Macs ou à l'infrastructure ?",
@@ -693,12 +1042,25 @@
         "Qui contacter en cas de harcèlement à 42 Paris (référent harcèlement) ?",
         "Comment signaler un comportement inadapté, une agression ou un harcèlement (social-report@42paris.fr) ?",
         "Quels sont les référents dédiés pour les besoins spécifiques (handicap, harcèlement, mixité) ?",
-        "Quel est l'email du référent handicap à 42 Paris ?"
+        "Quel est l'email du référent handicap à 42 Paris ?",
+        "Problème personnel",
+        "Selon la nature du problème rencontré, différents contacts sont dédiés : pedago@42paris.fr pour le pédagogique (Black Hole, Freeze, Paced System), le canal #staff-it pour le technique, adm@42paris.fr pour l'administratif, et #42paris_staff_building pour le bâtiment.",
+        "Pour un problème personnel (santé, famille, finances), la coach pédagogique Behta propose des échanges confidentiels par rendez-vous, mail ou Discord, en complément de numéros d'urgence nationaux comme le 112, le 15, le 18, le 17, le 3114 et le 3919.",
+        "En cas de comportement inadapté, agression ou harcèlement, il faut contacter immédiatement social-report@42paris.fr ou l'un des référents dédiés handicap, harcèlement ou mixité.",
+        "Behta",
+        "coach pédagogique",
+        "numéros d'urgence",
+        "social-report",
+        "referent-harcelement",
+        "pedago@42paris.fr",
+        "adm@42paris.fr",
+        "#staff-it",
+        "santé mentale"
       ]
     },
     {
       "filename": "/data/documents/Startup Experience.md",
-      "questions": [
+      "metaContexte": [
         "Qu'est-ce que le projet Startup Experience à 42 Paris ?",
         "Combien de temps dure le Startup Experience et quelles sont ses modalités ?",
         "Le Startup Experience est un projet pédagogique de 6 mois permettant aux étudiants de se consacrer pleinement à leur startup, avec un point mensuel avec le staff 42 et un mentor externe validé par l'école, rythmé par des rendus mensuels et une session de pitch finale devant un jury.",
@@ -716,12 +1078,25 @@
         "Que faire si je n'ai pas de mentor pour mon Startup Experience ?",
         "Y a-t-il une obligation de présence sur le campus pendant le Startup Experience ?",
         "Le Startup Experience est-il pris en compte dans le RNCP ?",
-        "Quelles conditions faut-il remplir pour être éligible au Startup Experience (Common Core validé, création d'entreprise) ?"
+        "Quelles conditions faut-il remplir pour être éligible au Startup Experience (Common Core validé, création d'entreprise) ?",
+        "Startup Experience",
+        "Le Startup Experience est un projet pédagogique de 6 mois à 42 Paris permettant aux étudiants ayant validé leur Common Core de se consacrer pleinement à leur startup, avec un point mensuel avec le staff, un mentor externe validé, et une session de pitch finale devant un jury.",
+        "Cette expérience, prise en compte dans le titre RNCP, exige un engagement à temps plein équivalent à un Work Experience et ne peut pas être cumulée avec une autre activité professionnelle.",
+        "Le Startup Experience fonctionne indépendamment de l'incubateur 42 à STATION F, mais il est possible de candidater aux deux, l'un après l'autre ou simultanément.",
+        "Startup Experience",
+        "HolyGraph",
+        "mentor externe",
+        "point mensuel",
+        "pitch final",
+        "titre RNCP",
+        "Work Experience",
+        "STATION F",
+        "temps plein"
       ]
     },
     {
       "filename": "/data/documents/Statut SFP _ Guide de l_assiduité.md",
-      "questions": [
+      "metaContexte": [
         "Qu'est-ce que le statut SFP (Stagiaire de la Formation Professionnelle) à 42 Paris ?",
         "Combien d'heures de formation par mois un SFP doit-il réaliser sur le campus ?",
         "Le travail à distance est-il comptabilisé dans les heures de présence pour un SFP ?",
@@ -746,12 +1121,25 @@
         "Qui contacter en cas de question sur son assiduité en tant que SFP ?",
         "Que se passe-t-il si 42 Paris déclare une absence à France Travail pour un SFP ?",
         "42 Paris a l'obligation de déclarer à France Travail toute absence, ce qui entraîne une baisse des allocations du SFP et la génération de trop-perçus.",
-        "Quelle est la différence entre le suivi d'un étudiant SFP et celui d'un étudiant classique à 42 Paris ?"
+        "Quelle est la différence entre le suivi d'un étudiant SFP et celui d'un étudiant classique à 42 Paris ?",
+        "Statut SFP _ Guide de l_assiduité",
+        "Le statut SFP (Stagiaire de la Formation Professionnelle) impose de réaliser 140 heures de formation par mois sur le campus, uniquement comptabilisées via le badge nominatif, avec obligation de déclarer sa formation à chaque actualisation France Travail.",
+        "La règle de minuit impose que l'entrée et la sortie soient enregistrées le même jour civil ; en cas de nuit blanche, il faut badger en sortie avant 23h59 et re-badger en entrée après minuit sous peine de perdre l'intervalle.",
+        "Toute fraude ou tentative de fraude sur le badgeage entraîne une convocation en conseil de discipline, l'annulation des heures fraudées et une sanction pouvant aller jusqu'à l'exclusion définitive.",
+        "SFP",
+        "140 heures",
+        "badge nominatif",
+        "règle de minuit",
+        "France Travail",
+        "AREF",
+        "fraude",
+        "dashboard.42paris.fr",
+        "actualisation mensuelle"
       ]
     },
     {
       "filename": "/data/documents/Steakoverflow _ Food.md",
-      "questions": [
+      "metaContexte": [
         "Où peut-on manger sur le campus de 42 Paris ?",
         "Quels sont les trois espaces cafétéria de 42 Paris ?",
         "Qu'est-ce que Steakoverflow, le restaurant de 42 Paris ?",
@@ -780,12 +1168,25 @@
         "Les règles de la cafétéria imposent de nettoyer systématiquement sa table et ranger ses chaises avant de partir, de nettoyer le micro-ondes en cas de problème, et interdisent les bouilloires ainsi que le fait de mettre les pieds sur les chaises, bancs ou tables.",
         "Que faire en cas de problème avec un distributeur automatique à 42 Paris ?",
         "Qui contacter en cas de panne d'un distributeur de nourriture ?",
-        "En cas de problème avec un distributeur automatique, il ne faut pas contacter 42 Paris mais directement l'entreprise en charge du distributeur, dont les coordonnées figurent sur une affiche dédiée."
+        "En cas de problème avec un distributeur automatique, il ne faut pas contacter 42 Paris mais directement l'entreprise en charge du distributeur, dont les coordonnées figurent sur une affiche dédiée.",
+        "Steakoverflow _ Food",
+        "42 Paris propose trois espaces cafétéria (Cantiskate, Shokudo, La Piscine) et son propre restaurant Steakoverflow, ouvert du lundi au vendredi de 12h à 16h, avec commande en ligne sur steakoverflow.42paris.fr et retrait en Cantiskate.",
+        "Des distributeurs automatiques payables par carte sont disponibles en cafétéria Shokudo, en complément de frigos et de 9 micro-ondes pour la nourriture apportée par les étudiants.",
+        "En cas de problème avec un distributeur automatique, il faut contacter directement l'entreprise en charge plutôt que le staff de 42 Paris.",
+        "Steakoverflow",
+        "Cantiskate",
+        "Shokudo",
+        "distributeurs automatiques",
+        "steakoverflow.42paris.fr",
+        "micro-ondes",
+        "cafétéria",
+        "plats du jour",
+        "cartes restaurant"
       ]
     },
     {
       "filename": "/data/documents/Système de progression.md",
-      "questions": [
+      "metaContexte": [
         "Comment fonctionne le système de progression à 42 Paris ?",
         "Qu'est-ce que le système YAMS sur 42 Next ?",
         "Le système YAMS est un dispositif pédagogique de contrôle du temps de formation sur 42 Next, garantissant l'engagement minimal et l'efficacité du parcours ; le non-respect des contraintes temporelles entraîne un Drop Out définitif.",
@@ -812,12 +1213,25 @@
         "Les règles de freeze sont-elles les mêmes que les Bonus Days ?",
         "Quelle est la différence entre le système YAMS (42 Next) et le Paced System (Intra V2/V3) ?",
         "Qu'est-ce que le speed up dans le Paced System ?",
-        "Que se passe-t-il si je ne valide pas ma milestone avant la deadline sur le Paced System ?"
+        "Que se passe-t-il si je ne valide pas ma milestone avant la deadline sur le Paced System ?",
+        "Système de progression",
+        "Le système YAMS (42Next) contrôle le temps de formation via des Milestones et des Skills, avec des niveaux de rythme allant d'Outstanding Pace à Significant Lag et une Grace Period de quatre semaines avant le Drop Out en cas de retard significatif.",
+        "Le Paced System (Intra V2/V3) propose plusieurs rythmes (Pace 8 à 24) avec des deadlines qui s'adaptent à la progression : valider rapidement donne des Bonus Days, tandis qu'un retard répété mène à une Milestone Ultimate Deadline puis au Black Hole.",
+        "Dans les deux systèmes, le Freeze met en pause la progression et les échéances pendant toute sa durée.",
+        "YAMS",
+        "Paced System",
+        "Milestones",
+        "Grace Period",
+        "Drop Out",
+        "Black Hole",
+        "Bonus Days",
+        "Common Core ETA",
+        "Pace"
       ]
     },
     {
       "filename": "/data/documents/Titres RNCP.md",
-      "questions": [
+      "metaContexte": [
         "Quels sont les titres RNCP proposés par 42 Paris ?",
         "Les titres RNCP de 42 sont-ils obligatoires pour valider le cursus ?",
         "Faut-il le baccalauréat pour obtenir un titre RNCP à 42 ?",
@@ -847,12 +1261,26 @@
         "La professionnalisation pour le RNCP peut se valider via deux stages en entreprise, un stage plus un an d'alternance, deux ans d'alternance, ou un Start-up Internship suivi d'un stage ou d'une alternance d'un an ; les contrats à temps partiel ne sont pas pris en compte.",
         "Les étudiants de moins de 30 ans en alternance signent un contrat d'apprentissage, tandis que ceux de 30 ans ou plus signent un contrat de professionnalisation pour valider leur titre RNCP.",
         "Si un étudiant n'a pas suffisamment d'expérience professionnelle pour valider son titre RNCP, l'équipe relations-entreprises@42.fr peut valider l'expérience sur présentation d'un contrat, à l'exclusion des expériences rétroactives.",
-        "Le projet de la catégorie Suite à valider peut être choisi parmi une liste incluant 42sh, BADASS, DoomNukem, Inception Of Things, HumanGL, kfs-2, Override, Pestilence, RT ou Total perspective vortex, quel que soit le titre visé."
+        "Le projet de la catégorie Suite à valider peut être choisi parmi une liste incluant 42sh, BADASS, DoomNukem, Inception Of Things, HumanGL, kfs-2, Override, Pestilence, RT ou Total perspective vortex, quel que soit le titre visé.",
+        "Titres RNCP",
+        "42 Paris propose deux titres reconnus par l'État, optionnels et accessibles dès 18 ans sans prérequis de diplôme : le Titre niveau 6 Concepteur Développeur de Solutions Informatiques et le Titre niveau 7 Expert en Architecture Informatique.",
+        "L'obtention du titre nécessite d'atteindre un niveau 42 donné, 17 pour le niveau 6 et 21 pour le niveau 7, de valider une spécialisation, un projet Suite, le tronc commun et des expériences professionnelles via stages ou alternance.",
+        "Une validation par VAE est possible avec au moins un an d'expérience professionnelle liée au titre en écrivant à vae@42.fr ; l'obtention finale passe toujours par un jury de certification composé de membres internes et externes.",
+        "Trois sessions de jury sont prévues en 2026 (février, avril, octobre), chacune avec sa propre deadline de rendu de projets, et l'inscription se fait via les annonces Discord/Slack ou le Towel Times.",
+        "Titre RNCP niveau 6",
+        "Titre RNCP niveau 7",
+        "Concepteur Développeur de Solutions Informatiques",
+        "Expert en Architecture Informatique",
+        "VAE",
+        "jury de certification",
+        "gcc.42.fr",
+        "projet Suite",
+        "Work Experience"
       ]
     },
     {
       "filename": "/data/documents/Triche _ IA.md",
-      "questions": [
+      "metaContexte": [
         "Quelle est la différence entre peer-learning et triche à 42 ?",
         "Est-ce que rendre un code identique à celui d'un camarade est considéré comme de la triche ?",
         "Peut-on discuter d'une approche ou expliquer un concept à un camarade sans que ce soit de la triche ?",
@@ -878,12 +1306,26 @@
         "Que révèle vraiment la triche à 42 sur le niveau d'un étudiant ?",
         "Tricher à 42 est avant tout se mentir à soi-même sur son propre niveau ; les examens, projets avancés et le monde professionnel ne laissent aucune place à ce genre de dette.",
         "Où trouver la définition précise de ce qui constitue un cas de triche à 42 Paris et les sanctions encourues ?",
-        "Le Règlement Intérieur de 42 Paris définit précisément les cas de triche et les sanctions associées."
+        "Le Règlement Intérieur de 42 Paris définit précisément les cas de triche et les sanctions associées.",
+        "Triche _ IA",
+        "Rendre un code identique à celui d'un autre étudiant est considéré comme de la triche même en cas de travail 'ensemble' : la discussion est encouragée mais le code doit rester individuel et explicable ligne par ligne.",
+        "S'inspirer de documentation ou d'exemples trouvés en ligne est normal, mais copier une solution toute faite sans chercher soi-même prive de l'apprentissage réel ; aider trop activement un camarade en écrivant du code à sa place est aussi une forme de triche.",
+        "L'usage de l'IA est interdit pendant la Piscine et déconseillé en Common Core pour préserver la capacité à résoudre des problèmes, éviter l'illusion de savoir et la fixation cognitive, et apprendre à déboguer par la pratique.",
+        "En Advanced Core, l'IA devient un outil légitime pour un développeur qui maîtrise déjà les fondamentaux, capable de formuler des prompts précis et d'évaluer la pertinence du code généré.",
+        "triche",
+        "peer-learning",
+        "IA",
+        "Common Core",
+        "Advanced Core",
+        "effet tunnel",
+        "Règlement Intérieur",
+        "code individuel",
+        "débogage"
       ]
     },
     {
       "filename": "/data/documents/Visiter le campus.md",
-      "questions": [
+      "metaContexte": [
         "Quels sont les horaires de visite autorisés au campus de 42 Paris ?",
         "Peut-on faire visiter le campus de 42 Paris à des amis ou de la famille ?",
         "Quelle est la durée maximale d'une visite au campus de 42 Paris ?",
@@ -905,12 +1347,26 @@
         "Pour visiter 42 Paris sans connaître d'étudiant sur place, il faut remplir un formulaire au moins 7 jours avant la visite, en précisant la date, l'heure et le nombre de personnes accompagnantes.",
         "Pour télétravailler depuis 42 Paris en tant qu'étudiant d'un autre campus, il faut remplir un formulaire au moins 15 jours ouvrés avant la visite ; les accès Wi-Fi et le badge sont envoyés environ 7 jours avant, mais aucun poste de travail n'est fourni.",
         "En cas de désaccord entre les règles écrites et les instructions de l'agent de sécurité à l'accueil, ce sont les instructions de l'agent de sécurité qui prévalent, et ces règles de visite peuvent changer régulièrement.",
-        "Les alumni ont accès à l'école et aux clusters mais les étudiants actuels et les candidats en piscine ont toujours la priorité sur les postes de travail, qui peuvent leur être retirés à tout moment par le staff."
+        "Les alumni ont accès à l'école et aux clusters mais les étudiants actuels et les candidats en piscine ont toujours la priorité sur les postes de travail, qui peuvent leur être retirés à tout moment par le staff.",
+        "Visiter le campus",
+        "Les visites du campus de 42 Paris sont autorisées du lundi au dimanche de 8h à 20h dans le bâtiment principal du 96 boulevard Bessières, avec un maximum de 2 heures et 3 visiteurs externes par étudiant accompagnateur.",
+        "Un étudiant est considéré 'close' et n'a pas accès au campus s'il est en Black Hole, en Freeze, si son inscription administrative n'est pas finalisée, ou si son cursus est terminé ou pas commencé.",
+        "Pour visiter sans connaître d'étudiant sur place, il faut remplir un formulaire au moins 7 jours avant ; pour télétravailler depuis 42 Paris en tant qu'étudiant d'un autre campus, il faut remplir un autre formulaire au moins 15 jours ouvrés avant, sans poste de travail fourni.",
+        "Les alumni ont accès à l'école et aux clusters mais les étudiants actuels et candidats en piscine gardent toujours la priorité sur les postes de travail.",
+        "visite du campus",
+        "étudiant close",
+        "Black Hole",
+        "alumni",
+        "formulaire de visite",
+        "télétravail",
+        "agent de sécurité",
+        "96 boulevard Bessières",
+        "accessibilité PMR"
       ]
     },
     {
       "filename": "/data/documents/Wi-Fi.md",
-      "questions": [
+      "metaContexte": [
         "Comment se connecter au Wi-Fi de 42 Paris ?",
         "Quel est le nom du réseau Wi-Fi de 42 Paris (SSID) ?",
         "Quels sont les paramètres de connexion au Wi-Fi de 42 Paris ?",
@@ -938,12 +1394,23 @@
         "Comment se connecter au réseau 42Paris Guest sur 42 Next ?",
         "Sur 42 Next, il faut se connecter au réseau 42Paris Guest, laisser le portail de connexion s'ouvrir puis entrer le code d'accès 58380-57966.",
         "Le processus de connexion au Wi-Fi de 42 Paris est-il différent entre 42 Next et l'Intranet v2/v3 ?",
-        "Le système de connexion Wi-Fi pour 42 Next va-t-il évoluer prochainement ?"
+        "Le système de connexion Wi-Fi pour 42 Next va-t-il évoluer prochainement ?",
+        "Wi-Fi",
+        "Wi Fi",
+        "WiFi",
+        "Le réseau Wi-Fi 42Paris se configure avec le SSID 42Paris, la méthode EAP TTLS recommandée ou PEAP, une authentification de phase 2 en PAP ou MSCHAPV2, l'identifiant Intra comme identité, et un certificat CA téléchargeable sur wifi.42paris.fr.",
+        "La connexion se fait en trois étapes : se rendre sur wifi.42paris.fr pour récupérer le mot de passe selon la méthode choisie, puis se connecter au réseau 42Paris avec ces paramètres.",
+        "Sur 42 Next, la connexion se fait via le réseau 42Paris Guest avec un code de portail captif, un système amené à évoluer prochainement.",
+        "SSID 42Paris",
+        "wifi.42paris.fr",
+        "certificat CA",
+        "42Paris Guest",
+        "portail captif"
       ]
     },
     {
       "filename": "/data/documents/Work Experience.md",
-      "questions": [
+      "metaContexte": [
         "Qu'est-ce que le projet Work Experience à 42 Paris ?",
         "Quels sont les différents projets Work Experience disponibles à 42 Paris ?",
         "Quelles sont les conditions d'éligibilité au projet Work Experience I ?",
@@ -1001,12 +1468,26 @@
         "Quels types d'événements l'équipe Relations Entreprises organise-t-elle à 42 Paris ?",
         "L'équipe Relations Entreprises organise tout au long de l'année des conférences métiers, des forums entreprises/job fairs, des workshops techniques, des hackathons, des ateliers CV/LinkedIn/entretiens mensuels, des visites d'entreprises et des soirées networking avec les alumni.",
         "Comment prendre rendez-vous avec l'équipe Relations Entreprises de 42 Paris ?",
-        "Il est possible de prendre rendez-vous avec l'équipe Relations Entreprises via un lien dédié disponible sur s.42paris.fr/permanences-re pour poser toute question restée sans réponse."
+        "Il est possible de prendre rendez-vous avec l'équipe Relations Entreprises via un lien dédié disponible sur s.42paris.fr/permanences-re pour poser toute question restée sans réponse.",
+        "Work Experience",
+        "Le choix du projet pédagogique (Work Experience I, Work Experience II, Stage non pédagogique, Part-Time I) dépend du niveau atteint, de la validation du Common Core et de la durée du contrat, avec un maximum de 2 jours de télétravail par semaine et aucun stage 100% distanciel autorisé.",
+        "Aucun stage ne peut débuter avant la signature de la convention par les trois parties, et la création de la convention suit un processus en sept étapes sur l'intranet, de l'inscription au projet jusqu'à la validation finale par l'équipe Relations Entreprises.",
+        "Tout stage de plus de 2 mois doit être rémunéré par la loi française, et un CDD/CDI ou une mission freelance en cours peut être valorisé dans le cadre d'un Work Experience, sans validation rétroactive possible.",
+        "En cas de problème en entreprise, de changement de tuteur ou de rupture anticipée de stage, il faut contacter rapidement l'équipe Relations Entreprises par email ; un stage interrompu avant 4 mois ne donne pas droit à l'XP mais permet un retry du projet.",
+        "Work Experience I",
+        "Work Experience II",
+        "convention de stage",
+        "Part-Time I",
+        "relations-entreprises@42.fr",
+        "télétravail",
+        "gratification",
+        "rupture de stage",
+        "CDD CDI"
       ]
     },
     {
       "filename": "/data/documents/Évaluations.md",
-      "questions": [
+      "metaContexte": [
         "Les évaluations à 42 doivent-elles se faire en présentiel ?",
         "Sur quel poste de travail se déroule une évaluation, celui de l'évaluateur ou de l'évalué ?",
         "Les évaluations à 42 sont obligatoires en présentiel sur un poste de l'école et ont lieu sur le poste de travail de l'évaluateur, et non sur celui de l'évalué.",
@@ -1033,12 +1514,26 @@
         "Peut-on réaliser une évaluation sur son téléphone à 42 ?",
         "Utiliser un VPN/Proxy/Tor sans le désactiver ou évaluer sur son téléphone fait considérer l'évaluation comme étant à distance, donc annulée et sanctionnée.",
         "Comment fonctionnent les points d'évaluation sur v2v3 ?",
-        "Chaque lundi à 8h00 sur v2v3, si le total de points d'évaluation d'un étudiant dépasse 4, il est automatiquement réinitialisé à 4 : il vaut mieux les utiliser plutôt que les stocker."
+        "Chaque lundi à 8h00 sur v2v3, si le total de points d'évaluation d'un étudiant dépasse 4, il est automatiquement réinitialisé à 4 : il vaut mieux les utiliser plutôt que les stocker.",
+        "Évaluations",
+        "Les évaluations à 42 se déroulent obligatoirement en présentiel sur le poste de travail de l'évaluateur, avec présence obligatoire des deux parties et interdiction de conserver une trace du projet de l'évalué après l'évaluation.",
+        "L'évalué doit être capable de justifier chaque choix d'implémentation et d'architecture de son code, sous peine d'être flaggé comme triche via Cannot explain code sur 42Next ou Cheat sur v2v3.",
+        "Les évaluations à distance sont interdites et considérées comme de la triche selon l'Article 7.5 du Règlement Intérieur, sauf exception pour les projets Companies en vidéo avec échange obligatoire avant notation.",
+        "évaluation",
+        "évaluateur",
+        "évalué",
+        "zéro trace",
+        "triche",
+        "Cannot explain code",
+        "Cheat",
+        "TIG",
+        "évaluation à distance",
+        "Règlement Intérieur"
       ]
     },
     {
       "filename": "/data/documents/Événements _ Coalitions.md",
-      "questions": [
+      "metaContexte": [
         "Combien d'événements sont organisés chaque année à 42 Paris ?",
         "Quels sont les différents types d'événements organisés à 42 Paris ?",
         "Quelle différence entre les événements étudiants, les événements organisés par 42 Paris et les événements externes ?",
@@ -1055,7 +1550,21 @@
         "Quel est le Discord de la coalition The Alliance et qui en est le Master ?",
         "Quel est le Discord de la coalition The Order et qui en est le Master ?",
         "Où consulter le classement et les scores des coalitions de 42 Paris ?",
-        "L'assignation à une coalition à 42 Paris est automatique après l'admission et te suit pendant toute ta scolarité ; les Masters de coalition, membres du staff, coordonnent les activités et communiquent via les Discords dédiés à chaque coalition."
+        "L'assignation à une coalition à 42 Paris est automatique après l'admission et te suit pendant toute ta scolarité ; les Masters de coalition, membres du staff, coordonnent les activités et communiquent via les Discords dédiés à chaque coalition.",
+        "Événements _ Coalitions",
+        "42 Paris organise plus de 500 événements par an répartis en trois catégories : événements étudiants organisés par les associations et clubs, événements organisés par le staff ou des partenaires, et événements externes relayés par l'école.",
+        "L'inscription à un événement se fait via l'intra ou le LMS et constitue un engagement à venir ; une absence non justifiée peut entraîner un TIG.",
+        "Les coalitions (The Fédération, The Assembly, The Alliance, The Order) sont des groupes assignés automatiquement à l'admission, animés par des Masters de coalition membres du staff, dont l'objectif est d'accumuler un maximum de points via les événements et challenges inter-coalitions.",
+        "coalitions",
+        "The Fédération",
+        "The Assembly",
+        "The Alliance",
+        "The Order",
+        "Master de coalition",
+        "TIG",
+        "points",
+        "événements étudiants",
+        "coalitions.42paris.fr"
       ]
     }
   ]
