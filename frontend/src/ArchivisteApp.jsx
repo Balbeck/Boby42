@@ -25,7 +25,7 @@ function ArchivisteApp() {
         {!hasStarted && (
           <div className="relative flex-1">
             <h1 className="absolute top-[25%] left-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center text-3xl font-medium text-chat-text">
-              🤖 L'Archiviste
+              🤖 Le Documentaliste 🕵️‍♂️
             </h1>
             <div className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2">
               <ChatInput
@@ -33,8 +33,14 @@ function ArchivisteApp() {
                 onStop={stopGeneration}
                 isSending={isSending}
                 autoFocus
+                placeholder="Quels documents souhaitez-vous ?"
               />
-              <Disclaimer />
+              <Disclaimer>
+                Je fouille dans le Notion tenu à jour par le Bocal de 42 Paris pour
+                retrouver les bons documents. Ils peuvent être en français, en
+                anglais, ou dans leur langue d'origine, telle qu'écrite par le
+                Bocal 📚
+              </Disclaimer>
             </div>
           </div>
         )}
@@ -58,8 +64,14 @@ function ArchivisteApp() {
                   onStop={stopGeneration}
                   isSending={isSending}
                   autoFocus
+                  placeholder="Quels documents souhaitez-vous ?"
                 />
-                <Disclaimer />
+                <Disclaimer>
+                  Je fouille dans le Notion tenu à jour par le Bocal de 42 Paris pour
+                  retrouver les bons documents. Ils peuvent être en français, en
+                  anglais, ou dans leur langue d'origine, telle qu'écrite par le
+                  Bocal 📚
+                </Disclaimer>
               </div>
             </div>
             <div ref={bottomRef} />

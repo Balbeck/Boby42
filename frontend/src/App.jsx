@@ -19,7 +19,7 @@ function App() {
         {!hasStarted && (
           <div className="relative flex-1">
             <h1 className="absolute top-[25%] left-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center text-3xl font-medium text-chat-text">
-              🎋 Bonjour 🌞
+              🌞 Bonjour 🎋
             </h1>
             <div className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2">
               <ChatInput

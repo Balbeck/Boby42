@@ -1,9 +1,15 @@
 import { useState } from 'react'
 
 /**
- * @param {{ onSend: (value: string) => void, onStop?: () => void, isSending?: boolean, autoFocus?: boolean }} props
+ * @param {{ onSend: (value: string) => void, onStop?: () => void, isSending?: boolean, autoFocus?: boolean, placeholder?: string }} props
  */
-export default function ChatInput({ onSend, onStop, isSending = false, autoFocus = false }) {
+export default function ChatInput({
+  onSend,
+  onStop,
+  isSending = false,
+  autoFocus = false,
+  placeholder = 'Comment puis je vous aider ?',
+}) {
   const [value, setValue] = useState('')
   const canSend = value.trim().length > 0
 
@@ -28,7 +34,7 @@ export default function ChatInput({ onSend, onStop, isSending = false, autoFocus
         value={value}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Comment puis je vous aider ?"
+        placeholder={placeholder}
         className="max-h-48 w-full resize-none bg-transparent py-4 pr-14 pl-5 text-chat-text placeholder:text-chat-text-muted focus:outline-none"
       />
 
