@@ -8,67 +8,46 @@ const { generateEmbedding } = require('./ollama.service')
 const VECTOR_STORE_PATH = path.join(__dirname, '../data/vector_store.json')
 const DOCUMENTS_ROOT = path.join(__dirname, '../data')
 
-const TOP_K = 5 // max results to score
-const MAX_DOCS = 2 // max full documents to use as LLM context
-const MIN_SCORE = 0.85 // min cosine similarity to keep a result
+const MAX_DOCS = 5 // max full documents to use as LLM context
+const MIN_SCORE = 0.89 // min cosine similarity to keep a result
 
 /**
- * Resolves a vector store filepath (e.g. "/LLMWiki/documents/Wi-Fi/Wi-Fi.md")
- * to the actual document path on disk (e.g. "<data>/documents/Notion/Wi-Fi.md").
- * The vector store still carries the old per-doc-folder layout inherited from
- * the ingestion tool; the real files now live flat under documents/Notion/,
- * so only the filename is kept, not the LLMWiki/documents/<Name>/ prefix.
+ * Resolves a vector store filename (e.g. "/data/documents/Alternance.md")
+ * to the actual document path on disk (e.g. "<data>/documents/Notion/Alternance.md").
+ * Only the basename is kept, so the exact prefix stored in vector_store.json
+ * is irrelevant as long as the filename matches a real file under documents/Notion/.
  *
- * @param {string} filepath
+ * @param {string} filename
  * @returns {string}
  */
-function resolveDocumentPath (filepath) {
-  const filename = path.basename(filepath)
-  return path.join(DOCUMENTS_ROOT, 'documents', 'Notion', filename)
+function resolveDocumentPath (filename) {
+  const basename = path.basename(filename)
+  return path.join(DOCUMENTS_ROOT, 'documents', 'Notion', basename)
 }
 
 /**
- * Scores every entry of the vector store against the question embedding
- * and returns the top-k results, sorted by descending score.
+ * Scans the vector store one document at a time and keeps a document as soon
+ * as one of its embeddings clears MIN_SCORE (the score kept is that first
+ * embedding's score, not the document's best score). Stops once MAX_DOCS
+ * documents have been selected.
  *
  * @param {number[]} queryEmbedding
- * @returns {Promise<{filepath: string, question: string, score: number}[]>}
+ * @returns {Promise<{filename: string, score: number}[]>}
  */
 async function searchVectorStore (queryEmbedding) {
   const raw = await fs.readFile(VECTOR_STORE_PATH, 'utf-8')
   const store = JSON.parse(raw)
 
-  const results = store.map((entry) => ({
-    filepath: entry.filepath,
-    question: entry.question,
-    score: cosineSimilarity(queryEmbedding, entry.embedding)
-  }))
-
-  results.sort((a, b) => b.score - a.score)
-  return results.slice(0, TOP_K)
-}
-
-/**
- * Deduplicates results by filepath and keeps only those above MIN_SCORE,
- * up to MAX_DOCS unique documents.
- *
- * @param {{filepath: string, score: number}[]} results
- * @returns {{filepath: string, score: number}[]}
- */
-function selectDocuments (results) {
-  const seen = new Set()
   const selected = []
 
-  for (const result of results) {
-    if (result.score < MIN_SCORE) {
-      break
+  for (const entry of store) {
+    for (const embedding of entry.embeddings) {
+      const score = cosineSimilarity(queryEmbedding, embedding)
+      if (score >= MIN_SCORE) {
+        selected.push({ filename: entry.filename, score })
+        break
+      }
     }
-
-    if (seen.has(result.filepath)) {
-      continue
-    }
-    seen.add(result.filepath)
-    selected.push(result)
 
     if (selected.length >= MAX_DOCS) {
       break
@@ -81,14 +60,14 @@ function selectDocuments (results) {
 /**
  * Reads the selected documents from disk.
  *
- * @param {{filepath: string, score: number}[]} selected
+ * @param {{filename: string, score: number}[]} selected
  * @returns {Promise<{name: string, path: string, score: number, content: string}[]>}
  */
 async function readDocuments (selected) {
   const documents = []
 
   for (const result of selected) {
-    const fullPath = resolveDocumentPath(result.filepath)
+    const fullPath = resolveDocumentPath(result.filename)
     try {
       const content = await fs.readFile(fullPath, 'utf-8')
       documents.push({
@@ -113,8 +92,7 @@ async function readDocuments (selected) {
  */
 async function retrieve (question) {
   const queryEmbedding = await generateEmbedding(question)
-  const results = await searchVectorStore(queryEmbedding)
-  const selected = selectDocuments(results)
+  const selected = await searchVectorStore(queryEmbedding)
   return readDocuments(selected)
 }
 
