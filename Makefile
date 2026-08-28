@@ -1,4 +1,4 @@
-.PHONY: localMac prod down logs help vectorStore
+.PHONY: localMac prod down logs help vectorStore subjectsPdfVectorStore
 
 help:
 	@echo "make localMac    - build and run on Docker Desktop (Mac), published ports, .env.localMac"
@@ -6,6 +6,7 @@ help:
 	@echo "make down        - stop and remove both containers"
 	@echo "make logs        - tail logs for both services"
 	@echo "make vectorStore - regenerate backend/data/vector_store.json (requires backend container running)"
+	@echo "make subjectsPdfVectorStore - regenerate backend/data/subjectsPdf_vector_store.json from subjectsPdfQuestions.json (requires backend container running)"
 
 localMac:
 	docker compose -f docker-compose.yml -f docker-compose.localmac.yml --env-file .env.localMac up -d --build
@@ -21,3 +22,6 @@ logs:
 
 vectorStore:
 	docker compose exec backend node scripts/generateVectorStore.js
+
+subjectsPdfVectorStore:
+	docker compose exec backend node scripts/generateSubjectsPdfVectorStore.js
