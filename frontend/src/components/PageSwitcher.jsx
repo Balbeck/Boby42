@@ -1,8 +1,8 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 
 const OPTIONS = [
-  { path: '/archiviste', flag: '🤖' },
-  { path: '/chat', flag: '👨‍🎓' },
+  { path: '/archiviste', flag: '🕵️‍♂️' },
+  { path: '/chat', flag: '👨🏻‍🏭' },
 ]
 
 /**
