@@ -6,7 +6,7 @@ import PageSwitcher from './components/PageSwitcher'
 import LanguageSwitcher from './components/LanguageSwitcher'
 import ConstructionNotice from './components/ConstructionNotice'
 import { useAutoScroll } from './hooks/useAutoScroll'
-import { useChat } from './hooks/useChat'
+import { useChat } from './state/conversationsContext'
 import { messages, useLanguage, setLanguage } from './i18n'
 
 function App() {

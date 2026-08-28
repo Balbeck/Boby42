@@ -4,7 +4,7 @@ import ArchivisteMessage from './components/ArchivisteMessage'
 import LanguageSwitcher from './components/LanguageSwitcher'
 import PageSwitcher from './components/PageSwitcher'
 import { useAutoScroll } from './hooks/useAutoScroll'
-import { useArchiviste } from './hooks/useArchiviste'
+import { useArchiviste } from './state/conversationsContext'
 import { messages, useLanguage, setLanguage } from './i18n'
 
 function ArchivisteApp() {
