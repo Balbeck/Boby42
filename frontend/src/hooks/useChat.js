@@ -34,7 +34,7 @@ export function useChat() {
       setExchanges((prev) =>
         prev.map((exchange) =>
           exchange.id === id
-            ? { ...exchange, answer: `Erreur : ${err.message}`, loading: false }
+            ? { ...exchange, error: err.message, loading: false }
             : exchange,
         ),
       )

@@ -1,17 +1,26 @@
 import { useState } from 'react'
 
 /**
- * @param {{ onSend: (value: string) => void, onStop?: () => void, isSending?: boolean, autoFocus?: boolean, placeholder?: string }} props
+ * @param {{
+ *   onSend: (value: string) => void,
+ *   onStop?: () => void,
+ *   isSending?: boolean,
+ *   autoFocus?: boolean,
+ *   placeholder?: string,
+ *   t: object,
+ * }} props
  */
 export default function ChatInput({
   onSend,
   onStop,
   isSending = false,
   autoFocus = false,
-  placeholder = 'Comment puis je vous aider ?',
+  placeholder,
+  t,
 }) {
   const [value, setValue] = useState('')
   const canSend = value.trim().length > 0
+  const resolvedPlaceholder = placeholder ?? t.chatInputPlaceholder
 
   function handleSend() {
     if (!canSend) return
@@ -34,7 +43,7 @@ export default function ChatInput({
         value={value}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder}
+        placeholder={resolvedPlaceholder}
         className="max-h-48 w-full resize-none bg-transparent py-4 pr-14 pl-5 text-chat-text placeholder:text-chat-text-muted focus:outline-none"
       />
 
@@ -42,7 +51,7 @@ export default function ChatInput({
         <button
           type="button"
           onClick={onStop}
-          aria-label="Arrêter la génération"
+          aria-label={t.stopAria}
           className="absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full bg-chat-green text-chat-bg transition-colors hover:bg-chat-green/80"
         >
           <span className="h-3 w-3 rounded-[3px] bg-chat-bg" />
@@ -52,7 +61,7 @@ export default function ChatInput({
           type="button"
           onClick={handleSend}
           disabled={!canSend}
-          aria-label="Envoyer le message"
+          aria-label={t.sendAria}
           className={`absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
             canSend
               ? 'bg-chat-green text-chat-bg hover:bg-chat-green/80'

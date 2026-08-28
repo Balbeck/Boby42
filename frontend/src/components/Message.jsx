@@ -26,25 +26,23 @@ function linkify(text) {
   )
 }
 
-const INTRO_TEXT = 'Laissez-moi voir ce que je peux faire'
-const SEARCH_TEXT = "Je consulte la base documentaire de l'école"
 const INTRO_DURATION = 3000
 const DOTS = ['.', '..', '...']
 const DOT_INTERVAL = 500
 
 /** Toujours affiché en entier à durée fixe, quoi qu'il arrive côté réseau. */
-function IntroStep({ onDone }) {
+function IntroStep({ text, onDone }) {
   useEffect(() => {
     const timer = setTimeout(onDone, INTRO_DURATION)
     return () => clearTimeout(timer)
   }, [onDone])
 
-  return <AnimatedText text={INTRO_TEXT} />
+  return <AnimatedText text={text} />
 }
 
 /** Prend le relai tant que la réponse n'est pas revenue, une fois l'intro terminée. */
-function WaitingStep() {
-  return <AnimatedText text={SEARCH_TEXT} />
+function WaitingStep({ text }) {
+  return <AnimatedText text={text} />
 }
 
 function AnimatedText({ text }) {
@@ -64,9 +62,15 @@ function AnimatedText({ text }) {
 }
 
 /**
- * @param {{ question: string, answer: string, loading?: boolean }} props
+ * @param {{
+ *   question: string,
+ *   answer: string,
+ *   loading?: boolean,
+ *   error?: string,
+ *   t: object,
+ * }} props
  */
-export default function Message({ question, answer, loading = false }) {
+export default function Message({ question, answer, loading = false, error, t }) {
   const [introDone, setIntroDone] = useState(false)
 
   return (
@@ -75,9 +79,14 @@ export default function Message({ question, answer, loading = false }) {
         {question}
       </div>
       {!introDone ? (
-        <IntroStep onDone={() => setIntroDone(true)} />
+        <IntroStep text={t.intro} onDone={() => setIntroDone(true)} />
       ) : loading ? (
-        <WaitingStep />
+        <WaitingStep text={t.searching} />
+      ) : error ? (
+        <div className="max-w-[85%] leading-relaxed text-chat-text">
+          {t.errorPrefix}
+          {error}
+        </div>
       ) : (
         <div className="max-w-[85%] whitespace-pre-line leading-relaxed text-chat-text">
           {linkify(answer)}

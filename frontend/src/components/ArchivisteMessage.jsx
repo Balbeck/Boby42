@@ -7,6 +7,7 @@ import ArchivisteDocument from './ArchivisteDocument'
  *   loading?: boolean,
  *   error?: string,
  *   onLoadDocument: (doc: import('../types/types.js').ArchivisteDocument) => void,
+ *   t: object,
  * }} props
  */
 export default function ArchivisteMessage({
@@ -15,6 +16,7 @@ export default function ArchivisteMessage({
   loading = false,
   error,
   onLoadDocument,
+  t,
 }) {
   return (
     <div className="flex flex-col gap-5 py-8">
@@ -24,22 +26,24 @@ export default function ArchivisteMessage({
 
       {loading ? (
         <div className="min-h-5 max-w-[85%] text-sm italic text-chat-text-muted">
-          Je consulte la base documentaire de l'école...
+          {t.archivisteSearching}
         </div>
       ) : error ? (
-        <div className="max-w-[85%] text-sm text-chat-text">Erreur : {error}</div>
+        <div className="max-w-[85%] text-sm text-chat-text">
+          {t.errorPrefix}
+          {error}
+        </div>
       ) : (
         <div className="flex max-w-[85%] flex-col gap-3">
           <div className="text-sm text-chat-text-muted">
-            {documents.length > 0
-              ? `${documents.length} document${documents.length > 1 ? 's' : ''} trouvé${documents.length > 1 ? 's' : ''}`
-              : 'Aucun document trouvé'}
+            {documents.length > 0 ? t.documentsFound(documents.length) : t.noDocuments}
           </div>
           {documents.map((document) => (
             <ArchivisteDocument
               key={document.name}
               document={document}
               onExpand={() => onLoadDocument(document)}
+              t={t}
             />
           ))}
         </div>

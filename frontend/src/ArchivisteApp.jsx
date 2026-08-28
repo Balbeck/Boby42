@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import ChatInput from './components/ChatInput'
 import Disclaimer from './components/Disclaimer'
 import ArchivisteMessage from './components/ArchivisteMessage'
@@ -6,17 +5,19 @@ import LanguageSwitcher from './components/LanguageSwitcher'
 import PageSwitcher from './components/PageSwitcher'
 import { useAutoScroll } from './hooks/useAutoScroll'
 import { useArchiviste } from './hooks/useArchiviste'
+import { messages, useLanguage, setLanguage } from './i18n'
 
 function ArchivisteApp() {
   const { exchanges, sendQuestion, stopGeneration, isSending, loadDocument } = useArchiviste()
   const { containerRef, bottomRef } = useAutoScroll()
-  const [language, setLanguage] = useState('fr')
+  const language = useLanguage()
+  const t = messages[language] ?? messages.fr
   const hasStarted = exchanges.length > 0
 
   return (
     <div className="flex min-h-svh justify-center bg-chat-bg">
       <div className="fixed top-4 left-4 z-20">
-        <PageSwitcher />
+        <PageSwitcher t={t} />
       </div>
       <div className="fixed top-4 right-4 z-20">
         <LanguageSwitcher language={language} onChange={setLanguage} />
@@ -25,7 +26,7 @@ function ArchivisteApp() {
         {!hasStarted && (
           <div className="relative flex-1">
             <h1 className="absolute top-[25%] left-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center text-3xl font-medium text-chat-text">
-              🤖 Le Documentaliste 🕵️‍♂️
+              {t.archivisteTitle}
             </h1>
             <div className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2">
               <ChatInput
@@ -33,14 +34,10 @@ function ArchivisteApp() {
                 onStop={stopGeneration}
                 isSending={isSending}
                 autoFocus
-                placeholder="Quels documents souhaitez-vous ?"
+                placeholder={t.archivisteInputPlaceholder}
+                t={t}
               />
-              <Disclaimer>
-                Je fouille dans le Notion tenu à jour par le Bocal de 42 Paris pour
-                retrouver les bons documents. Ils peuvent être en français, en
-                anglais, ou dans leur langue d'origine, telle qu'écrite par le
-                Bocal 📚
-              </Disclaimer>
+              <Disclaimer>{t.archivisteDisclaimer}</Disclaimer>
             </div>
           </div>
         )}
@@ -56,6 +53,7 @@ function ArchivisteApp() {
                   loading={exchange.loading}
                   error={exchange.error}
                   onLoadDocument={(doc) => loadDocument(exchange.id, doc, language)}
+                  t={t}
                 />
               ))}
               <div className="pt-8">
@@ -64,14 +62,10 @@ function ArchivisteApp() {
                   onStop={stopGeneration}
                   isSending={isSending}
                   autoFocus
-                  placeholder="Quels documents souhaitez-vous ?"
+                  placeholder={t.archivisteInputPlaceholder}
+                  t={t}
                 />
-                <Disclaimer>
-                  Je fouille dans le Notion tenu à jour par le Bocal de 42 Paris pour
-                  retrouver les bons documents. Ils peuvent être en français, en
-                  anglais, ou dans leur langue d'origine, telle qu'écrite par le
-                  Bocal 📚
-                </Disclaimer>
+                <Disclaimer>{t.archivisteDisclaimer}</Disclaimer>
               </div>
             </div>
             <div ref={bottomRef} />

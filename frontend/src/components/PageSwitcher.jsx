@@ -5,7 +5,10 @@ const OPTIONS = [
   { path: '/chat', flag: '👨‍🎓' },
 ]
 
-export default function PageSwitcher() {
+/**
+ * @param {{ t: object }} props
+ */
+export default function PageSwitcher({ t }) {
   const location = useLocation()
   const navigate = useNavigate()
   const activeIndex = location.pathname === '/chat' ? 1 : 0
@@ -18,7 +21,7 @@ export default function PageSwitcher() {
     <button
       type="button"
       onClick={handleToggle}
-      aria-label={activeIndex === 0 ? 'Switch to chat' : 'Switch to archiviste'}
+      aria-label={activeIndex === 0 ? t.switchToChat : t.switchToArchiviste}
       className="relative flex items-center rounded-full border border-chat-border bg-chat-surface p-1 shadow-sm shadow-black/20 transition-colors hover:bg-chat-surface-2"
     >
       <span

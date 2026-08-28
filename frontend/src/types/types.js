@@ -4,6 +4,7 @@
  * @property {string} question
  * @property {string} answer
  * @property {boolean} loading
+ * @property {string} [error] - message d'erreur brut ; le préfixe traduit est ajouté à l'affichage
  */
 
 /**
@@ -25,6 +26,7 @@
  * @property {number} score
  * @property {string} url - route prête à l'emploi pour récupérer le contenu (GET)
  * @property {string} [content] - rempli une fois chargé
+ * @property {string} [error] - message d'erreur brut si le chargement a échoué
  * @property {boolean} loading
  * @property {boolean} loaded
  */

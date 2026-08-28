@@ -95,7 +95,7 @@ export function useArchiviste() {
       setExchanges((prev) =>
         patchDocument(prev, exchangeId, doc.name, {
           loading: false,
-          content: `Erreur : ${err.message}`,
+          error: err.message,
         }),
       )
     }

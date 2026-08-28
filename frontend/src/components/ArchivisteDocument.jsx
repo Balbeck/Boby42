@@ -6,9 +6,13 @@ import remarkGfm from 'remark-gfm'
  * Un document trouvé, replié par défaut. Le contenu n'est chargé (via onExpand)
  * qu'au premier dépli — jamais rechargé ensuite (doc.loaded reste true).
  *
- * @param {{ document: import('../types/types.js').ArchivisteDocument, onExpand: () => void }} props
+ * @param {{
+ *   document: import('../types/types.js').ArchivisteDocument,
+ *   onExpand: () => void,
+ *   t: object,
+ * }} props
  */
-export default function ArchivisteDocument({ document, onExpand }) {
+export default function ArchivisteDocument({ document, onExpand, t }) {
   const [expanded, setExpanded] = useState(false)
 
   function handleToggle() {
@@ -44,7 +48,12 @@ export default function ArchivisteDocument({ document, onExpand }) {
       {expanded && (
         <div className="border-t border-chat-border px-4 py-3">
           {document.loading ? (
-            <div className="text-sm italic text-chat-text-muted">Chargement...</div>
+            <div className="text-sm italic text-chat-text-muted">{t.loading}</div>
+          ) : document.error ? (
+            <div className="text-sm text-chat-text">
+              {t.errorPrefix}
+              {document.error}
+            </div>
           ) : (
             <div className="prose prose-invert prose-sm max-w-none prose-a:text-chat-green">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{document.content}</ReactMarkdown>
