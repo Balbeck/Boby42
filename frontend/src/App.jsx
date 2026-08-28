@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import ChatInput from './components/ChatInput'
 import Disclaimer from './components/Disclaimer'
 import Message from './components/Message'
 import PageSwitcher from './components/PageSwitcher'
 import LanguageSwitcher from './components/LanguageSwitcher'
+import ConstructionNotice from './components/ConstructionNotice'
 import { useAutoScroll } from './hooks/useAutoScroll'
 import { useChat } from './hooks/useChat'
 import { messages, useLanguage, setLanguage } from './i18n'
@@ -13,9 +15,11 @@ function App() {
   const language = useLanguage()
   const t = messages[language] ?? messages.fr
   const hasStarted = exchanges.length > 0
+  const [showWip, setShowWip] = useState(true)
 
   return (
     <div className="flex min-h-svh justify-center bg-chat-bg">
+      {showWip && <ConstructionNotice onClose={() => setShowWip(false)} />}
       <div className="fixed top-4 left-4 z-20">
         <PageSwitcher t={t} />
       </div>

@@ -24,6 +24,10 @@ export const messages = {
     sendAria: 'Envoyer le message',
     switchToChat: 'Basculer vers le chat',
     switchToArchiviste: 'Basculer vers le documentaliste',
+    close: 'Fermer',
+    wipTitle: '🏗️ Section en construction 🛠️',
+    wipBody:
+      "Cette partie de Boby42 est encore en développement — ce qui peut expliquer des réponses parfois décevantes. Laissez-lui quand même sa chance, il apprend vite 👨🏻‍🏭",
   },
   en: {
     chatGreeting: '🌞 Bonjour 🎋',
@@ -45,5 +49,9 @@ export const messages = {
     sendAria: 'Send message',
     switchToChat: 'Switch to chat',
     switchToArchiviste: 'Switch to archiviste',
+    close: 'Close',
+    wipTitle: '🏗️ Section under construction 🛠️',
+    wipBody:
+      "This part of Boby42 is still under development — which can explain some disappointing answers. Give him a chance anyway, he learns fast 👨🏻‍🏭",
   },
 }
