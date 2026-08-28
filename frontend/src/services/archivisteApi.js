@@ -25,16 +25,13 @@ export async function search(question, language, { signal } = {}) {
 }
 
 /**
- * @param {string} url - route déjà prête à l'emploi, renvoyée par search()
- * @param {string} language - 'fr' | 'en'
+ * @param {string} url - route déjà prête à l'emploi, renvoyée par search() ;
+ *   la langue est portée par le path de cette URL (le backend l'y lit).
  * @param {{ signal?: AbortSignal }} [options]
  * @returns {Promise<{ name: string, content: string }>}
  */
-export async function fetchDocument(url, language, { signal } = {}) {
-  const separator = url.includes('?') ? '&' : '?'
-  const response = await fetch(`${API_URL}${url}${separator}language=${encodeURIComponent(language)}`, {
-    signal,
-  })
+export async function fetchDocument(url, { signal } = {}) {
+  const response = await fetch(`${API_URL}${url}`, { signal })
 
   if (!response.ok) {
     const body = await response.json().catch(() => null)

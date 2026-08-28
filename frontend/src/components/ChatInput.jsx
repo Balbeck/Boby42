@@ -20,7 +20,6 @@ export default function ChatInput({
 }) {
   const [value, setValue] = useState('')
   const canSend = value.trim().length > 0
-  const resolvedPlaceholder = placeholder ?? t.chatInputPlaceholder
 
   function handleSend() {
     if (!canSend) return
@@ -43,7 +42,7 @@ export default function ChatInput({
         value={value}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={resolvedPlaceholder}
+        placeholder={placeholder ?? t.chatInputPlaceholder}
         className="max-h-48 w-full resize-none bg-transparent py-4 pr-14 pl-5 text-chat-text placeholder:text-chat-text-muted focus:outline-none"
       />
 

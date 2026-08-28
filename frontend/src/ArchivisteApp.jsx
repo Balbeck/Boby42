@@ -52,7 +52,7 @@ function ArchivisteApp() {
                   documents={exchange.documents}
                   loading={exchange.loading}
                   error={exchange.error}
-                  onLoadDocument={(doc) => loadDocument(exchange.id, doc, language)}
+                  onLoadDocument={(doc) => loadDocument(exchange.id, doc)}
                   t={t}
                 />
               ))}

@@ -40,11 +40,6 @@ function IntroStep({ text, onDone }) {
   return <AnimatedText text={text} />
 }
 
-/** Prend le relai tant que la réponse n'est pas revenue, une fois l'intro terminée. */
-function WaitingStep({ text }) {
-  return <AnimatedText text={text} />
-}
-
 function AnimatedText({ text }) {
   const [dotIndex, setDotIndex] = useState(0)
 
@@ -81,7 +76,7 @@ export default function Message({ question, answer, loading = false, error, t })
       {!introDone ? (
         <IntroStep text={t.intro} onDone={() => setIntroDone(true)} />
       ) : loading ? (
-        <WaitingStep text={t.searching} />
+        <AnimatedText text={t.searching} />
       ) : error ? (
         <div className="max-w-[85%] leading-relaxed text-chat-text">
           {t.errorPrefix}

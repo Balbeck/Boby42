@@ -79,15 +79,14 @@ export function useArchiviste() {
   /**
    * @param {string} exchangeId
    * @param {ArchivisteDocument} doc
-   * @param {string} language - 'fr' | 'en'
    */
-  const loadDocument = useCallback(async (exchangeId, doc, language) => {
+  const loadDocument = useCallback(async (exchangeId, doc) => {
     if (doc.loaded || doc.loading) return
 
     setExchanges((prev) => patchDocument(prev, exchangeId, doc.name, { loading: true }))
 
     try {
-      const { content } = await fetchDocument(doc.url, language)
+      const { content } = await fetchDocument(doc.url)
       setExchanges((prev) =>
         patchDocument(prev, exchangeId, doc.name, { content, loading: false, loaded: true }),
       )

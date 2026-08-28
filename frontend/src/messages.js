@@ -26,7 +26,7 @@ export const messages = {
     switchToArchiviste: 'Basculer vers le documentaliste',
   },
   en: {
-    chatGreeting: '🌞 Hello 🎋',
+    chatGreeting: '🌞 Bonjour 🎋',
     chatInputPlaceholder: 'How can I help you?',
     chatDisclaimer:
       "Boby42 is an administrative assistant answering from the RTFM and the Bocal's Notion.\nHe is still in training and can be wrong — double-check what he tells you 🤖 !",
