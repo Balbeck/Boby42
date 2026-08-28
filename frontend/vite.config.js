@@ -15,6 +15,7 @@ export default defineConfig({
     allowedHosts: (process.env.VITE_ALLOWED_HOSTS || '').split(',').filter(Boolean),
     proxy: {
       '/BaseDocumentaire': backendTarget,
+      '/subjectspdf': backendTarget,
       '/archiviste/documents': backendTarget,
       // '/chat' and '/archiviste' (no suffix) are each both a React Router
       // page and a POST-only API endpoint: only proxy POST, let Vite serve

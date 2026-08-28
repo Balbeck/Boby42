@@ -24,8 +24,9 @@
  * @typedef {Object} ArchivisteDocument
  * @property {string} name
  * @property {number} score
- * @property {string} url - route prête à l'emploi pour récupérer le contenu (GET)
- * @property {string} [content] - rempli une fois chargé
+ * @property {'md' | 'pdf'} type - 'md' → contenu markdown fetché en JSON ; 'pdf' → affiché tel quel dans une <iframe>, jamais fetché
+ * @property {string} url - route prête à l'emploi (GET) : contenu JSON pour 'md', fichier PDF pour 'pdf'
+ * @property {string} [content] - rempli une fois chargé (type 'md' uniquement)
  * @property {string} [error] - message d'erreur brut si le chargement a échoué
  * @property {boolean} loading
  * @property {boolean} loaded
@@ -42,8 +43,8 @@
 
 /**
  * @typedef {Object} ArchivisteSearchResponse
- * @property {number} count
- * @property {{name: string, score: number, url: string}[]} documents
+ * @property {number} count - total des deux types confondus (Notion + sujets PDF)
+ * @property {{name: string, score: number, type: 'md' | 'pdf', url: string}[]} documents
  */
 
 export {}

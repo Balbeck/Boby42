@@ -34,19 +34,27 @@ export default function ArchivisteMessage({
           {error}
         </div>
       ) : (
-        <div className="flex max-w-[85%] flex-col gap-3">
-          <div className="text-sm text-chat-text-muted">
-            {documents.length > 0 ? t.documentsFound(documents.length) : t.noDocuments}
-          </div>
-          {documents.map((document) => (
-            <ArchivisteDocument
-              key={document.name}
-              document={document}
-              onExpand={() => onLoadDocument(document)}
-              t={t}
-            />
-          ))}
-        </div>
+        (() => {
+          const mdDocs = documents.filter((doc) => doc.type !== 'pdf')
+          const pdfDocs = documents.filter((doc) => doc.type === 'pdf')
+
+          return (
+            <div className="flex max-w-[85%] flex-col gap-3">
+              <div className="text-sm text-chat-text-muted">
+                <div>{t.documentsFound(mdDocs.length)}</div>
+                <div>{t.subjectsPdfFound(pdfDocs.length)}</div>
+              </div>
+              {[...mdDocs, ...pdfDocs].map((document) => (
+                <ArchivisteDocument
+                  key={`${document.type ?? 'md'}:${document.name}`}
+                  document={document}
+                  onExpand={() => onLoadDocument(document)}
+                  t={t}
+                />
+              ))}
+            </div>
+          )
+        })()
       )}
     </div>
   )

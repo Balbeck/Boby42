@@ -83,6 +83,13 @@ export function useArchiviste() {
   const loadDocument = useCallback(async (exchangeId, doc) => {
     if (doc.loaded || doc.loading) return
 
+    // PDFs aren't fetched as JSON — the <iframe> loads doc.url itself. Just mark
+    // it loaded so the no-op guard above holds on further expands.
+    if (doc.type === 'pdf') {
+      setExchanges((prev) => patchDocument(prev, exchangeId, doc.name, { loaded: true }))
+      return
+    }
+
     setExchanges((prev) => patchDocument(prev, exchangeId, doc.name, { loading: true }))
 
     try {

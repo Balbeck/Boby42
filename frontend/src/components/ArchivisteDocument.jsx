@@ -47,7 +47,23 @@ export default function ArchivisteDocument({ document, onExpand, t }) {
 
       {expanded && (
         <div className="border-t border-chat-border px-4 py-3">
-          {document.loading ? (
+          {document.type === 'pdf' ? (
+            <div className="flex flex-col gap-2">
+              <iframe
+                src={document.url}
+                title={document.name}
+                className="h-[70vh] w-full rounded-lg border border-chat-border bg-white"
+              />
+              <a
+                href={document.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-chat-green underline"
+              >
+                {t.openInNewTab}
+              </a>
+            </div>
+          ) : document.loading ? (
             <div className="text-sm italic text-chat-text-muted">{t.loading}</div>
           ) : document.error ? (
             <div className="text-sm text-chat-text">
