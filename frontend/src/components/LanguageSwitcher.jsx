@@ -39,7 +39,7 @@ export default function LanguageSwitcher({ language, onChange }) {
         className="flex items-center gap-2 rounded-full border border-chat-border bg-chat-surface px-3 py-1.5 text-sm text-chat-text shadow-sm shadow-black/20 transition-colors hover:bg-chat-surface-2"
       >
         <span>{current.flag}</span>
-        <span>{current.label}</span>
+        {open && <span>{current.label}</span>}
         <svg
           viewBox="0 0 24 24"
           fill="none"
