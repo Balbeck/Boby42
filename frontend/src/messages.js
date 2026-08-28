@@ -5,13 +5,13 @@
  */
 export const messages = {
   fr: {
-    chatGreeting: '🌞 Bonjour 🎋',
+    chatGreeting: '🎋 Bonjour',
     chatInputPlaceholder: 'Comment puis je vous aider ?',
     chatDisclaimer:
       'Boby42 est un assistant administratif qui répond à partir du RTFM et du Notion du Bocal.\nIl est encore en formation et peut se tromper - Vérifiez ce qu\'il vous conte 🤖 !',
     intro: 'Laissez-moi voir ce que je peux faire',
     searching: "Je consulte la base documentaire de l'école",
-    archivisteTitle: '🤖 Le Documentaliste 🕵️‍♂️',
+    archivisteTitle: '🕵️‍♂️ Le Documentaliste',
     archivisteInputPlaceholder: 'Quels documents souhaitez-vous ?',
     archivisteDisclaimer:
       "Je fouille dans le Notion tenu à jour par le Bocal de 42 Paris pour retrouver les bons documents. Ils peuvent être en français, en anglais, ou dans leur langue d'origine, telle qu'écrite par le Bocal 📚",
@@ -31,13 +31,13 @@ export const messages = {
       "Cette partie de Boby42 est encore en développement — ce qui peut expliquer des réponses parfois décevantes. Laissez-lui quand même sa chance, il apprend vite 👨🏻‍🏭",
   },
   en: {
-    chatGreeting: '🌞 Bonjour 🎋',
+    chatGreeting: '🎋 Bonjour',
     chatInputPlaceholder: 'How can I help you?',
     chatDisclaimer:
       "Boby42 is an administrative assistant answering from the RTFM and the Bocal's Notion.\nHe is still in training and can be wrong — double-check what he tells you 🤖 !",
     intro: 'Let me see what I can do',
     searching: "Searching the school's document base",
-    archivisteTitle: '🤖 The Archivist 🕵️‍♂️',
+    archivisteTitle: '🕵️‍♂️ The Archivist',
     archivisteInputPlaceholder: 'Which documents are you looking for?',
     archivisteDisclaimer:
       "I dig through the Notion kept up to date by 42 Paris's Bocal to find the right documents. They may be in French, in English, or in their original language, as written by the Bocal 📚",
