@@ -3,33 +3,74 @@
 const fs = require('node:fs/promises')
 const path = require('node:path')
 
-// Artisanal on purpose: every project subject PDF currently lives in this one
-// hard-coded category folder. NOT recursive. Basename-based resolution, exactly
-// like retriever.service.js's resolveDocumentPath() for the Notion base. See
-// root CLAUDE.md ("Subject project PDFs") for what a future multi-category
-// reorganisation has to change.
-const SUBJECTS_PDF_DIR = path.join(__dirname, '../data/SubjectsPdf/Machine_Learning')
+// Subject PDFs live under data/SubjectsPdf/<Category>/<Name>.pdf. There are now
+// two category folders (Machine_Learning, Old_Common_Core), so this walks the
+// whole SubjectsPdf tree recursively instead of one hard-coded folder. Resolution
+// stays basename-based, exactly like retriever.service.js's resolveDocumentPath()
+// for the Notion base: the store's `filename` keeps its full path, only the
+// basename is matched. This works only while basenames stay unique across
+// categories — if a future category reuses a basename, the serving route needs a
+// :category segment (see root CLAUDE.md, "Subject project PDFs").
+const SUBJECTS_PDF_ROOT = path.join(__dirname, '../data/SubjectsPdf')
 
 /**
- * Lists the .pdf filenames in the subject PDF folder — used as a whitelist to
- * validate names coming from request params. Missing folder -> empty list +
- * warning, so the app still boots.
+ * Recursively collects the absolute paths of every .pdf under `dir`.
+ * A missing directory yields an empty list (so the app still boots).
  *
+ * @param {string} dir
  * @returns {Promise<string[]>}
  */
-async function listSubjectsPdfFiles () {
+async function walkPdfFiles (dir) {
+  let entries
   try {
-    const entries = await fs.readdir(SUBJECTS_PDF_DIR, { withFileTypes: true })
-    return entries
-      .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.pdf'))
-      .map((entry) => entry.name)
+    entries = await fs.readdir(dir, { withFileTypes: true })
   } catch (err) {
     if (err.code === 'ENOENT') {
-      console.warn(`[subjectsPdfLibrary] folder not found: ${SUBJECTS_PDF_DIR}`)
+      console.warn(`[subjectsPdfLibrary] folder not found: ${dir}`)
       return []
     }
     throw err
   }
+
+  const files = []
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name)
+    if (entry.isDirectory()) {
+      files.push(...await walkPdfFiles(full))
+    } else if (entry.isFile() && entry.name.toLowerCase().endsWith('.pdf')) {
+      files.push(full)
+    }
+  }
+  return files
+}
+
+/**
+ * Builds a { basename -> absolute path } index of every subject PDF, used as the
+ * whitelist for request params. On a basename collision the first match wins and
+ * a warning is logged (the URL scheme can't disambiguate two same-named files).
+ *
+ * @returns {Promise<Map<string, string>>}
+ */
+async function buildSubjectsPdfIndex () {
+  const index = new Map()
+  for (const full of await walkPdfFiles(SUBJECTS_PDF_ROOT)) {
+    const name = path.basename(full)
+    if (index.has(name)) {
+      console.warn(`[subjectsPdfLibrary] duplicate basename ignored: ${full} (kept ${index.get(name)})`)
+      continue
+    }
+    index.set(name, full)
+  }
+  return index
+}
+
+/**
+ * Lists the .pdf filenames (basenames) across every subject PDF category folder.
+ *
+ * @returns {Promise<string[]>}
+ */
+async function listSubjectsPdfFiles () {
+  return [...(await buildSubjectsPdfIndex()).keys()]
 }
 
 /**
@@ -40,11 +81,8 @@ async function listSubjectsPdfFiles () {
  * @returns {Promise<string | null>} absolute path, or null if unknown
  */
 async function resolveSubjectsPdfFile (name) {
-  const knownNames = await listSubjectsPdfFiles()
-  if (!knownNames.includes(name)) {
-    return null
-  }
-  return path.join(SUBJECTS_PDF_DIR, name)
+  const index = await buildSubjectsPdfIndex()
+  return index.get(name) || null
 }
 
 module.exports = { listSubjectsPdfFiles, resolveSubjectsPdfFile }
