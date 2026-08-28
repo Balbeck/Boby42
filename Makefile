@@ -1,4 +1,4 @@
-.PHONY: localMac prod down logs help vectorStore subjectsPdfVectorStore db-migrate db-seed psql
+.PHONY: localMac prod down logs help vectorStore subjectsPdfVectorStore db-migrate db-seed psql check-env-lab
 
 help:
 	@echo "make localMac    - build and run on Docker Desktop (Mac), published ports, .env.localMac + .env.lab"
@@ -6,15 +6,22 @@ help:
 	@echo "make down        - stop and remove all containers"
 	@echo "make logs        - tail logs for all services"
 	@echo "make db-migrate  - apply pending Sequelize migrations (backend container must be running)"
-	@echo "make db-seed     - upsert the /lab user from .env.lab (backend container must be running)"
+	@echo "make db-seed     - upsert the /lab user from .env.lab (also done automatically at backend boot)"
 	@echo "make psql        - open a psql shell on the postgres container"
 	@echo "make vectorStore - regenerate backend/data/vector_store.json (requires backend container running)"
 	@echo "make subjectsPdfVectorStore - regenerate backend/data/subjectsPdf_vector_store.json from subjectsPdfQuestions.json (requires backend container running)"
 
-localMac:
+check-env-lab:
+	@test -f .env.lab || { \
+	  echo "ERROR: .env.lab is missing (it is git-ignored — not pulled with the repo)."; \
+	  echo "Create it from the template and fill it in:"; \
+	  echo "  cp .env.lab.example .env.lab && \$$EDITOR .env.lab"; \
+	  exit 1; }
+
+localMac: check-env-lab
 	docker compose -f docker-compose.yml -f docker-compose.localmac.yml --env-file .env.localMac --env-file .env.lab up -d --build
 
-prod:
+prod: check-env-lab
 	docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod --env-file .env.lab up -d --build
 
 down:

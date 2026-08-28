@@ -40,7 +40,7 @@ Non-secret variables live in `.env.prod` / `.env.localMac` (both committed — p
 | `POSTGRES_USER` / `POSTGRES_DB` | `backend/db/config.js`, `postgres` service | role + database name (`boby42` / `boby42`) |
 | `POSTGRES_HOST_PORT` | `docker-compose.yml` (`postgres` ports) | host-side port for the loopback publish (`127.0.0.1:5442:5432`) |
 | `POSTGRES_PASSWORD` | `postgres` service, `backend/db/config.js` | **secret — `.env.lab`**, no default |
-| `LAB_LOGIN` / `LAB_PASSWORD` | `backend/db/seed.js` | the single `/lab` account (seed only). **`.env.lab`** — empty ⇒ no user seeded |
+| `LAB_LOGIN` / `LAB_PASSWORD` | `backend/db/seed.js` (`seedLabUser`, at boot + `make db-seed`) | the single `/lab` account. **`.env.lab`** — empty ⇒ no user seeded ⇒ `/auth/lab/*` return 404 |
 | `LAB_JWT_SECRET` | `backend/services/labAuth.service.js` | signs the `/lab` session JWT. **`.env.lab`** — unset ⇒ `/auth/lab/*` return 404 |
 
 ### Frontend
@@ -51,3 +51,26 @@ Non-secret variables live in `.env.prod` / `.env.localMac` (both committed — p
 | `BACKEND_HOST` | `frontend/vite.config.js` — combined with `PORT` into the proxy target (`http://${BACKEND_HOST}:${PORT}`) for `/chat`, `/archiviste`, `/archiviste/documents` | host the frontend container reaches the backend on (`localhost` in prod, `host.docker.internal` on local Mac) |
 | `VITE_ALLOWED_HOSTS` | `frontend/vite.config.js` (`server.allowedHosts`) | comma-separated hostnames Vite's dev server accepts requests for (public domain in prod, `localhost` on local Mac) |
 | `VITE_API_URL` | `frontend/src/services/chatApi.js:1`, `frontend/src/services/archivisteApi.js:1` | escape hatch to call a different backend URL directly; left empty in both modes so the relative-path Vite proxy is used instead |
+
+## Deploying to a new host (or first run after T13)
+
+`.env.lab` is **git-ignored** — it is not pulled with the repo and must be created on each host:
+
+```bash
+cp .env.lab.example .env.lab
+$EDITOR .env.lab          # POSTGRES_PASSWORD=…  LAB_LOGIN=42wiz  LAB_PASSWORD=…  LAB_JWT_SECRET=$(openssl rand -hex 48)
+make prod                 # (or make localMac) — aborts early if .env.lab is missing
+```
+
+The backend applies migrations **and seeds the `/lab` user** automatically at boot (`plugins/sequelize.js` → `seedLabUser`), so no separate step is needed; `make db-seed` stays for a manual re-seed after changing `LAB_PASSWORD`.
+
+⚠️ **`POSTGRES_PASSWORD` is only read on the first init of the `postgres_data` volume.** If a `make prod` ever ran with an empty/wrong `.env.lab`, the database keeps the password from that first run and the backend logs `[db] not reachable … password authentication failed`. Recovery: `docker compose down -v` (**destroys the DB data**) then `make prod`, or fix it in place with `make psql` → `ALTER USER boby42 PASSWORD '…';`.
+
+**Quick health check on a host:**
+
+```bash
+docker compose ps                                   # 3 containers, postgres healthy
+docker compose logs backend | grep -iE "\[db\]|\[lab\]|\[seed\]|migrat|listening"
+docker compose exec backend node -e "require('./models').sequelize.authenticate().then(()=>console.log('DB reachable')).catch(e=>{console.error(e.message);process.exit(1)})"
+docker compose exec postgres psql -U boby42 -d boby42 -c "SELECT id, login FROM users;"
+```

@@ -19,6 +19,14 @@ const labAuth = require('../services/labAuth.service')
 module.exports = fp(async function (fastify) {
   await fastify.register(cookie)
 
+  // Make the fail-closed reason visible in the logs — a prod `/auth/lab/* → 404`
+  // is otherwise indistinguishable from a missing route.
+  if (labAuth.isConfigured()) {
+    fastify.log.info('[lab] gate enabled (LAB_JWT_SECRET set)')
+  } else {
+    fastify.log.warn('[lab] LAB_JWT_SECRET unset — /lab gate disabled, /auth/lab/* return 404')
+  }
+
   fastify.decorate('verifyLab', async function verifyLab(request, reply) {
     if (!labAuth.isConfigured()) return reply.callNotFound()
     if (!(await User.findOne({ attributes: ['id'] }))) return reply.callNotFound()
