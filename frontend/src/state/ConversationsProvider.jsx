@@ -1,3 +1,4 @@
+import { Outlet } from 'react-router-dom'
 import { useChat as useChatState } from '../hooks/useChat'
 import { useArchiviste as useArchivisteState } from '../hooks/useArchiviste'
 import { ChatContext, ArchivisteContext } from './conversationsContext'
@@ -19,5 +20,18 @@ export function ConversationsProvider({ children }) {
     <ChatContext.Provider value={chat}>
       <ArchivisteContext.Provider value={archiviste}>{children}</ArchivisteContext.Provider>
     </ChatContext.Provider>
+  )
+}
+
+/**
+ * Route de layout : monte `<ConversationsProvider>` une seule fois pour `/chat`
+ * et `/archiviste` (via `<Outlet>`), donc l'état survit au passage d'une page à
+ * l'autre. `/lab` est une route sœur, hors de ce provider.
+ */
+export function ConversationsLayout() {
+  return (
+    <ConversationsProvider>
+      <Outlet />
+    </ConversationsProvider>
   )
 }

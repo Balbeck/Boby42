@@ -12,6 +12,9 @@ build/
 # .env.localMac and .env.prod are intentionally committed (no secrets — ports,
 # URLs, model names) so `git pull` always has the right values on any machine.
 # See Launch&EnvReadme.md.
+# .env.lab is the one exception — it holds the only secrets (DB password, /lab
+# login, JWT secret) and is created locally from .env.lab.example.
+.env.lab
 
 # Logs
 *.log

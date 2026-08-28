@@ -1,0 +1,13 @@
+'use strict'
+
+const path = require('node:path')
+
+// Points sequelize-cli (used only to author migrations) at the project layout.
+// The runtime never shells out to the CLI — migrations are applied at boot by
+// umzug (see db/umzug.js, plugins/sequelize.js).
+module.exports = {
+  config: path.resolve(__dirname, 'db', 'config.js'),
+  'models-path': path.resolve(__dirname, 'models'),
+  'migrations-path': path.resolve(__dirname, 'db', 'migrations'),
+  'seeders-path': path.resolve(__dirname, 'db', 'seeders')
+}

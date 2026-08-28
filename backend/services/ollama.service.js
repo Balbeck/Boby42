@@ -11,9 +11,6 @@ const OLLAMA_EMBEDDING_MODEL = process.env.OLLAMA_EMBEDDING_MODEL
  * @returns {Promise<string>} the generated answer
  */
 async function generateAnswer(prompt) {
-
-  console.log(prompt)
-
   const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

@@ -3,28 +3,29 @@
 ## Commands
 
 ```bash
-make prod    # 42AI host (Linux) — network_mode: host, .env.prod
-make localMac   # Docker Desktop (Mac) — published ports, .env.localMac
+make prod    # 42AI host (Linux) — network_mode: host, .env.prod + .env.lab
+make localMac   # Docker Desktop (Mac) — published ports, .env.localMac + .env.lab
 ```
 
 ```bash
-make down` stops both containers
-make logs` tails both.
+make down` stops all containers
+make logs` tails all.
+make db-migrate` / `make db-seed` / `make psql`  — DB helpers (backend/postgres container running)
 ``` 
 Full mapping to `docker compose`: see `Makefile`.
 
-Behind the scenes, mode = which compose files + which env file get combined:
+Behind the scenes, mode = which compose files + which env files get combined (`.env.lab` is always the second `--env-file` — it carries the only secrets):
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml     --env-file .env.prod     up -d --build
-docker compose -f docker-compose.yml -f docker-compose.localmac.yml --env-file .env.localMac up -d --build
+docker compose -f docker-compose.yml -f docker-compose.prod.yml     --env-file .env.prod     --env-file .env.lab up -d --build
+docker compose -f docker-compose.yml -f docker-compose.localmac.yml --env-file .env.localMac --env-file .env.lab up -d --build
 ```
 
 `docker-compose.yml` is the shared base (build, volumes, `environment:` substitution). `docker-compose.prod.yml` adds `network_mode: host` to both services; `docker-compose.localmac.yml` adds `ports:` publishing instead — Docker Desktop's `network_mode: host` only reaches its own internal VM, never the Mac's real `localhost`.
 
 ## Variables
 
-All variables live in `.env.prod` / `.env.localMac` (both committed — no secrets, just ports/URLs/model names) and are injected into both containers via `docker-compose.yml`'s `environment:` blocks.
+Non-secret variables live in `.env.prod` / `.env.localMac` (both committed — ports/URLs/model names) and are injected via `docker-compose.yml`'s `environment:` blocks. **Secrets** live in **`.env.lab`** (git-ignored; copy from the committed `.env.lab.example` and fill in): `POSTGRES_PASSWORD`, `LAB_LOGIN`, `LAB_PASSWORD`, `LAB_JWT_SECRET`. `make localMac` / `make prod` pass it as a second `--env-file`.
 
 ### Backend
 
@@ -35,6 +36,12 @@ All variables live in `.env.prod` / `.env.localMac` (both committed — no secre
 | `OLLAMA_BASE_URL` | `backend/services/ollama.service.js:3` | Ollama host reachable from the backend container (`localhost` in prod, `host.docker.internal` on local Mac) |
 | `OLLAMA_GENERATION_MODEL` | `backend/services/ollama.service.js:4` | LLM model name for answer generation |
 | `OLLAMA_EMBEDDING_MODEL` | `backend/services/ollama.service.js:5` | embedding model name for retrieval |
+| `POSTGRES_HOST` / `POSTGRES_PORT` | `backend/db/config.js` | Postgres address — `postgres` / `5432` (bridge, local Mac) vs `localhost` / `5442` (loopback, prod `network_mode: host`) |
+| `POSTGRES_USER` / `POSTGRES_DB` | `backend/db/config.js`, `postgres` service | role + database name (`boby42` / `boby42`) |
+| `POSTGRES_HOST_PORT` | `docker-compose.yml` (`postgres` ports) | host-side port for the loopback publish (`127.0.0.1:5442:5432`) |
+| `POSTGRES_PASSWORD` | `postgres` service, `backend/db/config.js` | **secret — `.env.lab`**, no default |
+| `LAB_LOGIN` / `LAB_PASSWORD` | `backend/db/seed.js` | the single `/lab` account (seed only). **`.env.lab`** — empty ⇒ no user seeded |
+| `LAB_JWT_SECRET` | `backend/services/labAuth.service.js` | signs the `/lab` session JWT. **`.env.lab`** — unset ⇒ `/auth/lab/*` return 404 |
 
 ### Frontend
 

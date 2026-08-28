@@ -1,4 +1,26 @@
 services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: boby42-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-boby42}
+      POSTGRES_DB: ${POSTGRES_DB:-boby42}
+      # No default on purpose — Compose warns and Postgres refuses to start if
+      # it is missing. The value lives only in the git-ignored .env.lab.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      # Loopback only — the 42AI prod host is shared and the database must never
+      # be reachable from its network. Host port is configurable
+      # (POSTGRES_HOST_PORT, default 5442); the in-container port stays 5432.
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5442}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-boby42} -d ${POSTGRES_DB:-boby42}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
     build: ./backend
     container_name: boby42-backend
@@ -16,6 +38,22 @@ services:
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://localhost:11434}
       OLLAMA_GENERATION_MODEL: ${OLLAMA_GENERATION_MODEL:-mistral:latest}
       OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-snowflake-arctic-embed:335m}
+      # Database — db/config.js assembles the connection string from these parts
+      # (no ${VAR-inside-a-value} interpolation to rely on). Host/port differ per
+      # mode: bridge service name in local Mac, loopback-published port in prod.
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_USER: ${POSTGRES_USER:-boby42}
+      POSTGRES_DB: ${POSTGRES_DB:-boby42}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # /lab gated page — seeded login + JWT secret, all from .env.lab. Unset =
+      # the feature fails closed (routes 404, page shows only the greeting).
+      LAB_LOGIN: ${LAB_LOGIN:-}
+      LAB_PASSWORD: ${LAB_PASSWORD:-}
+      LAB_JWT_SECRET: ${LAB_JWT_SECRET:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   frontend:
     build: ./frontend
@@ -39,3 +77,4 @@ services:
 volumes:
   backend_node_modules:
   frontend_node_modules:
+  postgres_data:

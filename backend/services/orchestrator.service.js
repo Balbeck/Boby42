@@ -39,7 +39,7 @@ RÉPONSE :`
  * Orchestrates the RAG + LLM flow for a given question.
  *
  * @param {string} question
- * @returns {Promise<{answer: string, sources: {name: string, path: string, score: number}[]}>}
+ * @returns {Promise<import('../types/types').ChatResponse>}
  */
 async function getAnswer(question) {
   const documents = await retrieve(question)
