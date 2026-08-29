@@ -22,6 +22,9 @@ export default defineConfig({
       // /lab is an SPA page, but the auth API lives under /auth/lab (no page
       // collision) so it proxies plainly — no bypass needed.
       '/auth/lab': backendTarget,
+      // db-viz inspector API. /lab-data shadows no page (/lab is the page), so
+      // it proxies plainly like /auth/lab — no bypass.
+      '/lab-data': backendTarget,
       // '/chat' and '/archiviste' (no suffix) are each both a React Router
       // page and a POST-only API endpoint: only proxy POST, let Vite serve
       // the page for GET (direct navigation / refresh).

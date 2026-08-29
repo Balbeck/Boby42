@@ -120,4 +120,38 @@
  * @property {Object} [payload] - JSONB blob
  */
 
+/* ─── /lab db-viz inspector — services/labData.service.js ─────────────────── */
+
+/**
+ * One column of an inspected table, straight from `information_schema.columns`.
+ *
+ * @typedef {Object} LabColumn
+ * @property {string} name - the real column name (snake_case)
+ * @property {string} type - Postgres `data_type` (or the enum's `udt_name` when `data_type` is `USER-DEFINED`)
+ * @property {boolean} nullable
+ * @property {boolean} numeric - hint for the grid (right-align, tabular figures)
+ */
+
+/**
+ * One row of `GET /lab-data/tables` — a whitelisted table with its schema and
+ * current size. `users` is never in this list.
+ *
+ * @typedef {Object} LabTableInfo
+ * @property {string} name
+ * @property {LabColumn[]} columns
+ * @property {number} rowCount
+ */
+
+/**
+ * Body of `GET /lab-data/tables/:name` — one table's whole contents, newest
+ * first, capped at `limit` (default 1000, clamped to [1, 10000]).
+ *
+ * @typedef {Object} LabTableData
+ * @property {string} name
+ * @property {LabColumn[]} columns
+ * @property {Object[]} rows - the capped slice, ordered by `created_at` (or the pk) DESC
+ * @property {number} rowCount - the true total
+ * @property {boolean} truncated - `rowCount > rows.length`
+ */
+
 module.exports = {}

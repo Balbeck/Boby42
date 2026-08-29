@@ -39,3 +39,31 @@ export async function me() {
   if (!response.ok) return null
   return response.json().catch(() => null)
 }
+
+// db-viz inspector (GET /lab-data/*). Same contract as me(): a non-OK status is
+// an expected outcome — returned as null, never thrown — and the caller renders
+// an error state. These routes are ungated for now; the cookie still rides
+// along (credentials: 'include') so they keep working once a later task gates
+// them.
+
+/**
+ * @returns {Promise<Array<{ name: string, columns: object[], rowCount: number }> | null>}
+ */
+export async function tables() {
+  const response = await fetch(`${API_URL}/lab-data/tables`, { credentials: 'include' })
+  if (!response.ok) return null
+  return response.json().catch(() => null)
+}
+
+/**
+ * @param {string} name
+ * @returns {Promise<{ name: string, columns: object[], rows: object[], rowCount: number, truncated: boolean } | null>}
+ */
+export async function table(name) {
+  const response = await fetch(
+    `${API_URL}/lab-data/tables/${encodeURIComponent(name)}`,
+    { credentials: 'include' },
+  )
+  if (!response.ok) return null
+  return response.json().catch(() => null)
+}
