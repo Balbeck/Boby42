@@ -1,19 +1,53 @@
 import { useEffect, useState } from 'react'
 import * as labApi from '../../services/labApi'
 import DataGrid from './DataGrid'
+import RelationsExplorer from './RelationsExplorer'
 
 /**
- * The 💾 db-viz tab: pick one of the interaction-logging tables, pull its whole
- * contents (up to the backend's safety cap) in one request, render it as a
- * sortable grid. Switching tables is one more fetch; everything else is
+ * The 💾 db-viz tab: pick one interaction-logging table, pull its whole contents
+ * (up to the backend's safety cap) in one request, render it as a sortable,
+ * filterable grid. Switching tables is one more fetch; everything else is
  * client-side. Read-only — nothing here writes.
  *
- * English-only, like the rest of /lab.
+ * Each table gets a one-line hint naming its join keys, since the schema is
+ * normalised and the raw rows don't show how they relate. English-only.
  */
 
-// Warm muted red for hard errors — sits with the #1a1915 ground instead of a
-// pure alert red. The only colour here outside the chat-* tokens.
+// Warm muted red for hard errors — sits with the #1a1915 ground, not a pure
+// alert red. The only colour here outside the chat-* tokens.
 const ERR = 'text-[#cf9186]'
+
+// How each table relates to the others — backticks mark column names.
+const TABLE_HINTS = {
+  visitors:
+    'One row per anonymous browser. `anon_id` is the id the frontend keeps in localStorage. Pointed at by `conversations.visitor_id` and `events.visitor_id`.',
+  conversations:
+    'One thread on one `page` (chat | archiviste). Its `id` groups every message below it. `visitor_id` → visitors.',
+  messages:
+    'Two rows per exchange: `role` user, then assistant. `conversation_id` → conversations. The assistant row `id` is what documents and feedback point to.',
+  message_documents:
+    'RAG sources / matched docs for one assistant message. `message_id` → messages, `position` = display order. Never stores content.',
+  events:
+    'Append-only log. First use: a `no_match` row per empty /archiviste search — `payload` (JSON) holds the question.',
+  message_feedback:
+    'One 👍 / 👎 per assistant message. `message_id` → messages (unique). `rating` is -1 or 1; `comment` only kept on -1.',
+}
+
+/** Render a hint string, wrapping `backtick` spans as <code>. */
+function renderHint(text) {
+  return text.split(/`([^`]+)`/).map((part, i) =>
+    i % 2 === 1 ? (
+      <code
+        key={i}
+        className="rounded bg-chat-surface-2 px-1 py-0.5 font-mono text-[0.7rem] text-chat-text"
+      >
+        {part}
+      </code>
+    ) : (
+      <span key={i}>{part}</span>
+    ),
+  )
+}
 
 export default function DbViz() {
   const [tables, setTables] = useState(null) // null = loading | 'error' | LabTableInfo[]
@@ -57,26 +91,34 @@ export default function DbViz() {
 
   return (
     <div className="flex w-full max-w-full flex-col gap-5">
-      <div className="flex flex-wrap gap-2">
-        {tables.map((t) => {
-          const on = t.name === selected
-          return (
-            <button
-              key={t.name}
-              type="button"
-              onClick={() => setSelected(t.name)}
-              aria-pressed={on}
-              className={`rounded-md border px-3 py-1.5 text-sm transition-colors ${
-                on
-                  ? 'border-chat-green bg-chat-green/15 text-chat-text'
-                  : 'border-chat-border bg-chat-surface text-chat-text-muted hover:bg-chat-surface-2 hover:text-chat-text'
-              }`}
-            >
-              {t.name}
-              <span className="ml-1.5 tabular-nums opacity-60">{t.rowCount}</span>
-            </button>
-          )
-        })}
+      <div className="flex flex-col gap-2">
+        <span className="text-xs tracking-wide text-chat-text-muted uppercase">Table</span>
+        <div className="flex flex-wrap gap-2">
+          {tables.map((t) => {
+            const on = t.name === selected
+            return (
+              <button
+                key={t.name}
+                type="button"
+                onClick={() => setSelected(t.name)}
+                aria-pressed={on}
+                className={`flex items-baseline gap-2 rounded-md border px-3 py-1.5 transition-colors ${
+                  on
+                    ? 'border-chat-green bg-chat-green/15 text-chat-text'
+                    : 'border-chat-border bg-chat-surface text-chat-text-muted hover:bg-chat-surface-2 hover:text-chat-text'
+                }`}
+              >
+                <span className="font-mono text-sm">{t.name}</span>
+                <span className="text-xs tabular-nums opacity-60">{t.rowCount}</span>
+              </button>
+            )
+          })}
+        </div>
+        {selected && TABLE_HINTS[selected] && (
+          <p className="max-w-3xl text-xs leading-relaxed text-chat-text-muted">
+            {renderHint(TABLE_HINTS[selected])}
+          </p>
+        )}
       </div>
 
       {!selected && (
@@ -100,6 +142,15 @@ export default function DbViz() {
           <DataGrid columns={data.columns} rows={data.rows} />
         </div>
       )}
+
+      <div className="mt-2 flex flex-col gap-2 border-t border-chat-border pt-5">
+        <span className="text-xs tracking-wide text-chat-text-muted uppercase">Relations explorer</span>
+        <p className="max-w-3xl text-xs text-chat-text-muted">
+          Pick a conversation and follow its whole subtree — messages, their RAG documents,
+          feedback, events — assembled by foreign key in one request.
+        </p>
+        <RelationsExplorer />
+      </div>
     </div>
   )
 }

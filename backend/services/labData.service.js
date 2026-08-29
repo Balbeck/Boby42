@@ -142,6 +142,90 @@ async function readTable (name, { limit = DEFAULT_LIMIT } = {}) {
   return { name, columns, rows, rowCount, truncated: rowCount > rows.length }
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * One conversation and its whole subtree, assembled by foreign key: the owning
+ * visitor, every message in chronological order, each message's RAG documents
+ * and its feedback, plus the events linked to the conversation.
+ *
+ * This is NOT aggregation — every field is a raw row, only lightly nested. It
+ * touches conversations / visitors / messages / message_documents /
+ * message_feedback / events by literal name (never `users`, never anything from
+ * request input), with the ids bound as parameters.
+ *
+ * @param {string} conversationId
+ * @returns {Promise<import('../types/types').LabConversationTree | null>} null
+ *   when the id is malformed or no such conversation exists (route → 404).
+ */
+async function readConversationTree (conversationId) {
+  if (!conversationId || !UUID_RE.test(conversationId)) return null
+
+  const [conversation] = await sequelize.query(
+    'SELECT * FROM "conversations" WHERE "id" = :id',
+    { type: QueryTypes.SELECT, replacements: { id: conversationId } }
+  )
+  if (!conversation) return null
+
+  const [visitor = null] = await sequelize.query(
+    'SELECT * FROM "visitors" WHERE "id" = :vid',
+    { type: QueryTypes.SELECT, replacements: { vid: conversation.visitor_id } }
+  )
+
+  // Chronological; on a millisecond tie the user row still precedes its answer.
+  const messages = await sequelize.query(
+    'SELECT * FROM "messages" WHERE "conversation_id" = :id ORDER BY "created_at" ASC, ("role" = \'user\') DESC LIMIT 1000',
+    { type: QueryTypes.SELECT, replacements: { id: conversationId } }
+  )
+  const messageIds = messages.map((message) => message.id)
+
+  let documents = []
+  let feedback = []
+  if (messageIds.length) {
+    documents = await sequelize.query(
+      'SELECT * FROM "message_documents" WHERE "message_id" IN (:ids) ORDER BY "position" ASC',
+      { type: QueryTypes.SELECT, replacements: { ids: messageIds } }
+    )
+    feedback = await sequelize.query(
+      'SELECT * FROM "message_feedback" WHERE "message_id" IN (:ids)',
+      { type: QueryTypes.SELECT, replacements: { ids: messageIds } }
+    )
+  }
+
+  const events = await sequelize.query(
+    'SELECT * FROM "events" WHERE "conversation_id" = :id ORDER BY "created_at" ASC LIMIT 1000',
+    { type: QueryTypes.SELECT, replacements: { id: conversationId } }
+  )
+
+  const docsByMessage = groupBy(documents, 'message_id')
+  const feedbackByMessage = new Map(feedback.map((row) => [row.message_id, row]))
+
+  return {
+    conversation,
+    visitor,
+    messages: messages.map((message) => ({
+      ...message,
+      documents: docsByMessage.get(message.id) || [],
+      feedback: feedbackByMessage.get(message.id) || null
+    })),
+    events
+  }
+}
+
+/**
+ * @param {Object[]} rows
+ * @param {string} key
+ * @returns {Map<*, Object[]>}
+ */
+function groupBy (rows, key) {
+  const map = new Map()
+  for (const row of rows) {
+    if (!map.has(row[key])) map.set(row[key], [])
+    map.get(row[key]).push(row)
+  }
+  return map
+}
+
 /**
  * @param {number} value
  * @param {number} min
@@ -152,4 +236,4 @@ function clamp (value, min, max) {
   return Math.min(Math.max(value, min), max)
 }
 
-module.exports = { listTables, readTable, ALLOWED }
+module.exports = { listTables, readTable, readConversationTree, ALLOWED }

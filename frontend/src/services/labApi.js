@@ -67,3 +67,20 @@ export async function table(name) {
   if (!response.ok) return null
   return response.json().catch(() => null)
 }
+
+/**
+ * One conversation with its subtree (visitor, messages, documents, feedback,
+ * events), assembled server-side by foreign key.
+ *
+ * @param {string} conversationId
+ * @returns {Promise<object | null>} null on a malformed id, an unknown
+ *   conversation (404) or any non-OK status.
+ */
+export async function tree(conversationId) {
+  const response = await fetch(
+    `${API_URL}/lab-data/tree/${encodeURIComponent(conversationId)}`,
+    { credentials: 'include' },
+  )
+  if (!response.ok) return null
+  return response.json().catch(() => null)
+}

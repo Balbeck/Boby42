@@ -1,6 +1,6 @@
 'use strict'
 
-const { listTables, readTable } = require('../services/labData.service')
+const { listTables, readTable, readConversationTree } = require('../services/labData.service')
 
 // Raw read-only inspector for the /lab db-viz tab. Transport only — the
 // whitelist, the row cap and the SELECT live in services/labData.service.js.
@@ -31,6 +31,16 @@ const readSchema = {
   }
 }
 
+const treeSchema = {
+  params: {
+    type: 'object',
+    required: ['conversationId'],
+    properties: {
+      conversationId: { type: 'string', format: 'uuid' }
+    }
+  }
+}
+
 module.exports = async function (fastify, opts) {
   fastify.get('/lab-data/tables', async function () {
     return listTables()
@@ -41,5 +51,12 @@ module.exports = async function (fastify, opts) {
     // null → the name is not in the whitelist (includes `users`).
     if (!result) return reply.notFound('Unknown table')
     return result
+  })
+
+  // Relations explorer — one conversation with its subtree assembled by FK.
+  fastify.get('/lab-data/tree/:conversationId', { schema: treeSchema }, async function (request, reply) {
+    const tree = await readConversationTree(request.params.conversationId)
+    if (!tree) return reply.notFound('Conversation not found')
+    return tree
   })
 }

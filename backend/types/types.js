@@ -154,4 +154,16 @@
  * @property {boolean} truncated - `rowCount > rows.length`
  */
 
+/**
+ * Body of `GET /lab-data/tree/:conversationId` — one conversation with its whole
+ * subtree assembled by foreign key. Not aggregation: every field is a raw row,
+ * only lightly nested. The relations explorer renders this directly.
+ *
+ * @typedef {Object} LabConversationTree
+ * @property {Object} conversation - the `conversations` row
+ * @property {Object | null} visitor - the owning `visitors` row
+ * @property {Array<Object & { documents: Object[], feedback: Object | null }>} messages - `messages` rows in chronological order, each with its `message_documents` (by `position`) and its one `message_feedback`
+ * @property {Object[]} events - `events` rows linked to this conversation
+ */
+
 module.exports = {}
