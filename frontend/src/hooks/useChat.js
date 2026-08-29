@@ -7,6 +7,11 @@ export function useChat() {
   /** @type {[Exchange[], Function]} */
   const [exchanges, setExchanges] = useState([])
   const [isSending, setIsSending] = useState(false)
+  // The conversation this page's exchanges belong to (T4). `null` until the
+  // first response comes back with one. Kept in a ref too so `sendQuestion`
+  // stays referentially stable (same reason as `pendingIdRef`).
+  const [conversationId, setConversationId] = useState(null)
+  const conversationIdRef = useRef(null)
   const abortControllerRef = useRef(null)
   const pendingIdRef = useRef(null)
 
@@ -23,10 +28,19 @@ export function useChat() {
     setIsSending(true)
 
     try {
-      const { answer } = await sendMessage(trimmed, { signal: controller.signal })
+      const response = await sendMessage(trimmed, {
+        signal: controller.signal,
+        conversationId: conversationIdRef.current,
+      })
+      if (response.conversationId && response.conversationId !== conversationIdRef.current) {
+        conversationIdRef.current = response.conversationId
+        setConversationId(response.conversationId)
+      }
       setExchanges((prev) =>
         prev.map((exchange) =>
-          exchange.id === id ? { ...exchange, answer, loading: false } : exchange,
+          exchange.id === id
+            ? { ...exchange, answer: response.answer, loading: false }
+            : exchange,
         ),
       )
     } catch (err) {
@@ -56,5 +70,5 @@ export function useChat() {
     abortControllerRef.current = null
   }, [])
 
-  return { exchanges, sendQuestion, stopGeneration, isSending }
+  return { exchanges, sendQuestion, stopGeneration, isSending, conversationId }
 }

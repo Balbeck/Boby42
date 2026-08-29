@@ -1,18 +1,25 @@
+import { getVisitorId } from './identity'
+
 const API_URL = import.meta.env.VITE_API_URL || ''
 
 /** @import { ArchivisteSearchResponse } from '../types/types.js' */
 
 /**
  * @param {string} question
- * @param {string} language - 'fr' | 'en'
- * @param {{ signal?: AbortSignal }} [options]
+ * @param {string} language - 'fr' | 'en' | 'origin'
+ * @param {{ signal?: AbortSignal, conversationId?: string | null }} [options]
  * @returns {Promise<ArchivisteSearchResponse>}
  */
-export async function search(question, language, { signal } = {}) {
+export async function search(question, language, { signal, conversationId } = {}) {
   const response = await fetch(`${API_URL}/archiviste`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question, language }),
+    body: JSON.stringify({
+      question,
+      language,
+      visitorId: getVisitorId(),
+      ...(conversationId ? { conversationId } : {}),
+    }),
     signal,
   })
 

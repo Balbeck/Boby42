@@ -47,6 +47,7 @@
  * @typedef {Object} ChatResponse
  * @property {string} answer - the LLM answer, or the no-documents fallback text
  * @property {Source[]} sources - RAG-selected documents; `[]` when nothing cleared the threshold
+ * @property {string} [conversationId] - the conversation this exchange was logged under (T4); absent only if the logging write itself failed
  */
 
 /**
@@ -67,6 +68,54 @@
  * @typedef {Object} ArchivisteResponse
  * @property {number} count - `documents.length` (Notion + subject PDFs combined)
  * @property {ArchivisteResult[]} documents
+ * @property {string} [conversationId] - the conversation this search was logged under (T4); absent only if the logging write itself failed
+ */
+
+/* ─── Interaction logging (T4) — services/conversation.service.js ─────────── */
+
+/**
+ * One document to attach to an assistant message, by reference only (no
+ * content). `/chat` passes its `sources` (`path` set, `url` null); `/archiviste`
+ * passes its result rows (`url` set, `path` null).
+ *
+ * @typedef {Object} ExchangeDocument
+ * @property {string} name
+ * @property {string} [url]
+ * @property {string} [path]
+ * @property {number} [score] - cosine similarity, 0–1
+ */
+
+/**
+ * Input to `recordExchange()`.
+ *
+ * @typedef {Object} RecordExchangeInput
+ * @property {string} [anonId] - the visitor's `anon_id`; blank/missing → the synthetic fallback visitor
+ * @property {string} [conversationId] - reuse this conversation when it exists and belongs to the same visitor + page; otherwise a new one is created
+ * @property {'chat' | 'archiviste'} page
+ * @property {string} question
+ * @property {string | null} answer - the assistant text; `null` on `/archiviste` and on the error path (stored as `''`)
+ * @property {string | null} language
+ * @property {ExchangeDocument[]} [documents]
+ * @property {number} [latencyMs] - elapsed time around the service call
+ * @property {string | null} [errorCode] - `'ollama_error'` | `'retrieval_error'` on failure, else `null`
+ */
+
+/**
+ * Result of `recordExchange()`.
+ *
+ * @typedef {Object} RecordExchangeResult
+ * @property {string} conversationId - the reused or newly-created conversation UUID
+ * @property {string} messageId - the assistant message UUID (the `messageId` of the future /feedback contract)
+ */
+
+/**
+ * Input to `logEvent()`.
+ *
+ * @typedef {Object} LogEventInput
+ * @property {string} [anonId]
+ * @property {string} [conversationId]
+ * @property {string} type - e.g. `'no_match'`
+ * @property {Object} [payload] - JSONB blob
  */
 
 module.exports = {}

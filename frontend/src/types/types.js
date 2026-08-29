@@ -18,6 +18,7 @@
  * @typedef {Object} ChatResponse
  * @property {string} answer
  * @property {Source[]} sources
+ * @property {string} [conversationId] - conversation à laquelle l'échange a été rattaché (T4) ; le hook le renvoie à la question suivante
  */
 
 /**
@@ -45,6 +46,7 @@
  * @typedef {Object} ArchivisteSearchResponse
  * @property {number} count - total des deux types confondus (Notion + sujets PDF)
  * @property {{name: string, score: number, type: 'md' | 'pdf', url: string}[]} documents
+ * @property {string} [conversationId] - conversation à laquelle la recherche a été rattachée (T4) ; le hook le renvoie à la question suivante
  */
 
 export {}

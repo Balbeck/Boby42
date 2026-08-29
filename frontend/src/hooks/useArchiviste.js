@@ -25,6 +25,11 @@ export function useArchiviste() {
   /** @type {[ArchivisteExchange[], Function]} */
   const [exchanges, setExchanges] = useState([])
   const [isSending, setIsSending] = useState(false)
+  // The conversation this page's searches belong to (T4). `null` until the
+  // first response carries one; kept in a ref too so `sendQuestion` stays
+  // referentially stable.
+  const [conversationId, setConversationId] = useState(null)
+  const conversationIdRef = useRef(null)
   const abortControllerRef = useRef(null)
   const pendingIdRef = useRef(null)
 
@@ -41,8 +46,15 @@ export function useArchiviste() {
     setIsSending(true)
 
     try {
-      const { documents } = await search(trimmed, language, { signal: controller.signal })
-      const sorted = [...documents]
+      const response = await search(trimmed, language, {
+        signal: controller.signal,
+        conversationId: conversationIdRef.current,
+      })
+      if (response.conversationId && response.conversationId !== conversationIdRef.current) {
+        conversationIdRef.current = response.conversationId
+        setConversationId(response.conversationId)
+      }
+      const sorted = [...response.documents]
         .sort((a, b) => b.score - a.score)
         .map((doc) => ({ ...doc, loading: false, loaded: false }))
 
@@ -107,5 +119,5 @@ export function useArchiviste() {
     }
   }, [])
 
-  return { exchanges, sendQuestion, stopGeneration, isSending, loadDocument }
+  return { exchanges, sendQuestion, stopGeneration, isSending, loadDocument, conversationId }
 }

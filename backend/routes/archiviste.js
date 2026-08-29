@@ -2,6 +2,7 @@
 
 const path = require('node:path')
 const { retrieveWithSubjectsPdf } = require('../services/retriever.service')
+const { recordExchange, logEvent } = require('../services/conversation.service')
 
 const schema = {
   body: {
@@ -9,20 +10,40 @@ const schema = {
     required: ['question', 'language'],
     properties: {
       question: { type: 'string', minLength: 1 },
-      language: { type: 'string', enum: ['fr', 'en', 'origin'] }
+      language: { type: 'string', enum: ['fr', 'en', 'origin'] },
+      // Interaction logging (T4) — both optional, existing clients keep working.
+      visitorId: { type: 'string' },
+      conversationId: { type: 'string', format: 'uuid' }
     }
   }
 }
 
 module.exports = async function (fastify, opts) {
   fastify.post('/archiviste', { schema }, async function (request, reply) {
-    const { question, language } = request.body
+    const { question, language, visitorId, conversationId } = request.body
+    const startedAt = Date.now()
 
     let result
     try {
       result = await retrieveWithSubjectsPdf(question)
     } catch (err) {
       request.log.error(err)
+      // Still record the failed exchange, then return the unchanged 502.
+      try {
+        await recordExchange({
+          anonId: visitorId,
+          conversationId,
+          page: 'archiviste',
+          question,
+          answer: null,
+          language,
+          documents: [],
+          latencyMs: Date.now() - startedAt,
+          errorCode: 'retrieval_error'
+        })
+      } catch (recErr) {
+        request.log.error({ err: recErr }, 'archiviste: failed to record exchange (error path)')
+      }
       return reply.badGateway('Failed to search the document base')
     }
 
@@ -50,6 +71,36 @@ module.exports = async function (fastify, opts) {
     })
 
     const documents = [...notionResults, ...pdfResults]
-    return { count: documents.length, documents }
+
+    // Persistence must never break the response — log failures and move on.
+    let recordedConversationId = conversationId
+    try {
+      const rec = await recordExchange({
+        anonId: visitorId,
+        conversationId,
+        page: 'archiviste',
+        question,
+        answer: null, // no LLM answer on /archiviste — the assistant row carries only the docs
+        language,
+        documents: documents.map((d) => ({ name: d.name, url: d.url, path: null, score: d.score })),
+        latencyMs: Date.now() - startedAt,
+        errorCode: null
+      })
+      recordedConversationId = rec.conversationId
+
+      // A matched-nothing question is a gap in the document base — record it.
+      if (documents.length === 0) {
+        await logEvent({
+          anonId: visitorId,
+          conversationId: recordedConversationId,
+          type: 'no_match',
+          payload: { question, language }
+        })
+      }
+    } catch (err) {
+      request.log.error({ err }, 'archiviste: failed to record exchange')
+    }
+
+    return { count: documents.length, documents, conversationId: recordedConversationId }
   })
 }

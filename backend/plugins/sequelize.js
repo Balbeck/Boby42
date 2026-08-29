@@ -1,7 +1,7 @@
 'use strict'
 
 const fp = require('fastify-plugin')
-const { sequelize, User } = require('../models')
+const { sequelize, User, Visitor, Conversation, Message, MessageDocument, Event } = require('../models')
 const { createUmzug } = require('../db/umzug')
 const { seedLabUser } = require('../db/seed')
 
@@ -31,7 +31,7 @@ module.exports = fp(async function (fastify) {
   })
 
   fastify.decorate('sequelize', sequelize)
-  fastify.decorate('models', { User })
+  fastify.decorate('models', { User, Visitor, Conversation, Message, MessageDocument, Event })
 
   fastify.addHook('onClose', async () => {
     await sequelize.close()
