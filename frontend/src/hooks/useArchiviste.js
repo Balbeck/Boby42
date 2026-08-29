@@ -1,5 +1,6 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { search, fetchDocument } from '../services/archivisteApi'
+import { sendFeedback } from '../services/feedbackApi'
 
 /** @import { ArchivisteExchange, ArchivisteDocument } from '../types/types.js' */
 
@@ -32,6 +33,12 @@ export function useArchiviste() {
   const conversationIdRef = useRef(null)
   const abortControllerRef = useRef(null)
   const pendingIdRef = useRef(null)
+  // Mirror of `exchanges` so `submitFeedback` can read the current messageId /
+  // rating without a stale closure and without depending on `exchanges`.
+  const exchangesRef = useRef(exchanges)
+  useEffect(() => {
+    exchangesRef.current = exchanges
+  }, [exchanges])
 
   const sendQuestion = useCallback(async (question, language) => {
     const trimmed = question.trim()
@@ -42,7 +49,10 @@ export function useArchiviste() {
     const controller = new AbortController()
     abortControllerRef.current = controller
 
-    setExchanges((prev) => [...prev, { id, question: trimmed, documents: [], loading: true }])
+    setExchanges((prev) => [
+      ...prev,
+      { id, question: trimmed, documents: [], loading: true, messageId: null, rating: 0 },
+    ])
     setIsSending(true)
 
     try {
@@ -60,7 +70,14 @@ export function useArchiviste() {
 
       setExchanges((prev) =>
         prev.map((exchange) =>
-          exchange.id === id ? { ...exchange, documents: sorted, loading: false } : exchange,
+          exchange.id === id
+            ? {
+                ...exchange,
+                documents: sorted,
+                loading: false,
+                messageId: response.messageId ?? null,
+              }
+            : exchange,
         ),
       )
     } catch (err) {
@@ -119,5 +136,39 @@ export function useArchiviste() {
     }
   }, [])
 
-  return { exchanges, sendQuestion, stopGeneration, isSending, loadDocument, conversationId }
+  /**
+   * Optimistic 👍 / 👎 on a search's result list (attached to its assistant
+   * message). Flips instantly; a failed request rolls back silently.
+   *
+   * @param {string} exchangeId
+   * @param {-1 | 0 | 1} rating
+   * @param {string} [comment] - only sent with a -1
+   */
+  const submitFeedback = useCallback(async (exchangeId, rating, comment) => {
+    const exchange = exchangesRef.current.find((e) => e.id === exchangeId)
+    if (!exchange || !exchange.messageId) return
+
+    const previousRating = exchange.rating ?? 0
+    setExchanges((prev) =>
+      prev.map((e) => (e.id === exchangeId ? { ...e, rating } : e)),
+    )
+
+    try {
+      await sendFeedback(exchange.messageId, rating, comment)
+    } catch {
+      setExchanges((prev) =>
+        prev.map((e) => (e.id === exchangeId ? { ...e, rating: previousRating } : e)),
+      )
+    }
+  }, [])
+
+  return {
+    exchanges,
+    sendQuestion,
+    stopGeneration,
+    submitFeedback,
+    isSending,
+    loadDocument,
+    conversationId,
+  }
 }

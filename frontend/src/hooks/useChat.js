@@ -1,5 +1,6 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { sendMessage } from '../services/chatApi'
+import { sendFeedback } from '../services/feedbackApi'
 
 /** @import { Exchange } from '../types/types.js' */
 
@@ -14,6 +15,12 @@ export function useChat() {
   const conversationIdRef = useRef(null)
   const abortControllerRef = useRef(null)
   const pendingIdRef = useRef(null)
+  // Mirror of `exchanges` so `submitFeedback` can read the current messageId /
+  // rating without a stale closure and without depending on `exchanges`.
+  const exchangesRef = useRef(exchanges)
+  useEffect(() => {
+    exchangesRef.current = exchanges
+  }, [exchanges])
 
   const sendQuestion = useCallback(async (question) => {
     const trimmed = question.trim()
@@ -24,7 +31,10 @@ export function useChat() {
     const controller = new AbortController()
     abortControllerRef.current = controller
 
-    setExchanges((prev) => [...prev, { id, question: trimmed, answer: '', loading: true }])
+    setExchanges((prev) => [
+      ...prev,
+      { id, question: trimmed, answer: '', loading: true, messageId: null, rating: 0 },
+    ])
     setIsSending(true)
 
     try {
@@ -39,7 +49,12 @@ export function useChat() {
       setExchanges((prev) =>
         prev.map((exchange) =>
           exchange.id === id
-            ? { ...exchange, answer: response.answer, loading: false }
+            ? {
+                ...exchange,
+                answer: response.answer,
+                loading: false,
+                messageId: response.messageId ?? null,
+              }
             : exchange,
         ),
       )
@@ -70,5 +85,31 @@ export function useChat() {
     abortControllerRef.current = null
   }, [])
 
-  return { exchanges, sendQuestion, stopGeneration, isSending, conversationId }
+  /**
+   * Optimistic 👍 / 👎 on an exchange's answer. The rating flips instantly;
+   * a failed request rolls it back silently (no dialog).
+   *
+   * @param {string} exchangeId
+   * @param {-1 | 0 | 1} rating
+   * @param {string} [comment] - only sent with a -1
+   */
+  const submitFeedback = useCallback(async (exchangeId, rating, comment) => {
+    const exchange = exchangesRef.current.find((e) => e.id === exchangeId)
+    if (!exchange || !exchange.messageId) return
+
+    const previousRating = exchange.rating ?? 0
+    setExchanges((prev) =>
+      prev.map((e) => (e.id === exchangeId ? { ...e, rating } : e)),
+    )
+
+    try {
+      await sendFeedback(exchange.messageId, rating, comment)
+    } catch {
+      setExchanges((prev) =>
+        prev.map((e) => (e.id === exchangeId ? { ...e, rating: previousRating } : e)),
+      )
+    }
+  }, [])
+
+  return { exchanges, sendQuestion, stopGeneration, submitFeedback, isSending, conversationId }
 }

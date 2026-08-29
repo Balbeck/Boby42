@@ -8,7 +8,8 @@ import { useArchiviste } from './state/conversationsContext'
 import { messages, useLanguage, setLanguage } from './i18n'
 
 function ArchivisteApp() {
-  const { exchanges, sendQuestion, stopGeneration, isSending, loadDocument } = useArchiviste()
+  const { exchanges, sendQuestion, stopGeneration, submitFeedback, isSending, loadDocument } =
+    useArchiviste()
   const { containerRef, bottomRef } = useAutoScroll()
   const language = useLanguage()
   const t = messages[language] ?? messages.fr
@@ -52,6 +53,9 @@ function ArchivisteApp() {
                   documents={exchange.documents}
                   loading={exchange.loading}
                   error={exchange.error}
+                  messageId={exchange.messageId}
+                  rating={exchange.rating}
+                  onRate={(rating, comment) => submitFeedback(exchange.id, rating, comment)}
                   onLoadDocument={(doc) => loadDocument(exchange.id, doc)}
                   t={t}
                 />

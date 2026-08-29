@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import FeedbackButtons from './FeedbackButtons'
 
 const URL_REGEX = /(https?:\/\/[^\s]+)/g
 
@@ -62,10 +63,22 @@ function AnimatedText({ text }) {
  *   answer: string,
  *   loading?: boolean,
  *   error?: string,
+ *   messageId?: string | null,
+ *   rating?: -1 | 0 | 1,
+ *   onRate?: (rating: -1 | 0 | 1, comment?: string) => void,
  *   t: object,
  * }} props
  */
-export default function Message({ question, answer, loading = false, error, t }) {
+export default function Message({
+  question,
+  answer,
+  loading = false,
+  error,
+  messageId,
+  rating = 0,
+  onRate,
+  t,
+}) {
   const [introDone, setIntroDone] = useState(false)
 
   return (
@@ -83,8 +96,13 @@ export default function Message({ question, answer, loading = false, error, t })
           {error}
         </div>
       ) : (
-        <div className="max-w-[85%] whitespace-pre-line leading-relaxed text-chat-text">
-          {linkify(answer)}
+        <div className="flex max-w-[85%] flex-col">
+          <div className="whitespace-pre-line leading-relaxed text-chat-text">
+            {linkify(answer)}
+          </div>
+          {messageId && onRate && (
+            <FeedbackButtons rating={rating} onRate={onRate} t={t} />
+          )}
         </div>
       )}
     </div>

@@ -47,6 +47,9 @@ module.exports = async function (fastify, opts) {
 
     // Persistence must never break the response — log failures and move on.
     let recordedConversationId = conversationId
+    // The assistant message id — the handle a later /feedback call rates.
+    // Absent only if the logging write below fails (like conversationId).
+    let messageId
     try {
       const rec = await recordExchange({
         anonId: visitorId,
@@ -60,10 +63,11 @@ module.exports = async function (fastify, opts) {
         errorCode: null
       })
       recordedConversationId = rec.conversationId
+      messageId = rec.messageId
     } catch (err) {
       request.log.error({ err }, 'chat: failed to record exchange')
     }
 
-    return { answer, sources, conversationId: recordedConversationId }
+    return { answer, sources, conversationId: recordedConversationId, messageId }
   })
 }

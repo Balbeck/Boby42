@@ -10,7 +10,7 @@ import { useChat } from './state/conversationsContext'
 import { messages, useLanguage, setLanguage } from './i18n'
 
 function App() {
-  const { exchanges, sendQuestion, stopGeneration, isSending } = useChat()
+  const { exchanges, sendQuestion, stopGeneration, submitFeedback, isSending } = useChat()
   const { containerRef, bottomRef } = useAutoScroll()
   const language = useLanguage()
   const t = messages[language] ?? messages.fr
@@ -55,6 +55,9 @@ function App() {
                   answer={exchange.answer}
                   loading={exchange.loading}
                   error={exchange.error}
+                  messageId={exchange.messageId}
+                  rating={exchange.rating}
+                  onRate={(rating, comment) => submitFeedback(exchange.id, rating, comment)}
                   t={t}
                 />
               ))}

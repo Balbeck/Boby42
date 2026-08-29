@@ -1,6 +1,8 @@
 'use strict'
 
-const { sequelize, Visitor, Conversation, Message, MessageDocument, Event } = require('../models')
+const {
+  sequelize, Visitor, Conversation, Message, MessageDocument, Event, MessageFeedback
+} = require('../models')
 
 // Everything an anonymous request can't attribute (blank/missing anon id) lands
 // on this single synthetic visitor row rather than throwing.
@@ -145,6 +147,59 @@ async function logEvent({ anonId, conversationId, type, payload }) {
 }
 
 /**
+ * Records (or updates, or withdraws) the 👍 / 👎 on one assistant message.
+ *
+ * Ownership is enforced server-side: the rating is accepted only if the message
+ * is an `assistant` row in a conversation owned by the visitor identified by
+ * `anonId` (INNER JOIN messages → conversations → visitors on `anon_id`). This
+ * is the only thing stopping anyone from poisoning the project's one quality
+ * signal — a mismatch returns `{ ok: false, reason: 'not_found' }` (the route
+ * maps that to a 404, never confirming the message exists).
+ *
+ * `rating: 0` means "withdraw" → the row is deleted. `rating: 1` never keeps a
+ * comment (no free-text on positive ratings). Otherwise it's an upsert on the
+ * unique `message_id`, so re-rating updates in place.
+ *
+ * @param {{ messageId: string, anonId: string | null | undefined, rating: -1 | 0 | 1, comment?: string | null }} input
+ * @returns {Promise<{ ok: true, rating: -1 | 0 | 1 } | { ok: false, reason: 'not_found' }>}
+ */
+async function setFeedback({ messageId, anonId, rating, comment }) {
+  if (!messageId || !UUID_RE.test(messageId)) return { ok: false, reason: 'not_found' }
+
+  const key = String(anonId ?? '').trim() || FALLBACK_ANON_ID
+
+  // INNER JOINs (`required: true`) — a message whose conversation isn't this
+  // visitor's simply doesn't come back.
+  const message = await Message.findByPk(messageId, {
+    attributes: ['id', 'role'],
+    include: [
+      {
+        model: Conversation,
+        required: true,
+        attributes: ['id'],
+        include: [{ model: Visitor, required: true, attributes: ['id'], where: { anon_id: key } }]
+      }
+    ]
+  })
+  if (!message || message.role !== 'assistant') return { ok: false, reason: 'not_found' }
+
+  if (rating === 0) {
+    await MessageFeedback.destroy({ where: { message_id: messageId } })
+    return { ok: true, rating: 0 }
+  }
+
+  await MessageFeedback.upsert(
+    {
+      message_id: messageId,
+      rating,
+      comment: rating === -1 ? (comment ?? null) : null
+    },
+    { conflictFields: ['message_id'] }
+  )
+  return { ok: true, rating }
+}
+
+/**
  * @param {string} question
  * @returns {string}
  */
@@ -155,4 +210,4 @@ function buildTitle(question) {
   return clean.slice(0, TITLE_MAX - 1).trimEnd() + '…'
 }
 
-module.exports = { ensureVisitor, recordExchange, logEvent }
+module.exports = { ensureVisitor, recordExchange, logEvent, setFeedback }

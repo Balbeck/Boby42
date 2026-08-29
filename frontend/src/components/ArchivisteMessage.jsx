@@ -1,4 +1,5 @@
 import ArchivisteDocument from './ArchivisteDocument'
+import FeedbackButtons from './FeedbackButtons'
 
 /**
  * @param {{
@@ -6,6 +7,9 @@ import ArchivisteDocument from './ArchivisteDocument'
  *   documents?: import('../types/types.js').ArchivisteDocument[],
  *   loading?: boolean,
  *   error?: string,
+ *   messageId?: string | null,
+ *   rating?: -1 | 0 | 1,
+ *   onRate?: (rating: -1 | 0 | 1, comment?: string) => void,
  *   onLoadDocument: (doc: import('../types/types.js').ArchivisteDocument) => void,
  *   t: object,
  * }} props
@@ -15,6 +19,9 @@ export default function ArchivisteMessage({
   documents = [],
   loading = false,
   error,
+  messageId,
+  rating = 0,
+  onRate,
   onLoadDocument,
   t,
 }) {
@@ -52,6 +59,9 @@ export default function ArchivisteMessage({
                   t={t}
                 />
               ))}
+              {messageId && onRate && (
+                <FeedbackButtons rating={rating} onRate={onRate} t={t} />
+              )}
             </div>
           )
         })()

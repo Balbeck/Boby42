@@ -48,6 +48,7 @@
  * @property {string} answer - the LLM answer, or the no-documents fallback text
  * @property {Source[]} sources - RAG-selected documents; `[]` when nothing cleared the threshold
  * @property {string} [conversationId] - the conversation this exchange was logged under (T4); absent only if the logging write itself failed
+ * @property {string} [messageId] - the assistant message UUID, the handle for `POST /feedback`; absent only if the logging write failed
  */
 
 /**
@@ -69,6 +70,7 @@
  * @property {number} count - `documents.length` (Notion + subject PDFs combined)
  * @property {ArchivisteResult[]} documents
  * @property {string} [conversationId] - the conversation this search was logged under (T4); absent only if the logging write itself failed
+ * @property {string} [messageId] - the assistant message UUID, the handle for `POST /feedback`; absent only if the logging write failed
  */
 
 /* ─── Interaction logging (T4) — services/conversation.service.js ─────────── */

@@ -74,6 +74,10 @@ module.exports = async function (fastify, opts) {
 
     // Persistence must never break the response — log failures and move on.
     let recordedConversationId = conversationId
+    // The assistant message id — the handle a later /feedback call rates
+    // (on /archiviste the rating applies to the result list as a whole).
+    // Absent only if the logging write below fails (like conversationId).
+    let messageId
     try {
       const rec = await recordExchange({
         anonId: visitorId,
@@ -87,6 +91,7 @@ module.exports = async function (fastify, opts) {
         errorCode: null
       })
       recordedConversationId = rec.conversationId
+      messageId = rec.messageId
 
       // A matched-nothing question is a gap in the document base — record it.
       if (documents.length === 0) {
@@ -101,6 +106,6 @@ module.exports = async function (fastify, opts) {
       request.log.error({ err }, 'archiviste: failed to record exchange')
     }
 
-    return { count: documents.length, documents, conversationId: recordedConversationId }
+    return { count: documents.length, documents, conversationId: recordedConversationId, messageId }
   })
 }

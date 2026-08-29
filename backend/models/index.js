@@ -17,6 +17,10 @@ const Message = require('./message')(sequelize)
 const MessageDocument = require('./messageDocument')(sequelize)
 const Event = require('./event')(sequelize)
 
+// Answer feedback — one 👍 / 👎 per assistant message, the project's only
+// answer-quality signal. Built on T4's UUID `messages.id`.
+const MessageFeedback = require('./messageFeedback')(sequelize)
+
 // Associations — declared here, after every model is required. FK columns are
 // snake_case because the models are `underscored` (`visitor_id`,
 // `conversation_id`, `message_id`). ON DELETE is enforced by the migration (the
@@ -29,6 +33,9 @@ Message.belongsTo(Conversation, { foreignKey: 'conversation_id' })
 
 Message.hasMany(MessageDocument, { foreignKey: 'message_id', onDelete: 'CASCADE' })
 MessageDocument.belongsTo(Message, { foreignKey: 'message_id' })
+
+Message.hasOne(MessageFeedback, { foreignKey: 'message_id', onDelete: 'CASCADE' })
+MessageFeedback.belongsTo(Message, { foreignKey: 'message_id' })
 
 Visitor.hasMany(Event, { foreignKey: 'visitor_id', onDelete: 'SET NULL' })
 Event.belongsTo(Visitor, { foreignKey: 'visitor_id' })
@@ -44,5 +51,6 @@ module.exports = {
   Conversation,
   Message,
   MessageDocument,
-  Event
+  Event,
+  MessageFeedback
 }

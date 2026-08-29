@@ -16,6 +16,8 @@ export default defineConfig({
     proxy: {
       '/BaseDocumentaire': backendTarget,
       '/subjectspdf': backendTarget,
+      // POST-only API, no SPA page at /feedback — plain proxy, no bypass.
+      '/feedback': backendTarget,
       '/archiviste/documents': backendTarget,
       // /lab is an SPA page, but the auth API lives under /auth/lab (no page
       // collision) so it proxies plainly — no bypass needed.
