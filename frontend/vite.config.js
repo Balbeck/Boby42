@@ -25,6 +25,10 @@ export default defineConfig({
       // db-viz inspector API. /lab-data shadows no page (/lab is the page), so
       // it proxies plainly like /auth/lab — no bypass.
       '/lab-data': backendTarget,
+      // Transparent reverse-proxy to Ollama (test tooling, shared-key gated in
+      // routes/ollama.js). No page collision — plain proxy; http-proxy streams
+      // NDJSON responses through untouched.
+      '/ollama': backendTarget,
       // '/chat' and '/archiviste' (no suffix) are each both a React Router
       // page and a POST-only API endpoint: only proxy POST, let Vite serve
       // the page for GET (direct navigation / refresh).

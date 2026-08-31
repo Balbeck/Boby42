@@ -38,6 +38,9 @@ services:
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://localhost:11434}
       OLLAMA_GENERATION_MODEL: ${OLLAMA_GENERATION_MODEL:-mistral:latest}
       OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-snowflake-arctic-embed:335m}
+      # Shared key for the /ollama transparent proxy (routes/ollama.js). Secret,
+      # from .env.lab. Unset = the proxy route fails closed (404).
+      OLLAMA_PROXY_KEY: ${OLLAMA_PROXY_KEY:-}
       # Database — db/config.js assembles the connection string from these parts
       # (no ${VAR-inside-a-value} interpolation to rely on). Host/port differ per
       # mode: bridge service name in local Mac, loopback-published port in prod.
