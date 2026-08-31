@@ -92,12 +92,30 @@ export function useChat() {
       // Phase 2 — generation. Always runs, even with an empty list: the backend
       // then returns its no-documents fallback (no LLM call) and still logs the
       // exchange + returns the messageId the feedback buttons need.
+      // The answer streams in via `onToken`: the first fragment flips the
+      // exchange to `phase: 'done'` so the text renders as it grows; the final
+      // response below reconciles the full answer + attaches the messageId.
       const documents = sorted.map(({ name, type, score, url }) => ({ name, type, score, url }))
+      let streaming = false
       const response = await sendMessage(trimmed, {
         signal: controller.signal,
         conversationId: conversationIdRef.current,
         language,
         documents,
+        onToken: (_fragment, full) => {
+          setExchanges((prev) =>
+            prev.map((exchange) =>
+              exchange.id === id
+                ? {
+                    ...exchange,
+                    answer: full,
+                    ...(streaming ? {} : { phase: 'done', loading: false }),
+                  }
+                : exchange,
+            ),
+          )
+          streaming = true
+        },
       })
       if (response.conversationId && response.conversationId !== conversationIdRef.current) {
         conversationIdRef.current = response.conversationId

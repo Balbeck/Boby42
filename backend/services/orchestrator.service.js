@@ -157,12 +157,19 @@ async function loadDocuments(documents, language) {
  * sorted by descending score and clipped to a character budget by
  * `selectPromptDocuments()`; PDF rows are named to the model, never read.
  *
+ * `hooks.onToken`, when given, streams the generation: it is called with each
+ * incremental text fragment as Ollama produces it. The full answer is still
+ * returned in `{ answer, sources }` (assembled), so the caller's logging is
+ * unchanged. `hooks.signal` aborts the Ollama request. The no-documents fallback
+ * makes no LLM call, so `onToken` never fires for it.
+ *
  * @param {string} question
  * @param {import('../types/types').ChatDocument[] | null} [documents]
  * @param {'fr' | 'en' | 'origin'} [language='fr']
+ * @param {{ onToken?: (text: string) => void, signal?: AbortSignal }} [hooks]
  * @returns {Promise<import('../types/types').ChatResponse>}
  */
-async function getAnswer(question, documents, language) {
+async function getAnswer(question, documents, language, { onToken, signal } = {}) {
   const lang = language ?? 'fr'
 
   const rows = documents == null
@@ -181,7 +188,7 @@ async function getAnswer(question, documents, language) {
   console.info(`[orchestrator] prompt documents (${promptChars} chars): ${promptDocuments.map((doc) => doc.name).join(', ') || '(none)'}`)
 
   const prompt = buildPrompt(question, promptDocuments, subjectNames)
-  const answer = (await generateAnswer(prompt)).trim()
+  const answer = (await generateAnswer(prompt, {}, { onToken, signal })).trim()
   const sources = loaded.map(({ name, type, url, path, score }) => ({ name, type, url, path, score }))
 
   return { answer, sources }

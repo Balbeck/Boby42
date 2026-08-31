@@ -14,28 +14,72 @@ const GENERATION_OPTIONS = { num_ctx: 16384, temperature: 0.2, num_predict: 600 
 /**
  * Asks Ollama to generate an answer to the given prompt.
  *
+ * Non-streaming by default. Pass `hooks.onToken` to stream: the request is then
+ * made with `stream: true`, `onToken` is called with every incremental text
+ * fragment as it arrives, and the fully assembled answer is still returned at
+ * the end (so callers that also need the complete string — logging — are
+ * unchanged). `hooks.signal` aborts the underlying fetch (used to stop
+ * generation when the client disconnects).
+ *
  * @param {string} prompt
  * @param {object} [options]  merged over GENERATION_OPTIONS for this call
- * @returns {Promise<string>} the generated answer
+ * @param {{ onToken?: (text: string) => void, signal?: AbortSignal }} [hooks]
+ * @returns {Promise<string>} the generated answer (assembled, when streaming)
  */
-async function generateAnswer(prompt, options = {}) {
+async function generateAnswer(prompt, options = {}, { onToken, signal } = {}) {
+  const streaming = typeof onToken === 'function'
+
   const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       model: OLLAMA_GENERATION_MODEL,
       prompt,
-      stream: false,
+      stream: streaming,
       options: { ...GENERATION_OPTIONS, ...options }
-    })
+    }),
+    signal
   })
 
   if (!response.ok) {
     throw new Error(`Ollama request failed with status ${response.status}`)
   }
 
-  const data = await response.json()
-  return data.response
+  if (!streaming) {
+    const data = await response.json()
+    return data.response
+  }
+
+  // NDJSON: one JSON object per line, the last with done: true + stats.
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let full = ''
+
+  for (;;) {
+    const { value, done } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    let nl
+    while ((nl = buffer.indexOf('\n')) !== -1) {
+      const line = buffer.slice(0, nl).trim()
+      buffer = buffer.slice(nl + 1)
+      if (!line) continue
+      let obj
+      try {
+        obj = JSON.parse(line)
+      } catch {
+        continue
+      }
+      if (obj.error) throw new Error(`Ollama stream error: ${obj.error}`)
+      if (obj.response) {
+        full += obj.response
+        onToken(obj.response)
+      }
+    }
+  }
+
+  return full
 }
 
 /**
