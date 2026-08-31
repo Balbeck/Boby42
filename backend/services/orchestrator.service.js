@@ -5,6 +5,7 @@ const { generateAnswer } = require('./ollama.service')
 const { retrieveUnified } = require('./retriever.service')
 const { readBaseDocumentaireDocument, resolveNotionDir } = require('./documentReader.service')
 const { resolveSubjectsPdfFile } = require('./subjectsPdfLibrary.service')
+const { readSubjectsPdfText } = require('./subjectsPdfText.service')
 
 const NO_DOCUMENTS_ANSWER = "🤔 Je n'ai malheuresement aucune information à ce sujet dans mes datas.\nJe vous conseille la https://ft42.notion.site/rtfm-stud .\nVous y trouverez peut-être votre réponse !"
 
@@ -15,6 +16,23 @@ const NO_DOCUMENTS_ANSWER = "🤔 Je n'ai malheuresement aucune information à c
 // latency dial — halving it roughly halves the wait.
 const MAX_CONTEXT_CHARS = 24000
 const MAX_CHARS_PER_DOC = 15000
+// Per-subject slice, drawn from the same MAX_CONTEXT_CHARS budget as the md docs
+// and applied AFTER them (Notion keeps priority). The biggest subject alone is
+// 45 635 chars ≈ 12 400 tokens and up to 3 subjects can be returned — three at
+// full size would overflow the 16 384-token window, which Ollama truncates
+// SILENTLY (no error, no log line). 8 000 chars ≈ 2 200 tokens lets all three
+// fit, and on this corpus the first 8 000 chars are the title, summary, table of
+// contents and introduction — where "what is this project" actually lives.
+// Measured 2026-08-31 on the 42AI host: an 8 000-char slice produced grounded,
+// correct answers citing the real subject where naming it alone made the model
+// invent a "[Project Description]" document.
+//
+// EXCEPTION (checkpoint, Hector): when a subject is the ONLY document with text
+// — no Notion result, a single PDF — it gets the whole remaining budget instead
+// of this cap. Full-text "what is this project" answers measured richer
+// (~22 000 prompt chars) and nothing else is competing for the window. Two or
+// more subjects keep the 8 000 cap so all of them still fit the window.
+const MAX_CHARS_PER_PDF = 8000
 
 /**
  * Picks what actually goes in the prompt: highest score first, each document
@@ -24,25 +42,46 @@ const MAX_CHARS_PER_DOC = 15000
  * Sorting here is what puts it in front of the model. Input rows are not
  * mutated; the full list is still what gets logged and returned as `sources`.
  *
+ * Two passes over one shared MAX_CONTEXT_CHARS budget: md rows first (score
+ * desc, each capped at MAX_CHARS_PER_DOC), then pdf rows (score desc, each
+ * capped at MAX_CHARS_PER_PDF), so Notion documents keep priority and a subject
+ * only gets what is left. Each pass stops as soon as the remaining budget hits 0.
+ * The one exception: a subject that is the ONLY document with text (no md row,
+ * a single pdf row) is given the whole budget instead of MAX_CHARS_PER_PDF.
+ *
  * @param {{name: string, type: 'md' | 'pdf', content: string | null, score?: number}[]} documents
- * @returns {{name: string, text: string}[]}
+ * @returns {{name: string, type: 'md' | 'pdf', text: string}[]}
  */
 function selectPromptDocuments(documents) {
-  const withText = documents
+  const mdRows = documents
     .filter((doc) => doc.type === 'md' && doc.content)
+    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+  const pdfRows = documents
+    .filter((doc) => doc.type === 'pdf' && doc.content)
     .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
 
   const selected = []
   let used = 0
 
-  for (const doc of withText) {
-    const budget = Math.min(MAX_CHARS_PER_DOC, MAX_CONTEXT_CHARS - used)
-    if (budget <= 0) break
-    const slice = doc.content.slice(0, budget)
-    const text = slice.length < doc.content.length ? `${slice}\n\n[...]` : slice
-    selected.push({ name: doc.name, text })
-    used += slice.length
+  const take = (rows, type, perDocCap) => {
+    for (const doc of rows) {
+      const budget = Math.min(perDocCap, MAX_CONTEXT_CHARS - used)
+      if (budget <= 0) break
+      const slice = doc.content.slice(0, budget)
+      const text = slice.length < doc.content.length ? `${slice}\n\n[...]` : slice
+      selected.push({ name: doc.name, type, text })
+      used += slice.length
+    }
   }
+
+  // A lone subject (no Notion document, a single PDF) gets the whole window;
+  // otherwise every subject keeps the per-PDF cap so all of them fit.
+  const pdfCap = mdRows.length === 0 && pdfRows.length === 1
+    ? MAX_CONTEXT_CHARS
+    : MAX_CHARS_PER_PDF
+
+  take(mdRows, 'md', MAX_CHARS_PER_DOC)
+  take(pdfRows, 'pdf', pdfCap)
 
   return selected
 }
@@ -53,18 +92,18 @@ function selectPromptDocuments(documents) {
  * screen, not as a summariser.
  *
  * @param {string} question
- * @param {{name: string, text: string}[]} documents  the selectPromptDocuments() output
- * @param {string[]} subjectNames  names of the type:'pdf' rows (their content is not available)
+ * @param {{name: string, type: 'md' | 'pdf', text: string}[]} documents  the selectPromptDocuments() output
  * @returns {string}
  */
-function buildPrompt(question, documents, subjectNames) {
+function buildPrompt(question, documents) {
   const context = documents
-    .map((doc) => `--- Document : ${doc.name} ---\n${doc.text}`)
+    .map((doc) => {
+      const header = doc.type === 'pdf'
+        ? `--- Sujet de projet 42 (en anglais) : ${doc.name} ---`
+        : `--- Document : ${doc.name} ---`
+      return `${header}\n${doc.text}`
+    })
     .join('\n\n')
-
-  const subjects = subjectNames.length
-    ? `\nDes sujets de projet 42 ont aussi été trouvés et sont affichés à l'écran : ${subjectNames.join(', ')}.\nTu n'as pas leur contenu : mentionne-les en une phrase seulement s'ils semblent utiles, sans rien affirmer de ce qu'ils contiennent.\n`
-    : ''
 
   return `Tu es Boby42, l'assistant documentaire de 42 Paris.
 
@@ -77,7 +116,7 @@ QUI RÉPOND À SA QUESTION, et dans quel document cela se trouve.
 === DOCUMENTS TROUVÉS ===
 ${context}
 === FIN DES DOCUMENTS ===
-${subjects}
+
 QUESTION DE L'ÉTUDIANT : ${question}
 
 RÈGLES :
@@ -100,8 +139,10 @@ RÉPONSE :`
  * used to open anything and no path is ever built from a raw request string.
  * A row that does not resolve is dropped with a warning, never an error.
  *
- * PDFs carry no content in this phase (`content: null`); turning subject PDFs
- * into text is a separate later task.
+ * Subject PDFs are read too (L4): their text is extracted from the RESOLVED
+ * path via `readSubjectsPdfText()` (memoised, never throws). A failed
+ * extraction leaves `content: null` — the row is still returned, shown and
+ * previewable, just absent from the prompt.
  *
  * @param {import('../types/types').ChatDocument[]} documents
  * @param {'fr' | 'en' | 'origin'} language
@@ -138,7 +179,7 @@ async function loadDocuments(documents, language) {
         url: row.url,
         path: pdfPath,
         score: row.score,
-        content: null
+        content: await readSubjectsPdfText(pdfPath)
       })
     }
   }
@@ -153,9 +194,12 @@ async function loadDocuments(documents, language) {
  * `POST /chat/documents` already returned to the client) it re-resolves and
  * reads exactly those — no second embedding. When it is `undefined` / `null` it
  * calls `retrieveUnified()` itself (the one-call fallback that keeps a bare
- * client and the live page working). The prompt is built from the md rows only,
- * sorted by descending score and clipped to a character budget by
- * `selectPromptDocuments()`; PDF rows are named to the model, never read.
+ * client and the live page working). The prompt is built by
+ * `selectPromptDocuments()`: md rows first (score desc), then subject-PDF rows
+ * (score desc, capped tighter), all inside one character budget. If nothing
+ * carries text — every md row unresolved AND every PDF extraction failed, or a
+ * PDF-only result with no extractable text — the no-documents fallback answer is
+ * returned with `sources: []` and no Ollama call.
  *
  * `hooks.onToken`, when given, streams the generation: it is called with each
  * incremental text fragment as Ollama produces it. The full answer is still
@@ -177,21 +221,27 @@ async function getAnswer(question, documents, language, { onToken, signal } = {}
     : documents
 
   const loaded = await loadDocuments(rows, lang)
+  const promptDocuments = selectPromptDocuments(loaded)
 
-  if (loaded.length === 0) {
+  // No selected document carries text: every md row unresolved AND every PDF
+  // extraction failed (or a PDF-only result with no extractable text). Return
+  // the frozen fallback with no Ollama call — this also covers the old
+  // `loaded.length === 0` case.
+  if (promptDocuments.length === 0) {
     return { answer: NO_DOCUMENTS_ANSWER, sources: [] }
   }
 
-  const promptDocuments = selectPromptDocuments(loaded)
-  const subjectNames = loaded.filter((doc) => doc.type === 'pdf').map((doc) => doc.name)
   const promptChars = promptDocuments.reduce((n, doc) => n + doc.text.length, 0)
   console.info(`[orchestrator] prompt documents (${promptChars} chars): ${promptDocuments.map((doc) => doc.name).join(', ') || '(none)'}`)
 
-  const prompt = buildPrompt(question, promptDocuments, subjectNames)
+  const prompt = buildPrompt(question, promptDocuments)
   const answer = (await generateAnswer(prompt, {}, { onToken, signal })).trim()
   const sources = loaded.map(({ name, type, url, path, score }) => ({ name, type, url, path, score }))
 
   return { answer, sources }
 }
 
-module.exports = { getAnswer }
+// selectPromptDocuments / buildPrompt are pure and exported so a throwaway
+// test script can build the REAL prompt and send it to the /ollama proxy
+// without duplicating it here. No behaviour change.
+module.exports = { getAnswer, selectPromptDocuments, buildPrompt }

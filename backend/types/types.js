@@ -10,10 +10,12 @@
 
 /**
  * One entry selected from a vector store by the retriever: the filename as
- * stored, and the score of the *first* embedding that cleared the threshold
- * (per-document early-exit — not the document's best score; see
- * `retriever.service.js`). Only `path.basename(filename)` is used to resolve
- * the file on disk.
+ * stored, and a cosine score whose meaning depends on which selector produced
+ * it — `searchVectorStore()` / `searchSubjectsPdfStore()` (the /archiviste
+ * path) record the score of the *first* embedding that cleared the threshold
+ * (per-document early-exit, not the document's best), while `rankStore()` (the
+ * /chat path) records the document's *best* embedding score. Only
+ * `path.basename(filename)` is used to resolve the file on disk.
  *
  * @typedef {Object} VectorMatch
  * @property {string} filename
