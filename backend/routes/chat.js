@@ -9,6 +9,27 @@ const schema = {
     required: ['question'],
     properties: {
       question: { type: 'string', minLength: 1 },
+      // Optional — defaults to 'fr'. Decides the Notion url built for the
+      // preview and which language copy the generation call reads.
+      language: { type: 'string', enum: ['fr', 'en', 'origin'] },
+      // Optional — the rows a prior POST /chat/documents returned. When present,
+      // getAnswer reads exactly those (no second embedding); when absent it
+      // retrieves them itself (one-call fallback — keeps bare clients working).
+      documents: {
+        type: 'array',
+        maxItems: 10,
+        items: {
+          type: 'object',
+          required: ['name', 'type'],
+          additionalProperties: false,
+          properties: {
+            name: { type: 'string', minLength: 1, maxLength: 300 },
+            type: { type: 'string', enum: ['md', 'pdf'] },
+            score: { type: 'number' },
+            url: { type: 'string' }
+          }
+        }
+      },
       // Interaction logging (T4) — both optional, existing clients keep working.
       visitorId: { type: 'string' },
       conversationId: { type: 'string', format: 'uuid' }
@@ -18,12 +39,12 @@ const schema = {
 
 module.exports = async function (fastify, opts) {
   fastify.post('/chat', { schema }, async function (request, reply) {
-    const { question, visitorId, conversationId } = request.body
+    const { question, visitorId, conversationId, language, documents } = request.body
     const startedAt = Date.now()
 
     let answer, sources
     try {
-      ({ answer, sources } = await getAnswer(question))
+      ({ answer, sources } = await getAnswer(question, documents, language ?? 'fr'))
     } catch (err) {
       request.log.error(err)
       // Still record the failed exchange, then return the unchanged 502.
@@ -34,7 +55,7 @@ module.exports = async function (fastify, opts) {
           page: 'chat',
           question,
           answer: null,
-          language: null,
+          language: language ?? 'fr',
           documents: [],
           latencyMs: Date.now() - startedAt,
           errorCode: 'ollama_error'
@@ -57,7 +78,7 @@ module.exports = async function (fastify, opts) {
         page: 'chat',
         question,
         answer,
-        language: null,
+        language: language ?? 'fr',
         documents: sources,
         latencyMs: Date.now() - startedAt,
         errorCode: null

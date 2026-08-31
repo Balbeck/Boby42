@@ -94,6 +94,7 @@ async function readBaseDocumentaireDocument(language, name) {
 }
 
 module.exports = {
+  resolveNotionDir,
   listDocumentNames,
   readDocumentByName,
   listBaseDocumentaireNames,

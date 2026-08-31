@@ -19,6 +19,10 @@ export default defineConfig({
       // POST-only API, no SPA page at /feedback — plain proxy, no bypass.
       '/feedback': backendTarget,
       '/archiviste/documents': backendTarget,
+      // Nested API path under /chat — must stay ABOVE the '/chat' entry, whose
+      // bypass only forwards POST (same trap as '/archiviste/documents'). POST-only,
+      // no SPA page collision → plain proxy.
+      '/chat/documents': backendTarget,
       // /lab is an SPA page, but the auth API lives under /auth/lab (no page
       // collision) so it proxies plainly — no bypass needed.
       '/auth/lab': backendTarget,

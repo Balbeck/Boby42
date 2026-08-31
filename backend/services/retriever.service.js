@@ -155,4 +155,52 @@ async function retrieveWithSubjectsPdf (question) {
   return { documents, subjectsPdf: subjectsPdfSelected }
 }
 
-module.exports = { retrieve, retrieveWithSubjectsPdf }
+/**
+ * Retrieval for /chat — the one retrieval this page owns. Same selection as
+ * retrieveWithSubjectsPdf() (one shared question embedding, both stores, same
+ * budgets and thresholds), but it reads no file: the generation call reads the
+ * language-specific copy itself. Returns display-ready rows, identical in shape
+ * to a POST /archiviste result.
+ *
+ * Deliberate copy, not a shared helper: /chat must be free to change its
+ * retrieval later without any risk for /archiviste (the landing page).
+ *
+ * @param {string} question
+ * @param {'fr' | 'en' | 'origin'} [language='fr'] - only decides the Notion url
+ * @returns {Promise<{count: number, documents: import('../types/types').ChatDocument[]}>}
+ */
+async function retrieveUnified (question, language = 'fr') {
+  const queryEmbedding = await generateEmbedding(question)
+  const [notionSelected, subjectsPdfSelected] = await Promise.all([
+    searchVectorStore(queryEmbedding),
+    searchSubjectsPdfStore(queryEmbedding)
+  ])
+
+  // Notion rows — url built exactly as routes/archiviste.js does (names contain
+  // spaces, e.g. "Visiter le campus.md", so encodeURIComponent is required).
+  const notionRows = notionSelected.map(({ filename, score }) => {
+    const name = path.basename(filename).replace(/\.md$/, '')
+    return {
+      name,
+      score,
+      type: 'md',
+      url: `/BaseDocumentaire/${language}/Notion/${encodeURIComponent(name)}.md`
+    }
+  })
+
+  // Subject PDFs — language-agnostic (subjects are English-only), name drops .pdf.
+  const pdfRows = subjectsPdfSelected.map(({ filename, score }) => {
+    const base = path.basename(filename)
+    return {
+      name: base.replace(/\.pdf$/i, ''),
+      score,
+      type: 'pdf',
+      url: `/subjectspdf/${encodeURIComponent(base)}`
+    }
+  })
+
+  const documents = [...notionRows, ...pdfRows]
+  return { count: documents.length, documents }
+}
+
+module.exports = { retrieve, retrieveWithSubjectsPdf, retrieveUnified }

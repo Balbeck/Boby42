@@ -32,21 +32,48 @@
  */
 
 /**
- * One source echoed back in a `POST /chat` response — a `RetrievedDocument`
- * without its `content`.
+ * One display-ready row from `retrieveUnified()` / `POST /chat/documents`,
+ * identical in shape to a `POST /archiviste` result row. No content — the
+ * generation call reads the language-specific copy itself.
+ *
+ * @typedef {Object} ChatDocument
+ * @property {string} name - extension stripped (`Wi-Fi`, not `Wi-Fi.md`)
+ * @property {number} score - cosine similarity, 0–1
+ * @property {'md' | 'pdf'} type
+ * @property {string} url - ready-to-call GET route (Notion url carries the language)
+ */
+
+/**
+ * Response body of `POST /chat/documents` (phase 1 of the two-phase `/chat`).
+ *
+ * @typedef {Object} ChatDocumentsResponse
+ * @property {number} count - `documents.length` (Notion + subject PDFs combined)
+ * @property {ChatDocument[]} documents - Notion rows first, then PDF rows
+ */
+
+/**
+ * One source echoed back in a `POST /chat` response. Since the two-phase flow it
+ * carries the archiviste-style `type` / `url` too, and `name` has no extension
+ * (was `Wi-Fi.md` when `/chat` still used `retrieve()`).
  *
  * @typedef {Object} Source
- * @property {string} name
- * @property {string} path
+ * @property {string} name - extension stripped
+ * @property {'md' | 'pdf'} type
+ * @property {string} [url] - the preview route the client was handed
+ * @property {string | null} path - absolute file path: the language copy for `md`, the resolved PDF path for `pdf`
  * @property {number} score - cosine similarity, 0–1
  */
 
 /**
- * Response body of `POST /chat`.
+ * Response body of `POST /chat`. The answer is generated from the `md` sources'
+ * content; `sources` lists every document (md + pdf) that resolved. When
+ * `documents` was supplied in the request those exact rows are re-resolved
+ * (no second embedding); otherwise `retrieveUnified()` runs as a one-call
+ * fallback.
  *
  * @typedef {Object} ChatResponse
  * @property {string} answer - the LLM answer, or the no-documents fallback text
- * @property {Source[]} sources - RAG-selected documents; `[]` when nothing cleared the threshold
+ * @property {Source[]} sources - resolved documents; `[]` when nothing cleared the threshold / nothing resolved
  * @property {string} [conversationId] - the conversation this exchange was logged under (T4); absent only if the logging write itself failed
  * @property {string} [messageId] - the assistant message UUID, the handle for `POST /feedback`; absent only if the logging write failed
  */
