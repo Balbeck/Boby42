@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import LabLogin from './components/LabLogin'
 import LabTabs from './components/lab/LabTabs'
 import DbViz from './components/lab/DbViz'
-import { logout, me } from './services/labApi'
+import OllamaPanel from './components/lab/OllamaPanel'
+import { logout, me, ollamaKey } from './services/labApi'
 
 /**
  * The /lab page. Stands alone — outside ConversationsProvider and any shell.
@@ -15,13 +16,17 @@ import { logout, me } from './services/labApi'
  *   🌞 connexion  — the greeting + logout (behaviour unchanged)
  *   🔬 viz        — placeholder; reserved home of the future analytics dashboard
  *   💾 dbviz      — raw read-only view of the interaction-logging tables
+ *   💬 ollama     — bare console straight onto the backend's /ollama/* proxy
  *
  * English-only, by the same call as the rest of /lab.
  */
 export default function LabApp() {
   const [status, setStatus] = useState('loading') // 'loading' | 'in' | 'out'
   const [showLogin, setShowLogin] = useState(false)
-  const [tab, setTab] = useState('connexion') // 'connexion' | 'viz' | 'dbviz'
+  const [tab, setTab] = useState('connexion') // 'connexion' | 'viz' | 'dbviz' | 'ollama'
+  // The /ollama proxy key, fetched once we have a session; null when the proxy
+  // is off (OLLAMA_PROXY_KEY unset → 404) or the session lapsed.
+  const [proxyKey, setProxyKey] = useState(/** @type {string | null} */ (null))
 
   useEffect(() => {
     let cancelled = false
@@ -35,6 +40,16 @@ export default function LabApp() {
     }
   }, [])
 
+  // Pull the /ollama proxy key once a session is established.
+  useEffect(() => {
+    if (status !== 'in') return
+    let cancelled = false
+    ollamaKey().then((k) => !cancelled && setProxyKey(k))
+    return () => {
+      cancelled = true
+    }
+  }, [status])
+
   function recheck() {
     me().then((session) => {
       setStatus(session ? 'in' : 'out')
@@ -46,6 +61,7 @@ export default function LabApp() {
     await logout().catch(() => {})
     setStatus('out')
     setShowLogin(true)
+    setProxyKey(null)
   }
 
   // Authenticated: the tab shell.
@@ -53,11 +69,21 @@ export default function LabApp() {
     return (
       <div className="min-h-svh bg-chat-bg text-chat-text">
         <LabTabs active={tab} onChange={setTab} />
-        {tab === 'dbviz' ? (
+
+        {/* Kept mounted across tab switches (just hidden) so the 💬 console —
+            its exchanges, draft prompt and params — survives navigating away
+            and back. A full page reload still clears it. */}
+        <div className={`px-4 pt-20 pb-10 ${tab === 'ollama' ? '' : 'hidden'}`}>
+          <OllamaPanel apiKey={proxyKey} />
+        </div>
+
+        {tab === 'dbviz' && (
           <div className="px-4 pt-20 pb-10">
             <DbViz />
           </div>
-        ) : (
+        )}
+
+        {(tab === 'connexion' || tab === 'viz') && (
           <div className="flex min-h-svh flex-col items-center justify-center gap-3 px-4 text-center">
             {tab === 'connexion' && <ConnexionPanel onLogout={handleLogout} />}
             {tab === 'viz' && (

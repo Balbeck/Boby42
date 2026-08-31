@@ -40,6 +40,21 @@ export async function me() {
   return response.json().catch(() => null)
 }
 
+/**
+ * The shared key for the ALL /ollama/* proxy, handed to an authenticated /lab
+ * session so it never sits in tracked frontend source. Kept in memory only by
+ * the caller (no localStorage).
+ *
+ * @returns {Promise<string | null>} null when there is no session (401) or the
+ *   proxy / gate is disabled (404).
+ */
+export async function ollamaKey() {
+  const response = await fetch(`${API_URL}/auth/lab/ollama-key`, { credentials: 'include' })
+  if (!response.ok) return null
+  const body = await response.json().catch(() => null)
+  return body?.key ?? null
+}
+
 // db-viz inspector (GET /lab-data/*). Same contract as me(): a non-OK status is
 // an expected outcome — returned as null, never thrown — and the caller renders
 // an error state. These routes are ungated for now; the cookie still rides

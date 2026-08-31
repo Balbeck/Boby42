@@ -53,4 +53,15 @@ module.exports = async function (fastify) {
   fastify.get('/me', { preHandler: fastify.verifyLab }, async function (request) {
     return { login: request.labUser.login }
   })
+
+  // Hand the /ollama proxy's shared key to an authenticated /lab session, so the
+  // 💬 console tab can call ALL /ollama/* without the key living in tracked
+  // frontend source. Fails closed like the rest of /lab: verifyLab already
+  // returns 404 (gate unconfigured) / 401 (no session); on top of that, an
+  // unset OLLAMA_PROXY_KEY → 404 (the proxy itself is off, so don't confirm it).
+  fastify.get('/ollama-key', { preHandler: fastify.verifyLab }, async function (request, reply) {
+    const key = process.env.OLLAMA_PROXY_KEY
+    if (!key) return reply.callNotFound()
+    return { key }
+  })
 }

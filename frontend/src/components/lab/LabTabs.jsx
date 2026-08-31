@@ -8,17 +8,18 @@ import { useRef } from 'react'
  * Tabs are local LabApp state, not routes (one user, no need to deep-link).
  * English-only, like the rest of /lab.
  *
- * @param {{ active: 'connexion' | 'viz' | 'dbviz', onChange: (id: string) => void }} props
+ * @param {{ active: 'connexion' | 'viz' | 'dbviz' | 'ollama', onChange: (id: string) => void }} props
  */
 
 const TABS = [
   { id: 'connexion', icon: '🌞', label: 'Connexion' },
   { id: 'viz', icon: '🔬', label: 'Visualizations' },
   { id: 'dbviz', icon: '💾', label: 'Database viewer' },
+  { id: 'ollama', icon: '💬', label: 'Ollama console' },
 ]
 
 // One class per index — matches PageSwitcher's translate-x-8 step (w-8 cells).
-const SLIDE = ['translate-x-0', 'translate-x-8', 'translate-x-16']
+const SLIDE = ['translate-x-0', 'translate-x-8', 'translate-x-16', 'translate-x-24']
 
 export default function LabTabs({ active, onChange }) {
   const btnRefs = useRef([])
