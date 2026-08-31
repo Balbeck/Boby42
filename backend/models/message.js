@@ -25,7 +25,11 @@ module.exports = (sequelize) =>
       content: { type: DataTypes.TEXT, allowNull: false },
       language: { type: DataTypes.STRING, allowNull: true },
       latency_ms: { type: DataTypes.INTEGER, allowNull: true },
-      error_code: { type: DataTypes.STRING, allowNull: true }
+      error_code: { type: DataTypes.STRING, allowNull: true },
+      // How many documents the exchange returned to the front. `0` is the
+      // queryable form of "nothing matched" (paired with a 'no_match' event).
+      // Null on rows written before this column existed.
+      document_count: { type: DataTypes.INTEGER, allowNull: true }
     },
     {
       tableName: 'messages',

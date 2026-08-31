@@ -104,13 +104,14 @@
 
 /**
  * One document to attach to an assistant message, by reference only (no
- * content). `/chat` passes its `sources` (`path` set, `url` null); `/archiviste`
- * passes its result rows (`url` set, `path` null).
+ * content). Both `/chat` (from its `sources`) and `/archiviste` (from its
+ * result rows) pass `type`, `url` and the resolved on-disk `path`.
  *
  * @typedef {Object} ExchangeDocument
  * @property {string} name
+ * @property {'md' | 'pdf'} [type]
  * @property {string} [url]
- * @property {string} [path]
+ * @property {string | null} [path] - absolute file path: the language copy for `md`, the resolved PDF path for `pdf`
  * @property {number} [score] - cosine similarity, 0–1
  */
 
@@ -124,7 +125,7 @@
  * @property {string} question
  * @property {string | null} answer - the assistant text; `null` on `/archiviste` and on the error path (stored as `''`)
  * @property {string | null} language
- * @property {ExchangeDocument[]} [documents]
+ * @property {ExchangeDocument[]} [documents] - also sets `messages.document_count` (its length; `0` = nothing matched)
  * @property {number} [latencyMs] - elapsed time around the service call
  * @property {string | null} [errorCode] - `'ollama_error'` | `'retrieval_error'` on failure, else `null`
  */

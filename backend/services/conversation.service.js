@@ -102,7 +102,9 @@ async function recordExchange({
         content: answer ?? '',
         language: language ?? null,
         latency_ms: Number.isFinite(latencyMs) ? Math.round(latencyMs) : null,
-        error_code: errorCode ?? null
+        error_code: errorCode ?? null,
+        // `0` is the meaningful "nothing matched" value (see the 'no_match' event).
+        document_count: documents.length
       },
       { transaction }
     )
@@ -112,6 +114,7 @@ async function recordExchange({
         documents.map((doc, position) => ({
           message_id: assistant.id,
           name: doc.name,
+          type: doc.type ?? null,
           url: doc.url ?? null,
           path: doc.path ?? null,
           score: Number.isFinite(doc.score) ? doc.score : null,

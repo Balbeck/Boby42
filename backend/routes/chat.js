@@ -1,7 +1,7 @@
 'use strict'
 
 const { getAnswer } = require('../services/orchestrator.service')
-const { recordExchange } = require('../services/conversation.service')
+const { recordExchange, logEvent } = require('../services/conversation.service')
 
 const schema = {
   body: {
@@ -88,6 +88,22 @@ module.exports = async function (fastify, opts) {
       }
     }
 
+    // A question that matched nothing is a gap in the document base — log it,
+    // mirroring routes/archiviste.js. Only on the success path (an ollama_error
+    // is not a no-match). Fail-safe like the rest.
+    const recordNoMatch = async (recordedConversationId) => {
+      try {
+        await logEvent({
+          anonId: visitorId,
+          conversationId: recordedConversationId,
+          type: 'no_match',
+          payload: { question, language: lang }
+        })
+      } catch (err) {
+        request.log.error({ err }, 'chat: failed to log no_match event')
+      }
+    }
+
     // ---- Streaming path (NDJSON) ---------------------------------------------
     if (stream) {
       reply.hijack()
@@ -125,6 +141,7 @@ module.exports = async function (fastify, opts) {
 
       const { conversationId: recordedConversationId = conversationId, messageId } =
         await recordOk(answer, sources)
+      if (sources.length === 0) await recordNoMatch(recordedConversationId)
 
       write({ type: 'done', answer, sources, conversationId: recordedConversationId, messageId })
       return raw.end()
@@ -142,6 +159,7 @@ module.exports = async function (fastify, opts) {
 
     const { conversationId: recordedConversationId = conversationId, messageId } =
       await recordOk(answer, sources)
+    if (sources.length === 0) await recordNoMatch(recordedConversationId)
 
     return { answer, sources, conversationId: recordedConversationId, messageId }
   })

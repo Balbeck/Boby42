@@ -3,6 +3,8 @@
 const path = require('node:path')
 const { retrieveWithSubjectsPdf } = require('../services/retriever.service')
 const { recordExchange, logEvent } = require('../services/conversation.service')
+const { resolveNotionDir } = require('../services/documentReader.service')
+const { resolveSubjectsPdfFile } = require('../services/subjectsPdfLibrary.service')
 
 const schema = {
   body: {
@@ -79,6 +81,22 @@ module.exports = async function (fastify, opts) {
     // Absent only if the logging write below fails (like conversationId).
     let messageId
     try {
+      // Same by-reference shape /chat logs: keep `type`, and resolve the real
+      // on-disk `path` through the existing whitelists (the language copy for
+      // md, the resolved PDF path for pdf) — never built from a request string.
+      const notionDir = resolveNotionDir(language)
+      const documentsForLog = await Promise.all(
+        documents.map(async (d) => ({
+          name: d.name,
+          type: d.type,
+          url: d.url,
+          path: d.type === 'md'
+            ? (notionDir ? path.join(notionDir, `${d.name}.md`) : null)
+            : await resolveSubjectsPdfFile(`${d.name}.pdf`),
+          score: d.score
+        }))
+      )
+
       const rec = await recordExchange({
         anonId: visitorId,
         conversationId,
@@ -86,7 +104,7 @@ module.exports = async function (fastify, opts) {
         question,
         answer: null, // no LLM answer on /archiviste — the assistant row carries only the docs
         language,
-        documents: documents.map((d) => ({ name: d.name, url: d.url, path: null, score: d.score })),
+        documents: documentsForLog,
         latencyMs: Date.now() - startedAt,
         errorCode: null
       })
