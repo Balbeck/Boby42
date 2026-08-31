@@ -1,46 +1,54 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import ArchivisteDocument from './ArchivisteDocument'
 import FeedbackButtons from './FeedbackButtons'
 
-const URL_REGEX = /(https?:\/\/[^\s]+)/g
-
 /**
- * Splits text on URLs and turns them into clickable links.
+ * Markdown collapses single newlines into one paragraph, but a chat answer uses
+ * them as line breaks. Turn every single newline into a hard break (two trailing
+ * spaces). No lookbehind regex — `(?<!\n)` is a parse-time syntax error on
+ * Safari < 16.4 and blanks the whole bundle.
  *
  * @param {string} text
- * @returns {(string | import('react').ReactNode)[]}
+ * @returns {string}
  */
-function linkify(text) {
-  return text.split(URL_REGEX).map((part, index) =>
-    index % 2 === 1 ? (
-      <a
-        key={index}
-        href={part}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-chat-green underline hover:no-underline"
-      >
-        42Doc
-      </a>
-    ) : (
-      part
-    ),
+const withHardBreaks = (text) =>
+  text.split('\n\n').map((block) => block.split('\n').join('  \n')).join('\n\n')
+
+/**
+ * Custom `a` renderer: `remark-gfm` turns a bare URL into an autolink whose text
+ * equals its href — those keep today's `42Doc` label; real markdown links keep
+ * their own text.
+ *
+ * @param {{ href?: string, children?: import('react').ReactNode }} props
+ */
+function MarkdownLink({ href, children }) {
+  const text = Array.isArray(children) ? children.join('') : children
+  const label = typeof text === 'string' && text === href ? '42Doc' : children
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-chat-green underline hover:no-underline"
+    >
+      {label}
+    </a>
   )
 }
 
-const INTRO_DURATION = 3000
 const DOTS = ['.', '..', '...']
 const DOT_INTERVAL = 500
 
-/** Toujours affiché en entier à durée fixe, quoi qu'il arrive côté réseau. */
-function IntroStep({ text, onDone }) {
-  useEffect(() => {
-    const timer = setTimeout(onDone, INTRO_DURATION)
-    return () => clearTimeout(timer)
-  }, [onDone])
-
-  return <AnimatedText text={text} />
-}
+// Minimum time each step stays on screen once entered, so the intro → searching
+// → reading → answer sequence looks the same whether generation takes ~100 s
+// (md context) or ~9 s (pdf-only: the prompt carries no document text). Without
+// it a fast answer makes the documents and the answer land together and the
+// "reading" step is never seen.
+const STEP_DURATIONS = { intro: 3000, searching: 1000, reading: 3000 }
+const FULL_ORDER = ['intro', 'searching', 'reading', 'done']
+const NO_DOCUMENTS_ORDER = ['intro', 'searching', 'done']
 
 function AnimatedText({ text }) {
   const [dotIndex, setDotIndex] = useState(0)
@@ -99,6 +107,59 @@ function DocumentsBlock({ documents, onLoadDocument, t }) {
 }
 
 /**
+ * Drives the message through `intro → searching → reading → done` as a
+ * forward-only sequence. `phase` says how far the backend has got; the step
+ * never skips ahead and never leaves a step before its minimum on-screen time
+ * (counted from when it was entered, so a slow generation adds no extra wait).
+ * With no documents found the `reading` step is dropped — nothing to read.
+ *
+ * @param {'retrieving' | 'reading' | 'done' | 'error'} phase
+ * @param {boolean} hasDocuments
+ * @returns {'intro' | 'searching' | 'reading' | 'done' | 'error'}
+ */
+function useGuidedStep(phase, hasDocuments) {
+  const order = hasDocuments ? FULL_ORDER : NO_DOCUMENTS_ORDER
+
+  const target =
+    phase === 'error' ? 'error'
+      : phase === 'done' ? 'done'
+        : phase === 'reading' && hasDocuments ? 'reading'
+          : 'searching'
+
+  const [step, setStep] = useState('intro')
+  // Wall-clock time the current step was entered. Set from an effect (never
+  // during render) so the minimum-duration maths below is measured from entry.
+  const enteredAt = useRef(0)
+
+  useEffect(() => {
+    enteredAt.current = Date.now()
+  }, [step])
+
+  useEffect(() => {
+    if (step === 'error' || step === target) return
+
+    if (target === 'error') {
+      // let the intro play its fixed beat, then jump straight to the error
+      const wait = step === 'intro'
+        ? Math.max(0, STEP_DURATIONS.intro - (Date.now() - enteredAt.current))
+        : 0
+      const timer = setTimeout(() => setStep('error'), wait)
+      return () => clearTimeout(timer)
+    }
+
+    const fromIdx = order.indexOf(step)
+    const toIdx = order.indexOf(target)
+    if (toIdx <= fromIdx) return
+
+    const wait = Math.max(0, STEP_DURATIONS[step] - (Date.now() - enteredAt.current))
+    const timer = setTimeout(() => setStep(order[fromIdx + 1]), wait)
+    return () => clearTimeout(timer)
+  }, [step, target, order])
+
+  return step
+}
+
+/**
  * @param {{
  *   question: string,
  *   answer: string,
@@ -124,46 +185,44 @@ export default function Message({
   onLoadDocument,
   t,
 }) {
-  const [introDone, setIntroDone] = useState(false)
-
-  const showDocuments = phase === 'reading' || phase === 'done'
+  const step = useGuidedStep(phase, documents.length > 0)
+  const showDocuments = (step === 'reading' || step === 'done') && documents.length > 0
 
   return (
     <div className="flex flex-col gap-5 py-8">
       <div className="max-w-[85%] self-end rounded-2xl bg-chat-surface-2 px-4 py-3 text-chat-text">
         {question}
       </div>
-      {!introDone ? (
-        <IntroStep text={t.intro} onDone={() => setIntroDone(true)} />
-      ) : (
-        <div className="flex max-w-[85%] flex-col gap-5">
-          {phase === 'retrieving' && <AnimatedText text={t.searching} />}
+      <div className="flex max-w-[85%] flex-col gap-5">
+        {step === 'intro' && <AnimatedText text={t.intro} />}
+        {step === 'searching' && <AnimatedText text={t.searching} />}
 
-          {showDocuments && (
-            <DocumentsBlock documents={documents} onLoadDocument={onLoadDocument} t={t} />
-          )}
+        {showDocuments && (
+          <DocumentsBlock documents={documents} onLoadDocument={onLoadDocument} t={t} />
+        )}
 
-          {phase === 'reading' && <AnimatedText text={t.chatReading} />}
+        {step === 'reading' && <AnimatedText text={t.chatReading} />}
 
-          {phase === 'error' && (
-            <div className="leading-relaxed text-chat-text">
-              {t.errorPrefix}
-              {error}
+        {step === 'error' && (
+          <div className="leading-relaxed text-chat-text">
+            {t.errorPrefix}
+            {error}
+          </div>
+        )}
+
+        {step === 'done' && (
+          <div className="flex flex-col">
+            <div className="prose prose-invert prose-sm max-w-none prose-a:text-chat-green">
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: MarkdownLink }}>
+                {withHardBreaks(answer)}
+              </ReactMarkdown>
             </div>
-          )}
-
-          {phase === 'done' && (
-            <div className="flex flex-col">
-              <div className="whitespace-pre-line leading-relaxed text-chat-text">
-                {linkify(answer)}
-              </div>
-              {messageId && onRate && (
-                <FeedbackButtons rating={rating} onRate={onRate} t={t} />
-              )}
-            </div>
-          )}
-        </div>
-      )}
+            {messageId && onRate && (
+              <FeedbackButtons rating={rating} onRate={onRate} t={t} />
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
