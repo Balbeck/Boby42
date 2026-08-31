@@ -15,12 +15,10 @@ export const messages = {
     chatDocsNotionLabel: 'RTFM - Notion',
     chatDocsSubjectsLabel: 'Sujets Projet 42',
     chatDocsCount: (n) => `${n} document${n > 1 ? 's' : ''} trouvé${n > 1 ? 's' : ''}`,
-    archivisteTitle: '🕵️‍♂️ Le Documentaliste',
-    archivisteIndexNotice:
-      "Pour l'instant, seuls les sujets du Old Common Core et de la branche Machine Learning sont indexés.",
+    archivisteTitle: '🕵️‍♂️ Archiviste 42',
     archivisteInputPlaceholder: 'Quels documents souhaitez-vous ?',
     archivisteDisclaimer:
-      'Je fouille le Notion des documents administratifs, tenu à jour par le Bocal de 42 Paris 📚',
+      'Je fouille les docs administratifs du RTFM - Notion, tenus à jour par le Bocal de 42 Paris 📚\nPour l\'instant, seuls les sujets du Old Common Core et de la branche Machine Learning sont indexés.',
     archivisteSearching: "Je consulte la base documentaire de l'école...",
     documentsFound: (n) => `${n} document${n > 1 ? 's' : ''} trouvé${n > 1 ? 's' : ''} dans le Notion`,
     subjectsPdfFound: (n) => `${n} sujet${n > 1 ? 's' : ''} 42 trouvé${n > 1 ? 's' : ''} dans la base`,
@@ -34,7 +32,7 @@ export const messages = {
     stopAria: 'Arrêter la génération',
     sendAria: 'Envoyer le message',
     switchToChat: 'Basculer vers le chat',
-    switchToArchiviste: 'Basculer vers le documentaliste',
+    switchToArchiviste: "Basculer vers l'archiviste",
     close: 'Fermer',
     wipTitle: '🏗️ Section en construction 🛠️',
     wipBody:
@@ -51,12 +49,10 @@ export const messages = {
     chatDocsNotionLabel: 'RTFM - Notion',
     chatDocsSubjectsLabel: '42 Project Subjects',
     chatDocsCount: (n) => `${n} document${n === 1 ? '' : 's'} found`,
-    archivisteTitle: '🕵️‍♂️ The Archivist',
-    archivisteIndexNotice:
-      'For now, only the Old Common Core and Machine Learning branch subjects are indexed.',
+    archivisteTitle: '🕵️‍♂️ 42 Archivist',
     archivisteInputPlaceholder: 'Which documents are you looking for?',
     archivisteDisclaimer:
-      "I search the administrative-docs Notion, kept up to date by 42 Paris's Bocal 📚",
+      "I search the administrative RTFM - Notion docs, kept up to date by 42 Paris's Bocal 📚\nFor now, only the Old Common Core and Machine Learning branch subjects are indexed.",
     archivisteSearching: "Searching the school's document base...",
     documentsFound: (n) => `${n} document${n > 1 ? 's' : ''} found in Notion`,
     subjectsPdfFound: (n) => `${n} subject${n > 1 ? 's' : ''} from 42 found in the base`,
