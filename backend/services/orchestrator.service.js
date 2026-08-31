@@ -91,18 +91,23 @@ function selectPromptDocuments(documents) {
  * framed as a documentalist commenting on documents the student already sees on
  * screen, not as a summariser.
  *
+ * Notion documents and 42 subject PDFs are rendered under the SAME
+ * `--- Document : <name> ---` header. A distinct pdf header
+ * (`--- Sujet de projet 42 (en anglais) : X ---`) was tried and measured worse
+ * on the 42AI host: mistral copied the whole header string into its `[...]`
+ * citation tag (`[Sujet de projet 42 (en anglais) : Minishell.en.subject]`).
+ * With the plain header the model cites the bare name `[Minishell.en.subject]`,
+ * as it already does for Notion docs. The "en anglais" hint is dropped — rule 5
+ * ("answer in the question's language") covers it and every measured answer over
+ * an English subject came back in French.
+ *
  * @param {string} question
  * @param {{name: string, type: 'md' | 'pdf', text: string}[]} documents  the selectPromptDocuments() output
  * @returns {string}
  */
 function buildPrompt(question, documents) {
   const context = documents
-    .map((doc) => {
-      const header = doc.type === 'pdf'
-        ? `--- Sujet de projet 42 (en anglais) : ${doc.name} ---`
-        : `--- Document : ${doc.name} ---`
-      return `${header}\n${doc.text}`
-    })
+    .map((doc) => `--- Document : ${doc.name} ---\n${doc.text}`)
     .join('\n\n')
 
   return `Tu es Boby42, l'assistant documentaire de 42 Paris.
