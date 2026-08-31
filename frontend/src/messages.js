@@ -11,6 +11,10 @@ export const messages = {
       'Boby42 est un assistant administratif qui répond à partir du RTFM et du Notion du Bocal.\nIl est encore en formation et peut se tromper - Vérifiez ce qu\'il vous conte 🤖 !',
     intro: 'Laissez-moi voir ce que je peux faire',
     searching: "Je consulte la base documentaire de l'école",
+    chatReading: 'Je lis les documents et je prépare ma réponse',
+    chatDocsNotionLabel: 'RTFM - Notion',
+    chatDocsSubjectsLabel: 'Sujets Projet 42',
+    chatDocsCount: (n) => `${n} document${n > 1 ? 's' : ''} trouvé${n > 1 ? 's' : ''}`,
     archivisteTitle: '🕵️‍♂️ Le Documentaliste',
     archivisteIndexNotice:
       "Pour l'instant, seuls les sujets du Old Common Core et de la branche Machine Learning sont indexés.",
@@ -43,6 +47,10 @@ export const messages = {
       "Boby42 is an administrative assistant answering from the RTFM and the Bocal's Notion.\nHe is still in training and can be wrong — double-check what he tells you 🤖 !",
     intro: 'Let me see what I can do',
     searching: "Searching the school's document base",
+    chatReading: 'Reading the documents and writing my answer',
+    chatDocsNotionLabel: 'RTFM - Notion',
+    chatDocsSubjectsLabel: '42 Project Subjects',
+    chatDocsCount: (n) => `${n} document${n === 1 ? '' : 's'} found`,
     archivisteTitle: '🕵️‍♂️ The Archivist',
     archivisteIndexNotice:
       'For now, only the Old Common Core and Machine Learning branch subjects are indexed.',

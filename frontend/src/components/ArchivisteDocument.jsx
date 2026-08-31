@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm'
 /**
  * Un document trouvé, replié par défaut. Le contenu n'est chargé (via onExpand)
  * qu'au premier dépli — jamais rechargé ensuite (doc.loaded reste true).
+ * Composant présentational partagé par /archiviste et /chat.
  *
  * @param {{
  *   document: import('../types/types.js').ArchivisteDocument,

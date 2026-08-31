@@ -3,6 +3,8 @@
  * @property {string} id
  * @property {string} question
  * @property {string} answer
+ * @property {ArchivisteDocument[]} documents - lignes trouvées par POST /chat/documents (phase 1), rendues comme sur /archiviste ; chargées paresseusement au dépli
+ * @property {'retrieving' | 'reading' | 'done' | 'error'} phase - étape du flux à deux appels : 'retrieving' (phase 1), 'reading' (phase 2 en cours), 'done', 'error'
  * @property {boolean} loading
  * @property {string} [error] - message d'erreur brut ; le préfixe traduit est ajouté à l'affichage
  * @property {string | null} [messageId] - id du message assistant renvoyé par /chat ; handle pour /feedback (null tant que la réponse n'est pas revenue)
@@ -11,7 +13,9 @@
 
 /**
  * @typedef {Object} Source
- * @property {string} name
+ * @property {string} name - sans extension .md / .pdf (convention archiviste, depuis L1)
+ * @property {'md' | 'pdf'} [type]
+ * @property {string} [url] - route de prévisualisation
  * @property {string} path
  * @property {number} score
  */

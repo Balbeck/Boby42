@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import ArchivisteDocument from './ArchivisteDocument'
 import FeedbackButtons from './FeedbackButtons'
 
 const URL_REGEX = /(https?:\/\/[^\s]+)/g
@@ -58,28 +59,74 @@ function AnimatedText({ text }) {
 }
 
 /**
+ * The source documents found for this question — the same count lines and
+ * collapsible rows as `/archiviste`, shown before (and kept above) the answer.
+ *
+ * @param {{
+ *   documents: import('../types/types.js').ArchivisteDocument[],
+ *   onLoadDocument: (doc: import('../types/types.js').ArchivisteDocument) => void,
+ *   t: object,
+ * }} props
+ */
+function DocumentsBlock({ documents, onLoadDocument, t }) {
+  const mdDocs = documents.filter((doc) => doc.type !== 'pdf')
+  const pdfDocs = documents.filter((doc) => doc.type === 'pdf')
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1 text-xs text-chat-text-muted">
+        <div className="flex items-baseline gap-1.5">
+          <span className="font-medium italic text-chat-text">{t.chatDocsNotionLabel}</span>
+          <span aria-hidden>·</span>
+          <span>{t.chatDocsCount(mdDocs.length)}</span>
+        </div>
+        <div className="flex items-baseline gap-1.5">
+          <span className="font-medium italic text-chat-text">{t.chatDocsSubjectsLabel}</span>
+          <span aria-hidden>·</span>
+          <span>{t.chatDocsCount(pdfDocs.length)}</span>
+        </div>
+      </div>
+      {[...mdDocs, ...pdfDocs].map((doc) => (
+        <ArchivisteDocument
+          key={`${doc.type}:${doc.name}`}
+          document={doc}
+          onExpand={() => onLoadDocument(doc)}
+          t={t}
+        />
+      ))}
+    </div>
+  )
+}
+
+/**
  * @param {{
  *   question: string,
  *   answer: string,
- *   loading?: boolean,
+ *   documents?: import('../types/types.js').ArchivisteDocument[],
+ *   phase?: 'retrieving' | 'reading' | 'done' | 'error',
  *   error?: string,
  *   messageId?: string | null,
  *   rating?: -1 | 0 | 1,
  *   onRate?: (rating: -1 | 0 | 1, comment?: string) => void,
+ *   onLoadDocument?: (doc: import('../types/types.js').ArchivisteDocument) => void,
  *   t: object,
  * }} props
  */
 export default function Message({
   question,
   answer,
-  loading = false,
+  documents = [],
+  phase = 'retrieving',
   error,
   messageId,
   rating = 0,
   onRate,
+  onLoadDocument,
   t,
 }) {
   const [introDone, setIntroDone] = useState(false)
+
+  const showDocuments = phase === 'reading' || phase === 'done'
 
   return (
     <div className="flex flex-col gap-5 py-8">
@@ -88,20 +135,32 @@ export default function Message({
       </div>
       {!introDone ? (
         <IntroStep text={t.intro} onDone={() => setIntroDone(true)} />
-      ) : loading ? (
-        <AnimatedText text={t.searching} />
-      ) : error ? (
-        <div className="max-w-[85%] leading-relaxed text-chat-text">
-          {t.errorPrefix}
-          {error}
-        </div>
       ) : (
-        <div className="flex max-w-[85%] flex-col">
-          <div className="whitespace-pre-line leading-relaxed text-chat-text">
-            {linkify(answer)}
-          </div>
-          {messageId && onRate && (
-            <FeedbackButtons rating={rating} onRate={onRate} t={t} />
+        <div className="flex max-w-[85%] flex-col gap-5">
+          {phase === 'retrieving' && <AnimatedText text={t.searching} />}
+
+          {showDocuments && (
+            <DocumentsBlock documents={documents} onLoadDocument={onLoadDocument} t={t} />
+          )}
+
+          {phase === 'reading' && <AnimatedText text={t.chatReading} />}
+
+          {phase === 'error' && (
+            <div className="leading-relaxed text-chat-text">
+              {t.errorPrefix}
+              {error}
+            </div>
+          )}
+
+          {phase === 'done' && (
+            <div className="flex flex-col">
+              <div className="whitespace-pre-line leading-relaxed text-chat-text">
+                {linkify(answer)}
+              </div>
+              {messageId && onRate && (
+                <FeedbackButtons rating={rating} onRate={onRate} t={t} />
+              )}
+            </div>
           )}
         </div>
       )}

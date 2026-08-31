@@ -10,7 +10,8 @@ import { useChat } from './state/conversationsContext'
 import { messages, useLanguage, setLanguage } from './i18n'
 
 function App() {
-  const { exchanges, sendQuestion, stopGeneration, submitFeedback, isSending } = useChat()
+  const { exchanges, sendQuestion, stopGeneration, submitFeedback, loadDocument, isSending } =
+    useChat()
   const { containerRef, bottomRef } = useAutoScroll()
   const language = useLanguage()
   const t = messages[language] ?? messages.fr
@@ -34,7 +35,7 @@ function App() {
             </h1>
             <div className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2">
               <ChatInput
-                onSend={sendQuestion}
+                onSend={(question) => sendQuestion(question, language)}
                 onStop={stopGeneration}
                 isSending={isSending}
                 autoFocus
@@ -53,17 +54,19 @@ function App() {
                   key={exchange.id}
                   question={exchange.question}
                   answer={exchange.answer}
-                  loading={exchange.loading}
+                  documents={exchange.documents}
+                  phase={exchange.phase}
                   error={exchange.error}
                   messageId={exchange.messageId}
                   rating={exchange.rating}
                   onRate={(rating, comment) => submitFeedback(exchange.id, rating, comment)}
+                  onLoadDocument={(doc) => loadDocument(exchange.id, doc)}
                   t={t}
                 />
               ))}
               <div className="pt-8">
                 <ChatInput
-                  onSend={sendQuestion}
+                  onSend={(question) => sendQuestion(question, language)}
                   onStop={stopGeneration}
                   isSending={isSending}
                   autoFocus
