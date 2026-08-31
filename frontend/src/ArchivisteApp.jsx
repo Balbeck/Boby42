@@ -26,9 +26,10 @@ function ArchivisteApp() {
       <div className="flex w-full max-w-2xl flex-col px-4">
         {!hasStarted && (
           <div className="relative flex-1">
-            <h1 className="absolute top-[25%] left-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center text-3xl font-medium text-chat-text">
-              {t.archivisteTitle}
-            </h1>
+            <div className="absolute top-[25%] left-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center">
+              <h1 className="text-3xl font-medium text-chat-text">{t.archivisteTitle}</h1>
+              <p className="mt-2 text-xs text-chat-text/40">{t.archivisteIndexNotice}</p>
+            </div>
             <div className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2">
               <ChatInput
                 onSend={(question) => sendQuestion(question, language)}

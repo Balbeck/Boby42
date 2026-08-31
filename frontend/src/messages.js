@@ -12,9 +12,11 @@ export const messages = {
     intro: 'Laissez-moi voir ce que je peux faire',
     searching: "Je consulte la base documentaire de l'école",
     archivisteTitle: '🕵️‍♂️ Le Documentaliste',
+    archivisteIndexNotice:
+      "Pour l'instant, seuls les sujets du Old Common Core et de la branche Machine Learning sont indexés.",
     archivisteInputPlaceholder: 'Quels documents souhaitez-vous ?',
     archivisteDisclaimer:
-      "Je fouille dans le Notion tenu à jour par le Bocal de 42 Paris pour retrouver les bons documents. Ils peuvent être en français, en anglais, ou dans leur langue d'origine, telle qu'écrite par le Bocal 📚",
+      'Je fouille le Notion des documents administratifs, tenu à jour par le Bocal de 42 Paris 📚',
     archivisteSearching: "Je consulte la base documentaire de l'école...",
     documentsFound: (n) => `${n} document${n > 1 ? 's' : ''} trouvé${n > 1 ? 's' : ''} dans le Notion`,
     subjectsPdfFound: (n) => `${n} sujet${n > 1 ? 's' : ''} 42 trouvé${n > 1 ? 's' : ''} dans la base`,
@@ -42,9 +44,11 @@ export const messages = {
     intro: 'Let me see what I can do',
     searching: "Searching the school's document base",
     archivisteTitle: '🕵️‍♂️ The Archivist',
+    archivisteIndexNotice:
+      'For now, only the Old Common Core and Machine Learning branch subjects are indexed.',
     archivisteInputPlaceholder: 'Which documents are you looking for?',
     archivisteDisclaimer:
-      "I dig through the Notion kept up to date by 42 Paris's Bocal to find the right documents. They may be in French, in English, or in their original language, as written by the Bocal 📚",
+      "I search the administrative-docs Notion, kept up to date by 42 Paris's Bocal 📚",
     archivisteSearching: "Searching the school's document base...",
     documentsFound: (n) => `${n} document${n > 1 ? 's' : ''} found in Notion`,
     subjectsPdfFound: (n) => `${n} subject${n > 1 ? 's' : ''} from 42 found in the base`,

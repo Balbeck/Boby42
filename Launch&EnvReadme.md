@@ -52,7 +52,7 @@ Non-secret variables live in `.env.prod` / `.env.localMac` (both committed — p
 | `VITE_ALLOWED_HOSTS` | `frontend/vite.config.js` (`server.allowedHosts`) | comma-separated hostnames Vite's dev server accepts requests for (public domain in prod, `localhost` on local Mac) |
 | `VITE_API_URL` | `frontend/src/services/chatApi.js:1`, `frontend/src/services/archivisteApi.js:1` | escape hatch to call a different backend URL directly; left empty in both modes so the relative-path Vite proxy is used instead |
 
-## Deploying to a new host (or first run after T13)
+## Deploying to a new host
 
 `.env.lab` is **git-ignored** — it is not pulled with the repo and must be created on each host:
 
