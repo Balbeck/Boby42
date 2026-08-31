@@ -6,6 +6,7 @@ import PageSwitcher from './components/PageSwitcher'
 import { useAutoScroll } from './hooks/useAutoScroll'
 import { useArchiviste } from './state/conversationsContext'
 import { messages, useLanguage, setLanguage } from './i18n'
+import { withNotionLink } from './notionLink'
 
 function ArchivisteApp() {
   const { exchanges, sendQuestion, stopGeneration, submitFeedback, isSending, loadDocument } =
@@ -38,7 +39,7 @@ function ArchivisteApp() {
                 placeholder={t.archivisteInputPlaceholder}
                 t={t}
               />
-              <Disclaimer>{t.archivisteDisclaimer}</Disclaimer>
+              <Disclaimer>{withNotionLink(t.archivisteDisclaimer, t.archivisteDisclaimerNotion)}</Disclaimer>
             </div>
           </div>
         )}
@@ -69,7 +70,7 @@ function ArchivisteApp() {
                   placeholder={t.archivisteInputPlaceholder}
                   t={t}
                 />
-                <Disclaimer>{t.archivisteDisclaimer}</Disclaimer>
+                <Disclaimer>{withNotionLink(t.archivisteDisclaimer, t.archivisteDisclaimerNotion)}</Disclaimer>
               </div>
             </div>
             <div ref={bottomRef} />

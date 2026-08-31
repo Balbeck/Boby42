@@ -8,6 +8,7 @@ import ConstructionNotice from './components/ConstructionNotice'
 import { useAutoScroll } from './hooks/useAutoScroll'
 import { useChat } from './state/conversationsContext'
 import { messages, useLanguage, setLanguage } from './i18n'
+import { withNotionLink } from './notionLink'
 
 // Vu une seule fois par chargement de page : le flag survit aux remontages de
 // <App> (bascule /chat ↔ /archiviste) mais est remis à zéro par un vrai reload.
@@ -49,7 +50,7 @@ function App() {
                 autoFocus
                 t={t}
               />
-              <Disclaimer>{t.chatDisclaimer}</Disclaimer>
+              <Disclaimer>{withNotionLink(t.chatDisclaimer, t.chatDisclaimerNotion)}</Disclaimer>
             </div>
           </div>
         )}
@@ -80,7 +81,7 @@ function App() {
                   autoFocus
                   t={t}
                 />
-                <Disclaimer>{t.chatDisclaimer}</Disclaimer>
+                <Disclaimer>{withNotionLink(t.chatDisclaimer, t.chatDisclaimerNotion)}</Disclaimer>
               </div>
             </div>
             <div ref={bottomRef} />
