@@ -37,3 +37,13 @@ body {
 .card-in {
   animation: card-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* Chat : documents / réponse apparaissent en douceur dès qu'ils sont prêts */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fade-in 0.35s ease-out;
+}

@@ -81,7 +81,7 @@ function DocumentsBlock({ documents, onLoadDocument, t }) {
   const pdfDocs = documents.filter((doc) => doc.type === 'pdf')
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="fade-in flex flex-col gap-3">
       <div className="flex flex-col gap-1 text-xs text-chat-text-muted">
         <div className="flex items-baseline gap-1.5">
           <span className="font-medium italic text-chat-text">{t.chatDocsNotionLabel}</span>
@@ -126,7 +126,16 @@ function useGuidedStep(phase, hasDocuments) {
         : phase === 'reading' && hasDocuments ? 'reading'
           : 'searching'
 
-  const [step, setStep] = useState('intro')
+  // Mount at the step matching the phase we're handed, so an exchange revisited
+  // after a tab switch (already 'done' / 'error', or mid-generation 'reading')
+  // shows its state at once instead of replaying intro → searching → reading.
+  // Only a fresh 'retrieving' exchange starts the animated sequence.
+  const [step, setStep] = useState(() =>
+    phase === 'done' ? 'done'
+      : phase === 'error' ? 'error'
+        : phase === 'reading' && hasDocuments ? 'reading'
+          : 'intro',
+  )
   // Wall-clock time the current step was entered. Set from an effect (never
   // during render) so the minimum-duration maths below is measured from entry.
   const enteredAt = useRef(0)
@@ -137,6 +146,13 @@ function useGuidedStep(phase, hasDocuments) {
 
   useEffect(() => {
     if (step === 'error' || step === target) return
+
+    // The stream has started — show the answer now, don't sit through the
+    // remaining minimum step durations.
+    if (target === 'done') {
+      const timer = setTimeout(() => setStep('done'), 0)
+      return () => clearTimeout(timer)
+    }
 
     if (target === 'error') {
       // let the intro play its fixed beat, then jump straight to the error
@@ -211,7 +227,7 @@ export default function Message({
         )}
 
         {step === 'done' && (
-          <div className="flex flex-col">
+          <div className="fade-in flex flex-col">
             <div className="prose prose-invert prose-sm max-w-none prose-a:text-chat-green">
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: MarkdownLink }}>
                 {withHardBreaks(answer)}
