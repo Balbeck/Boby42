@@ -47,3 +47,24 @@ body {
 .fade-in {
   animation: fade-in 0.35s ease-out;
 }
+
+/* Bascule /chat ↔ /archiviste : la colonne de contenu se fond en douceur au
+   montage (titre, input, disclaimer, historique). Le fond et les switchers
+   fixes restent immobiles. */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-in {
+  animation: page-in 0.4s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay-in,
+  .card-in,
+  .fade-in,
+  .page-in {
+    animation: none;
+  }
+}

@@ -36,7 +36,7 @@ function App() {
       <div className="fixed top-4 right-4 z-20">
         <LanguageSwitcher language={language} onChange={setLanguage} />
       </div>
-      <div className="flex w-full max-w-2xl flex-col px-4">
+      <div className="page-in flex w-full max-w-2xl flex-col px-4">
         {!hasStarted && (
           <div className="relative flex-1">
             <h1 className="absolute top-[25%] left-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center text-3xl font-medium text-chat-text">
