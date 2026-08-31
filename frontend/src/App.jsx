@@ -9,6 +9,10 @@ import { useAutoScroll } from './hooks/useAutoScroll'
 import { useChat } from './state/conversationsContext'
 import { messages, useLanguage, setLanguage } from './i18n'
 
+// Vu une seule fois par chargement de page : le flag survit aux remontages de
+// <App> (bascule /chat ↔ /archiviste) mais est remis à zéro par un vrai reload.
+let wipSeen = false
+
 function App() {
   const { exchanges, sendQuestion, stopGeneration, submitFeedback, loadDocument, isSending } =
     useChat()
@@ -16,11 +20,15 @@ function App() {
   const language = useLanguage()
   const t = messages[language] ?? messages.fr
   const hasStarted = exchanges.length > 0
-  const [showWip, setShowWip] = useState(true)
+  const [showWip, setShowWip] = useState(!wipSeen)
+  const dismissWip = () => {
+    wipSeen = true
+    setShowWip(false)
+  }
 
   return (
     <div className="flex min-h-svh justify-center bg-chat-bg">
-      {showWip && <ConstructionNotice onClose={() => setShowWip(false)} />}
+      {showWip && <ConstructionNotice onClose={dismissWip} />}
       <div className="fixed top-4 left-4 z-20">
         <PageSwitcher t={t} />
       </div>
