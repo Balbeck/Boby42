@@ -47,9 +47,17 @@ export default function ArchivisteMessage({
 
           return (
             <div className="flex max-w-[85%] flex-col gap-3">
-              <div className="text-sm text-chat-text-muted">
-                <div>{t.documentsFound(mdDocs.length)}</div>
-                <div>{t.subjectsPdfFound(pdfDocs.length)}</div>
+              <div className="flex flex-col gap-1 text-xs text-chat-text-muted">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-medium italic text-chat-text">{t.chatDocsNotionLabel}</span>
+                  <span aria-hidden>·</span>
+                  <span>{t.chatDocsCount(mdDocs.length)}</span>
+                </div>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-medium italic text-chat-text">{t.chatDocsSubjectsLabel}</span>
+                  <span aria-hidden>·</span>
+                  <span>{t.chatDocsCount(pdfDocs.length)}</span>
+                </div>
               </div>
               {[...mdDocs, ...pdfDocs].map((document) => (
                 <ArchivisteDocument
