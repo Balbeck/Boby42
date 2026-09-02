@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import * as labApi from '../../services/labApi'
-import DataGrid from './DataGrid'
+import DataGrid, { ChevronSelect } from './DataGrid'
 import RelationsExplorer from './RelationsExplorer'
 
 /**
@@ -93,26 +93,19 @@ export default function DbViz() {
     <div className="flex w-full max-w-full flex-col gap-5">
       <div className="flex flex-col gap-2">
         <span className="text-xs tracking-wide text-chat-text-muted uppercase">Table</span>
-        <div className="flex flex-wrap gap-2">
-          {tables.map((t) => {
-            const on = t.name === selected
-            return (
-              <button
-                key={t.name}
-                type="button"
-                onClick={() => setSelected(t.name)}
-                aria-pressed={on}
-                className={`flex items-baseline gap-2 rounded-md border px-3 py-1.5 transition-colors ${
-                  on
-                    ? 'border-chat-green bg-chat-green/15 text-chat-text'
-                    : 'border-chat-border bg-chat-surface text-chat-text-muted hover:bg-chat-surface-2 hover:text-chat-text'
-                }`}
-              >
-                <span className="font-mono text-sm">{t.name}</span>
-                <span className="text-xs tabular-nums opacity-60">{t.rowCount}</span>
-              </button>
-            )
-          })}
+        <div className="self-start">
+          <ChevronSelect
+            value={selected ?? ''}
+            onChange={(e) => setSelected(e.target.value || null)}
+            className="max-w-[22rem] py-1.5 pr-9 pl-2.5 font-mono text-sm"
+          >
+            <option value="">— pick a table —</option>
+            {tables.map((t) => (
+              <option key={t.name} value={t.name}>
+                {t.name} — {t.rowCount} rows
+              </option>
+            ))}
+          </ChevronSelect>
         </div>
         {selected && TABLE_HINTS[selected] && (
           <p className="max-w-3xl text-xs leading-relaxed text-chat-text-muted">

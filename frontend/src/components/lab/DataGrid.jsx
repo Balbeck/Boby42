@@ -17,7 +17,10 @@ import { UUID_RE, chipColor, fmtTimestamp } from './format'
  *   • any cell click copies its raw value; the ⧉ in the first column copies the
  *     whole row as JSON — for pasting straight into a SQL WHERE clause
  *   • one free-text filter across all columns; header click sorts (asc → desc →
- *     off), always on the raw value
+ *     off) with a per-column comparator chosen from the column type — long text
+ *     by length, dates chronologically, enums grouped, NULL always last
+ *   • client-side pagination over the fetched rows (the fetch is one capped
+ *     request); page size + prev/next, applied after filter and sort
  *
  * The grid scrolls inside its own box; the page body never scrolls sideways.
  *
@@ -25,28 +28,69 @@ import { UUID_RE, chipColor, fmtTimestamp } from './format'
  */
 
 const ENUMISH = new Set(['role', 'page', 'type', 'error_code', 'language'])
+const PAGE_SIZES = [50, 100, 250, Infinity]
 
 export default function DataGrid({ columns, rows }) {
   const [sort, setSort] = useState({ col: null, dir: null }) // dir: 'asc' | 'desc' | null
   const [query, setQuery] = useState('')
+  const [pageSize, setPageSize] = useState(100)
+  const [page, setPage] = useState(1)
   const [toast, setToast] = useState(null)
   const toastTimer = useRef(0)
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), [])
+
+  // Back to the first page whenever what's being paged changes underneath us
+  // (new table, edited filter, re-sort, resized page). "Adjust state during
+  // render off a previous-value snapshot" — the React-recommended alternative
+  // to a setState-in-effect.
+  const [pagedOver, setPagedOver] = useState({ rows, query, sort, pageSize })
+  if (
+    pagedOver.rows !== rows ||
+    pagedOver.query !== query ||
+    pagedOver.sort !== sort ||
+    pagedOver.pageSize !== pageSize
+  ) {
+    setPagedOver({ rows, query, sort, pageSize })
+    setPage(1)
+  }
+
+  // The comparator + one-word mode hint for the active column. Recomputed only
+  // when the column or the underlying rows change (the length/object scan is one
+  // pass over the fetched rows — cheap at the 1000-row cap).
+  const activeKind = useMemo(() => {
+    if (!sort.col) return null
+    const col = columns.find((c) => c.name === sort.col)
+    return col ? sortKindFor(col, rows) : null
+  }, [sort.col, columns, rows])
 
   const view = useMemo(() => {
     const q = query.trim().toLowerCase()
     let out = q
       ? rows.filter((row) => columns.some((c) => cellText(row[c.name]).toLowerCase().includes(q)))
       : rows
-    if (sort.col && sort.dir) {
+    if (sort.col && sort.dir && activeKind) {
+      const { compare } = activeKind
       out = [...out].sort((a, b) => {
-        const cmp = compare(a[sort.col], b[sort.col])
+        const av = a[sort.col]
+        const bv = b[sort.col]
+        const aE = isEmpty(av)
+        const bE = isEmpty(bv)
+        // NULL / undefined / '' always sort last — not flipped by desc.
+        if (aE || bE) return aE && bE ? 0 : aE ? 1 : -1
+        const cmp = compare(av, bv)
         return sort.dir === 'asc' ? cmp : -cmp
       })
     }
     return out
-  }, [rows, columns, query, sort])
+  }, [rows, columns, query, sort, activeKind])
+
+  const total = view.length
+  const pageCount = pageSize === Infinity ? 1 : Math.max(1, Math.ceil(total / pageSize))
+  const safePage = Math.min(page, pageCount)
+  const start = pageSize === Infinity ? 0 : (safePage - 1) * pageSize
+  const end = pageSize === Infinity ? total : Math.min(total, start + pageSize)
+  const paged = useMemo(() => view.slice(start, end), [view, start, end])
 
   function cycle(name) {
     setSort((s) => {
@@ -80,24 +124,63 @@ export default function DataGrid({ columns, rows }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Filter rows…"
-          className="w-56 rounded-md border border-chat-border bg-chat-surface px-2.5 py-1 text-sm text-chat-text placeholder:text-chat-text-muted focus:border-chat-green focus:outline-none"
+          className="w-56 rounded-md border border-chat-border bg-chat-surface px-2.5 py-1.5 text-sm text-chat-text transition-colors placeholder:text-chat-text-muted focus:border-chat-green focus:outline-none"
         />
         <span className="text-xs text-chat-text-muted tabular-nums">
-          {view.length}
-          {query.trim() && ` / ${rows.length}`} rows
+          <span className="text-chat-text">{total === 0 ? '0' : `${start + 1}–${end}`}</span> of{' '}
+          {total}
+          {query.trim() && ` (filtered from ${rows.length})`}
         </span>
         <span
           role="status"
           aria-live="polite"
           className={`text-xs text-chat-green transition-opacity duration-200 motion-reduce:transition-none ${toast ? 'opacity-100' : 'opacity-0'}`}
         >
-          {toast ?? ' '}
+          {toast ?? ' '}
         </span>
+
+        <div className="ml-auto flex items-center gap-1.5 text-xs text-chat-text-muted">
+          <label className="flex items-center gap-1.5">
+            Rows
+            <ChevronSelect
+              value={pageSize === Infinity ? 'all' : pageSize}
+              onChange={(e) =>
+                setPageSize(e.target.value === 'all' ? Infinity : Number(e.target.value))
+              }
+              className="py-1 pr-7 pl-2 text-xs"
+            >
+              {PAGE_SIZES.map((n) => (
+                <option key={n} value={n === Infinity ? 'all' : n}>
+                  {n === Infinity ? 'all' : n}
+                </option>
+              ))}
+            </ChevronSelect>
+          </label>
+          <button
+            type="button"
+            onClick={() => setPage(safePage - 1)}
+            disabled={safePage <= 1}
+            className="rounded-md border border-chat-border bg-chat-surface px-2 py-1 transition-colors hover:bg-chat-surface-2 hover:text-chat-text disabled:opacity-30 disabled:hover:bg-chat-surface disabled:hover:text-chat-text-muted"
+          >
+            ‹ Prev
+          </button>
+          <span className="px-1 tabular-nums">
+            {safePage} / {pageCount}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage(safePage + 1)}
+            disabled={safePage >= pageCount}
+            className="rounded-md border border-chat-border bg-chat-surface px-2 py-1 transition-colors hover:bg-chat-surface-2 hover:text-chat-text disabled:opacity-30 disabled:hover:bg-chat-surface disabled:hover:text-chat-text-muted"
+          >
+            Next ›
+          </button>
+        </div>
       </div>
 
       <div className="max-h-[70vh] overflow-auto rounded-lg border border-chat-border">
         <table className="min-w-full border-collapse text-left align-top">
-          <thead className="sticky top-0 z-10 bg-chat-surface-2">
+          <thead className="sticky top-0 z-10 bg-chat-surface-2 shadow-[0_4px_12px_-6px_rgba(0,0,0,0.55)]">
             <tr>
               <th className="w-9 border-b border-chat-border px-1" aria-hidden="true" />
               {columns.map((col) => {
@@ -108,17 +191,21 @@ export default function DataGrid({ columns, rows }) {
                     scope="col"
                     aria-sort={on ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
                     onClick={() => cycle(col.name)}
-                    title="Click to sort"
+                    title={
+                      on
+                        ? `Sorted ${sort.dir === 'asc' ? 'ascending' : 'descending'} (${activeKind?.hint}) — click to cycle`
+                        : 'Click to sort'
+                    }
                     className={`cursor-pointer border-b border-chat-border px-2.5 py-2 whitespace-nowrap select-none transition-colors hover:text-chat-text ${
                       on ? 'text-chat-green' : 'text-chat-text-muted'
                     } ${col.numeric ? 'text-right' : 'text-left'}`}
                   >
                     <span className="text-sm font-medium">{col.name}</span>
                     <span aria-hidden="true" className="ml-1 inline-block w-2 text-chat-green">
-                      {on ? (sort.dir === 'asc' ? '▲' : '▼') : ''}
+                      {on ? (sort.dir === 'asc' ? '↑' : '↓') : ''}
                     </span>
                     <span className="mt-0.5 block text-[10px] font-normal lowercase text-chat-text-muted">
-                      {col.type || '—'}
+                      {on && activeKind ? activeKind.hint : shortType(col.type)}
                     </span>
                   </th>
                 )
@@ -126,7 +213,7 @@ export default function DataGrid({ columns, rows }) {
             </tr>
           </thead>
           <tbody>
-            {view.length === 0 && (
+            {total === 0 && (
               <tr>
                 <td
                   colSpan={columns.length + 1}
@@ -136,12 +223,12 @@ export default function DataGrid({ columns, rows }) {
                 </td>
               </tr>
             )}
-            {view.map((row, i) => (
+            {paged.map((row, i) => (
               <tr
-                key={row.id ?? i}
+                key={row.id ?? start + i}
                 className="odd:bg-chat-surface/30 hover:bg-chat-surface-2/50"
               >
-                <td className="border-b border-chat-border/40 px-1 py-1 align-top">
+                <td className="border-b border-chat-border/40 px-1 py-1.5 align-top">
                   <button
                     type="button"
                     title="Copy row as JSON"
@@ -155,7 +242,7 @@ export default function DataGrid({ columns, rows }) {
                 {columns.map((col) => (
                   <td
                     key={col.name}
-                    className={`max-w-[30rem] border-b border-chat-border/40 px-2.5 py-1 align-top text-xs ${
+                    className={`max-w-[30rem] border-b border-chat-border/40 px-2.5 py-1.5 align-top text-xs ${
                       col.numeric ? 'text-right' : 'text-left'
                     }`}
                   >
@@ -277,14 +364,142 @@ function cellText(v) {
   return String(v)
 }
 
-/** Empty sorts after non-empty; dates and numbers numeric, the rest natural-string. */
-function compare(a, b) {
-  const aEmpty = a === null || a === undefined
-  const bEmpty = b === null || b === undefined
-  if (aEmpty && bEmpty) return 0
-  if (aEmpty) return 1
-  if (bEmpty) return -1
-  if (a instanceof Date && b instanceof Date) return a.getTime() - b.getTime()
-  if (typeof a === 'number' && typeof b === 'number') return a - b
-  return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
+/**
+ * A native <select> with a drawn chevron, so it reads as part of the UI instead
+ * of an OS widget. Real select underneath — keyboard and screen-reader intact.
+ *
+ * @param {import('react').SelectHTMLAttributes<HTMLSelectElement>} props
+ */
+export function ChevronSelect({ className = '', children, ...rest }) {
+  return (
+    <span className="relative inline-flex items-center">
+      <select
+        {...rest}
+        className={`cursor-pointer appearance-none rounded-md border border-chat-border bg-chat-surface text-chat-text transition-colors hover:bg-chat-surface-2 focus:border-chat-green focus:outline-none ${className}`}
+      >
+        {children}
+      </select>
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-chat-text-muted"
+      >
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </span>
+  )
+}
+
+// Postgres type strings, trimmed to something readable under a column name.
+const TYPE_SHORT = {
+  'character varying': 'varchar',
+  'timestamp with time zone': 'timestamptz',
+  'timestamp without time zone': 'timestamp',
+  'double precision': 'float8',
+  boolean: 'bool',
+}
+
+/** @param {string} [t] */
+function shortType(t) {
+  if (!t) return '—'
+  if (t.startsWith('enum_')) return 'enum'
+  return TYPE_SHORT[t] ?? t
+}
+
+// ---------------------------------------------------------------------------
+// Per-column sort
+//
+// A column is matched to one "kind" (first entry whose `match` returns true),
+// which carries a `compare(a, b)` for two non-empty values and a one-word `hint`
+// shown in the active header. NULL / undefined / '' are handled by the caller
+// (always last) — a kind never sees them. Adding a kind = adding one entry.
+// ---------------------------------------------------------------------------
+
+const isEmpty = (v) => v === null || v === undefined || v === ''
+
+const byNumber = (keyOf) => (a, b) => keyOf(a) - keyOf(b)
+const byString = (a, b) =>
+  String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
+const byLength = (a, b) => cellText(a).length - cellText(b).length || byString(a, b)
+
+const toEpoch = (v) => (v instanceof Date ? v.getTime() : Date.parse(v))
+const toBool = (v) => (v === true || v === 'true' || v === 't' || v === 1 ? 1 : 0)
+
+/**
+ * @typedef {object} SortKind
+ * @property {string} id
+ * @property {(col: { name: string, type?: string, numeric?: boolean }, ctx: { longest: number, hasObject: boolean }) => boolean} match
+ * @property {(a: unknown, b: unknown) => number} compare
+ * @property {string} hint
+ */
+
+const LONG_TEXT_CHARS = 120
+
+/** @type {SortKind[]} */
+const SORT_KINDS = [
+  { id: 'rating', match: (c) => c.name === 'rating', compare: byNumber(Number), hint: 'low→high' },
+  {
+    id: 'date',
+    match: (c) => (c.type || '').startsWith('timestamp'),
+    compare: byNumber(toEpoch),
+    hint: 'oldest→',
+  },
+  {
+    id: 'boolean',
+    match: (c) => (c.type || '') === 'boolean',
+    compare: byNumber(toBool),
+    hint: 'low→high',
+  },
+  {
+    id: 'json',
+    match: (c, ctx) => /json/.test(c.type || '') || ctx.hasObject,
+    compare: byLength,
+    hint: 'by size',
+  },
+  {
+    id: 'number',
+    match: (c) => c.numeric || /int|numeric|real|double|decimal|serial/.test(c.type || ''),
+    compare: byNumber(Number),
+    hint: 'low→high',
+  },
+  {
+    id: 'enum',
+    match: (c) => (c.type || '').startsWith('enum_') || ENUMISH.has(c.name),
+    compare: byString,
+    hint: 'grouped',
+  },
+  {
+    id: 'longtext',
+    match: (c, ctx) => (c.type || '') === 'text' || ctx.longest > LONG_TEXT_CHARS,
+    compare: byLength,
+    hint: 'by length',
+  },
+]
+
+/** @type {SortKind} */
+const DEFAULT_KIND = { id: 'text', match: () => true, compare: byString, hint: 'A→Z' }
+
+/** One pass over the fetched rows: longest visible value + "any cell is an object". */
+function scanColumn(column, rows) {
+  let longest = 0
+  let hasObject = false
+  for (const row of rows) {
+    const v = row[column.name]
+    if (v === null || v === undefined) continue
+    if (typeof v === 'object' && !(v instanceof Date)) hasObject = true
+    const len = cellText(v).length
+    if (len > longest) longest = len
+  }
+  return { longest, hasObject }
+}
+
+/** @returns {SortKind} */
+function sortKindFor(column, rows) {
+  const ctx = scanColumn(column, rows)
+  return SORT_KINDS.find((k) => k.match(column, ctx)) ?? DEFAULT_KIND
 }
