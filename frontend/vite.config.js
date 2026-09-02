@@ -29,6 +29,9 @@ export default defineConfig({
       // db-viz inspector API. /lab-data shadows no page (/lab is the page), so
       // it proxies plainly like /auth/lab — no bypass.
       '/lab-data': backendTarget,
+      // /lab 🔬 analytics dashboard API. No page at /analytics — plain proxy,
+      // no bypass. Gated backend-side by fastify.verifyLab.
+      '/analytics': backendTarget,
       // Transparent reverse-proxy to Ollama (test tooling, shared-key gated in
       // routes/ollama.js). No page collision — plain proxy; http-proxy streams
       // NDJSON responses through untouched.

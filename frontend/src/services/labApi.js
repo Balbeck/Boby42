@@ -99,3 +99,75 @@ export async function tree(conversationId) {
   if (!response.ok) return null
   return response.json().catch(() => null)
 }
+
+// 🔬 analytics dashboard (GET /analytics/*). Same contract as the db-viz reads:
+// gated backend-side, a non-OK status is an expected outcome (→ null), never a
+// throw; the caller renders an error/empty state.
+
+/** @param {Record<string, string | number>} [params] @returns {string} */
+function qs(params) {
+  const usp = new URLSearchParams()
+  for (const [k, v] of Object.entries(params || {})) {
+    if (v !== undefined && v !== null && v !== '') usp.set(k, String(v))
+  }
+  const s = usp.toString()
+  return s ? `?${s}` : ''
+}
+
+/**
+ * The whole dashboard payload for one window: tiles (range + all-time), daily
+ * series, score histogram, top documents, language + error splits.
+ *
+ * @param {{ from?: string, to?: string }} [range]
+ * @returns {Promise<import('../types/types').AnalyticsOverview | null>}
+ */
+export async function analyticsOverview(range) {
+  const response = await fetch(`${API_URL}/analytics/overview${qs(range)}`, {
+    credentials: 'include',
+  })
+  if (!response.ok) return null
+  return response.json().catch(() => null)
+}
+
+/**
+ * The list of unmatched questions (`no_match` events), newest first, paginated.
+ *
+ * @param {{ from?: string, to?: string, limit?: number, offset?: number, page?: 'chat' | 'archiviste' }} [params]
+ * @returns {Promise<{ items: object[], total: number } | null>}
+ */
+export async function analyticsUnmatched(params) {
+  const response = await fetch(`${API_URL}/analytics/unmatched${qs(params)}`, {
+    credentials: 'include',
+  })
+  if (!response.ok) return null
+  return response.json().catch(() => null)
+}
+
+/**
+ * A page of the admin-wide conversation list.
+ *
+ * @param {{ from?: string, to?: string, limit?: number, offset?: number, page?: 'chat' | 'archiviste' }} [params]
+ * @returns {Promise<{ items: object[], total: number } | null>}
+ */
+export async function analyticsConversations(params) {
+  const response = await fetch(`${API_URL}/analytics/conversations${qs(params)}`, {
+    credentials: 'include',
+  })
+  if (!response.ok) return null
+  return response.json().catch(() => null)
+}
+
+/**
+ * One conversation's full subtree (same shape as `tree()` / GET /lab-data/tree).
+ *
+ * @param {string} id
+ * @returns {Promise<object | null>} null on a bad/unknown id or any non-OK status.
+ */
+export async function analyticsConversation(id) {
+  const response = await fetch(
+    `${API_URL}/analytics/conversations/${encodeURIComponent(id)}`,
+    { credentials: 'include' },
+  )
+  if (!response.ok) return null
+  return response.json().catch(() => null)
+}

@@ -10,17 +10,17 @@ const { sequelize } = require('../models')
  * order). No aggregation, no shaping — that is the separate analytics task.
  *
  * ── Safety ──────────────────────────────────────────────────────────────────
- * The two /lab-data routes ship UNGATED for now (a later task adds
- * `fastify.verifyLab`). Until then this whitelist is the ONLY thing between the
- * routes and the database, so it is load-bearing, not defence-in-depth:
+ * The three /lab-data routes run `{ preHandler: fastify.verifyLab }` — the same
+ * gate as the rest of /lab (404 when unconfigured, 401 without a valid session).
+ * This whitelist is defence-in-depth behind that gate, not the sole safeguard:
  *
  *   ALLOWED = every registered Sequelize model's table  MINUS  `users`
  *
  * `users` holds the /lab login principal — the bcrypt `password_hash` and the
- * live `session_token` — and must never be reachable here. Any table a future
- * model adds shows up automatically; nothing schema-qualified or outside this
- * set is ever accepted. The validated name is the only identifier interpolated
- * into `FROM "<name>"`, and it is always double-quoted.
+ * live `session_token` — and must never be reachable here, gated or not. Any
+ * table a future model adds shows up automatically; nothing schema-qualified or
+ * outside this set is ever accepted. The validated name is the only identifier
+ * interpolated into `FROM "<name>"`, and it is always double-quoted.
  */
 
 const EXCLUDED = new Set(['users']) // bcrypt hash + live session token — never expose

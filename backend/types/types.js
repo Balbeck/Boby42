@@ -196,4 +196,126 @@
  * @property {Object[]} events - `events` rows linked to this conversation
  */
 
+/* ─── /lab 🔬 usage dashboard — services/analytics.service.js ─────────────── */
+
+/**
+ * Counter-tile figures for one window. `overview` returns two of these — a
+ * `range` block for the selected period and an `allTime` block from the same SQL
+ * with an unbounded window.
+ *
+ * @typedef {Object} AnalyticsTotals
+ * @property {number} requests - assistant messages in the window
+ * @property {number} requestsChat
+ * @property {number} requestsArchiviste
+ * @property {number} thumbsUp - `message_feedback.rating = 1`
+ * @property {number} thumbsDown - `message_feedback.rating = -1`
+ * @property {number} noMatch - assistant messages with `document_count = 0`
+ * @property {number | null} noMatchRate - `noMatch / requests`; null when `requests = 0`
+ * @property {number} activeVisitors - distinct `conversations.visitor_id` with an exchange in the window
+ * @property {number} conversations - distinct conversations touched in the window
+ * @property {number | null} avgMessagesPerConversation
+ * @property {number | null} chatLatencyP50 - ms, `percentile_cont` over chat `latency_ms`
+ * @property {number | null} chatLatencyP95 - ms
+ * @property {number | null} chatLatencyMax - ms
+ */
+
+/**
+ * One Paris-local day of a gap-filled series (a day with no traffic is a real
+ * `0` row, never a gap).
+ *
+ * @typedef {Object} DailyVisitorsRow
+ * @property {string} day - `YYYY-MM-DD`
+ * @property {number} active - distinct visitors with an exchange that day
+ * @property {number} new - visitors whose `first_seen_at` is that day
+ */
+
+/**
+ * @typedef {Object} DailyVolumeRow
+ * @property {string} day - `YYYY-MM-DD`
+ * @property {number} total - all assistant messages that day
+ * @property {number} chat
+ * @property {number} archiviste
+ * @property {number} noMatch - `document_count = 0` that day
+ */
+
+/**
+ * @typedef {Object} DailyFeedbackRow
+ * @property {string} day - `YYYY-MM-DD`
+ * @property {number} up
+ * @property {number} down
+ */
+
+/**
+ * One bar of the retrieval-score histogram (15 fixed 0.01-wide bins over
+ * [0.85, 1.00]).
+ *
+ * @typedef {Object} ScoreHistogramBin
+ * @property {number} bucket - 1-based bin index
+ * @property {number} lo - inclusive lower edge
+ * @property {number} hi - exclusive upper edge
+ * @property {number} count - `message_documents` rows in the bin
+ */
+
+/**
+ * @typedef {Object} TopDocumentRow
+ * @property {string} name
+ * @property {'md' | 'pdf' | null} type - null on pre-migration rows
+ * @property {number} count - times returned in the window
+ * @property {number | null} avgScore
+ * @property {string} lastUsedAt - ISO timestamp of the most recent use
+ */
+
+/**
+ * Full body of `GET /analytics/overview`.
+ *
+ * @typedef {Object} AnalyticsOverview
+ * @property {{ from: string, to: string }} window - the resolved window (ISO)
+ * @property {{ range: AnalyticsTotals, allTime: AnalyticsTotals }} totals
+ * @property {{ visitors: DailyVisitorsRow[], volume: DailyVolumeRow[], feedback: DailyFeedbackRow[] }} daily
+ * @property {ScoreHistogramBin[]} scoreHistogram
+ * @property {TopDocumentRow[]} topDocuments
+ * @property {Array<{ language: string, count: number }>} languages
+ * @property {Array<{ code: string, count: number }>} errors - `code = 'ok'` is a NULL `error_code`
+ */
+
+/**
+ * One row of `GET /analytics/unmatched` — a `no_match` event.
+ *
+ * @typedef {Object} UnmatchedQuestionRow
+ * @property {string} id - the `events.id` (as a string)
+ * @property {string | null} question - `payload->>'question'`
+ * @property {string | null} language - `payload->>'language'`
+ * @property {'chat' | 'archiviste' | null} page - the owning conversation's page (LEFT JOIN; null if unlinked)
+ * @property {string} createdAt - ISO timestamp
+ */
+
+/**
+ * Body of `GET /analytics/unmatched`.
+ *
+ * @typedef {Object} UnmatchedQuestionsResponse
+ * @property {UnmatchedQuestionRow[]} items
+ * @property {number} total - rows matching the filter, ignoring limit/offset
+ */
+
+/**
+ * One row of `GET /analytics/conversations` (the admin-wide list).
+ *
+ * @typedef {Object} ConversationListRow
+ * @property {string} id - conversation UUID
+ * @property {'chat' | 'archiviste'} page
+ * @property {string} title
+ * @property {string} createdAt - ISO
+ * @property {string} updatedAt - ISO
+ * @property {number} messageCount - all rows (both roles) in the conversation
+ * @property {boolean} hasNegativeFeedback - any assistant answer in it rated −1
+ */
+
+/**
+ * Body of `GET /analytics/conversations`.
+ *
+ * @typedef {Object} ConversationListResponse
+ * @property {ConversationListRow[]} items
+ * @property {number} total
+ */
+
 module.exports = {}

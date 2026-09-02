@@ -2,19 +2,20 @@ import { useEffect, useState } from 'react'
 import LabLogin from './components/LabLogin'
 import LabTabs from './components/lab/LabTabs'
 import DbViz from './components/lab/DbViz'
+import VizDashboard from './components/lab/VizDashboard'
 import OllamaPanel from './components/lab/OllamaPanel'
 import { logout, me, ollamaKey } from './services/labApi'
 
 /**
  * The /lab page. Stands alone — outside ConversationsProvider and any shell.
  *
- * On mount it asks GET /auth/lab/me: a session → the 3-tab shell below; no
+ * On mount it asks GET /auth/lab/me: a session → the 4-tab shell below; no
  * session (401) or feature disabled (404) → the login popup, unchanged.
  *
- * When authenticated, a slim icon-only tab bar (LabTabs) switches three local
+ * When authenticated, a slim icon-only tab bar (LabTabs) switches four local
  * panels — tabs are component state, not routes:
  *   🌞 connexion  — the greeting + logout (behaviour unchanged)
- *   🔬 viz        — placeholder; reserved home of the future analytics dashboard
+ *   🔬 viz        — the usage dashboard + conversation browser (VizDashboard)
  *   💾 dbviz      — raw read-only view of the interaction-logging tables
  *   💬 ollama     — bare console straight onto the backend's /ollama/* proxy
  *
@@ -77,18 +78,21 @@ export default function LabApp() {
           <OllamaPanel apiKey={proxyKey} />
         </div>
 
+        {tab === 'viz' && (
+          <div className="px-4 pt-20 pb-10">
+            <VizDashboard />
+          </div>
+        )}
+
         {tab === 'dbviz' && (
           <div className="px-4 pt-20 pb-10">
             <DbViz />
           </div>
         )}
 
-        {(tab === 'connexion' || tab === 'viz') && (
+        {tab === 'connexion' && (
           <div className="flex min-h-svh flex-col items-center justify-center gap-3 px-4 text-center">
-            {tab === 'connexion' && <ConnexionPanel onLogout={handleLogout} />}
-            {tab === 'viz' && (
-              <p className="text-chat-text-muted">📉 📈 Visualizations to come 🏞️</p>
-            )}
+            <ConnexionPanel onLogout={handleLogout} />
           </div>
         )}
       </div>

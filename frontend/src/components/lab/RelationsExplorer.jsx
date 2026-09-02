@@ -111,8 +111,15 @@ export default function RelationsExplorer() {
   )
 }
 
-/** @param {{ tree: { conversation: object, visitor: object | null, messages: object[], events: object[] } }} props */
-function Tree({ tree }) {
+/**
+ * The one transcript renderer for a conversation subtree (visitor → messages →
+ * documents / feedback, + events). Exported so the 🔬 tab's ConversationBrowser
+ * reuses it rather than growing a third transcript view — no behaviour change
+ * to the 💾 tab.
+ *
+ * @param {{ tree: { conversation: object, visitor: object | null, messages: object[], events: object[] } }} props
+ */
+export function Tree({ tree }) {
   const { conversation, visitor, messages, events } = tree
 
   return (

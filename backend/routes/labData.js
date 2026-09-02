@@ -5,11 +5,11 @@ const { listTables, readTable, readConversationTree } = require('../services/lab
 // Raw read-only inspector for the /lab db-viz tab. Transport only — the
 // whitelist, the row cap and the SELECT live in services/labData.service.js.
 //
-// UNGATED for now, by decision: this task is display-only. A later dedicated
-// task adds `{ preHandler: fastify.verifyLab }` to both routes and nothing
-// else. Until then the model-derived table whitelist (which drops `users`) in
-// the service is the only safeguard — do not add a cookie check or feature flag
-// here.
+// Gated: every route runs `{ preHandler: fastify.verifyLab }`, so an
+// unconfigured deployment answers 404 and a request without a valid `lab_token`
+// cookie answers 401. The frontend already sends `credentials: 'include'`. The
+// model-derived table whitelist (which drops `users`) in the service stays as
+// defence-in-depth behind the gate.
 //
 // Top-level route file: autoload does not prefix these, so the full paths are
 // declared explicitly (same as routes/chat.js, routes/subjectspdf.js).
@@ -42,19 +42,23 @@ const treeSchema = {
 }
 
 module.exports = async function (fastify, opts) {
-  fastify.get('/lab-data/tables', async function () {
+  fastify.get('/lab-data/tables', { preHandler: fastify.verifyLab }, async function () {
     return listTables()
   })
 
-  fastify.get('/lab-data/tables/:name', { schema: readSchema }, async function (request, reply) {
-    const result = await readTable(request.params.name, { limit: request.query.limit })
-    // null → the name is not in the whitelist (includes `users`).
-    if (!result) return reply.notFound('Unknown table')
-    return result
-  })
+  fastify.get(
+    '/lab-data/tables/:name',
+    { schema: readSchema, preHandler: fastify.verifyLab },
+    async function (request, reply) {
+      const result = await readTable(request.params.name, { limit: request.query.limit })
+      // null → the name is not in the whitelist (includes `users`).
+      if (!result) return reply.notFound('Unknown table')
+      return result
+    }
+  )
 
   // Relations explorer — one conversation with its subtree assembled by FK.
-  fastify.get('/lab-data/tree/:conversationId', { schema: treeSchema }, async function (request, reply) {
+  fastify.get('/lab-data/tree/:conversationId', { schema: treeSchema, preHandler: fastify.verifyLab }, async function (request, reply) {
     const tree = await readConversationTree(request.params.conversationId)
     if (!tree) return reply.notFound('Conversation not found')
     return tree
