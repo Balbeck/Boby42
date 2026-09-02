@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import PersistentNav from '../layout/PersistentNav'
 import { useChat as useChatState } from '../hooks/useChat'
 import { useArchiviste as useArchivisteState } from '../hooks/useArchiviste'
 import { ChatContext, ArchivisteContext } from './conversationsContext'
@@ -25,13 +25,17 @@ export function ConversationsProvider({ children }) {
 
 /**
  * Route de layout : monte `<ConversationsProvider>` une seule fois pour `/chat`
- * et `/archiviste` (via `<Outlet>`), donc l'état survit au passage d'une page à
- * l'autre. `/lab` est une route sœur, hors de ce provider.
+ * et `/archiviste`, donc l'état survit au passage d'une page à l'autre. `/lab`
+ * est une route sœur, hors de ce provider.
+ *
+ * `<PersistentNav>` (qui rend `<Outlet />`) est un enfant, pas ce composant :
+ * il lit `useChat()` / `useArchiviste()`, et un composant ne peut pas consommer
+ * le contexte qu'il rend lui-même.
  */
 export function ConversationsLayout() {
   return (
     <ConversationsProvider>
-      <Outlet />
+      <PersistentNav />
     </ConversationsProvider>
   )
 }

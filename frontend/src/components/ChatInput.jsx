@@ -1,7 +1,13 @@
-import { useState } from 'react'
-
 /**
+ * Champ de saisie **contrôlé** : `value` / `onChange` vivent au-dessus du
+ * router (un brouillon par page, cf. `hooks/useChat.js` / `hooks/useArchiviste.js`),
+ * pour qu'une bascule /chat ↔ /archiviste ne perde pas un message non envoyé.
+ * Chaque page rend ce composant dans deux branches (vide / démarrée) : les deux
+ * lisent et écrivent le même brouillon.
+ *
  * @param {{
+ *   value: string,
+ *   onChange: (value: string) => void,
  *   onSend: (value: string) => void,
  *   onStop?: () => void,
  *   isSending?: boolean,
@@ -11,6 +17,8 @@ import { useState } from 'react'
  * }} props
  */
 export default function ChatInput({
+  value,
+  onChange,
   onSend,
   onStop,
   isSending = false,
@@ -18,13 +26,13 @@ export default function ChatInput({
   placeholder,
   t,
 }) {
-  const [value, setValue] = useState('')
   const canSend = value.trim().length > 0
 
   function handleSend() {
     if (!canSend) return
+    // Le brouillon est vidé par l'appelant (à l'envoi), pas ici : il ne
+    // s'agit plus d'un état local.
     onSend(value)
-    setValue('')
   }
 
   function handleKeyDown(event) {
@@ -40,7 +48,7 @@ export default function ChatInput({
         autoFocus={autoFocus}
         rows={1}
         value={value}
-        onChange={(event) => setValue(event.target.value)}
+        onChange={(event) => onChange(event.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder ?? t.chatInputPlaceholder}
         className="max-h-48 w-full resize-none bg-transparent py-4 pr-14 pl-5 text-chat-text placeholder:text-chat-text-muted focus:outline-none"

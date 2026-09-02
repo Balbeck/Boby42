@@ -1,32 +1,29 @@
-import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
 /**
- * Un document trouvé, replié par défaut. Le contenu n'est chargé (via onExpand)
+ * Un document trouvé, replié par défaut. Le contenu n'est chargé (via onToggle)
  * qu'au premier dépli — jamais rechargé ensuite (doc.loaded reste true).
  * Composant présentational partagé par /archiviste et /chat.
  *
+ * `expanded` est porté par le document lui-même (état des hooks, au-dessus du
+ * router) et non par un `useState` local : un aller-retour /chat ↔ /archiviste
+ * démonte ce composant, et un document déplié doit le rester.
+ *
  * @param {{
  *   document: import('../types/types.js').ArchivisteDocument,
- *   onExpand: () => void,
+ *   onToggle: () => void,
  *   t: object,
  * }} props
  */
-export default function ArchivisteDocument({ document, onExpand, t }) {
-  const [expanded, setExpanded] = useState(false)
-
-  function handleToggle() {
-    const next = !expanded
-    setExpanded(next)
-    if (next) onExpand()
-  }
+export default function ArchivisteDocument({ document, onToggle, t }) {
+  const expanded = document.expanded ?? false
 
   return (
     <div className="rounded-xl border border-chat-border bg-chat-surface">
       <button
         type="button"
-        onClick={handleToggle}
+        onClick={onToggle}
         className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
       >
         <span className="text-sm font-medium text-chat-text">{document.name}</span>

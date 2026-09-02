@@ -72,11 +72,11 @@ function AnimatedText({ text }) {
  *
  * @param {{
  *   documents: import('../types/types.js').ArchivisteDocument[],
- *   onLoadDocument: (doc: import('../types/types.js').ArchivisteDocument) => void,
+ *   onToggleDocument: (doc: import('../types/types.js').ArchivisteDocument) => void,
  *   t: object,
  * }} props
  */
-function DocumentsBlock({ documents, onLoadDocument, t }) {
+function DocumentsBlock({ documents, onToggleDocument, t }) {
   const mdDocs = documents.filter((doc) => doc.type !== 'pdf')
   const pdfDocs = documents.filter((doc) => doc.type === 'pdf')
 
@@ -98,7 +98,7 @@ function DocumentsBlock({ documents, onLoadDocument, t }) {
         <ArchivisteDocument
           key={`${doc.type}:${doc.name}`}
           document={doc}
-          onExpand={() => onLoadDocument(doc)}
+          onToggle={() => onToggleDocument(doc)}
           t={t}
         />
       ))}
@@ -185,7 +185,7 @@ function useGuidedStep(phase, hasDocuments) {
  *   messageId?: string | null,
  *   rating?: -1 | 0 | 1,
  *   onRate?: (rating: -1 | 0 | 1, comment?: string) => void,
- *   onLoadDocument?: (doc: import('../types/types.js').ArchivisteDocument) => void,
+ *   onToggleDocument?: (doc: import('../types/types.js').ArchivisteDocument) => void,
  *   t: object,
  * }} props
  */
@@ -198,7 +198,7 @@ export default function Message({
   messageId,
   rating = 0,
   onRate,
-  onLoadDocument,
+  onToggleDocument,
   t,
 }) {
   const step = useGuidedStep(phase, documents.length > 0)
@@ -214,7 +214,7 @@ export default function Message({
         {step === 'searching' && <AnimatedText text={t.searching} />}
 
         {showDocuments && (
-          <DocumentsBlock documents={documents} onLoadDocument={onLoadDocument} t={t} />
+          <DocumentsBlock documents={documents} onToggleDocument={onToggleDocument} t={t} />
         )}
 
         {step === 'reading' && <AnimatedText text={t.chatReading} />}

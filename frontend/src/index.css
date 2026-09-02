@@ -60,11 +60,23 @@ body {
   animation: page-in 0.4s ease-out;
 }
 
+/* Tiroir des conversations : le panneau glisse depuis la gauche au-dessus d'un
+   fond assombri (le contenu ne bouge pas — voir layout/PersistentNav.jsx). */
+@keyframes drawer-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.drawer-in {
+  animation: drawer-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .overlay-in,
   .card-in,
   .fade-in,
-  .page-in {
+  .page-in,
+  .drawer-in {
     animation: none;
   }
 }

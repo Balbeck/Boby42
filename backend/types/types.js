@@ -318,4 +318,42 @@
  * @property {number} total
  */
 
+/**
+ * One row of `GET /conversations` — the visitor's own history (drawer list).
+ *
+ * @typedef {Object} ConversationSummary
+ * @property {string} id - conversation UUID
+ * @property {'chat' | 'archiviste'} page - the page it belongs to; the drawer navigates there before reopening it
+ * @property {string} title - the first question, truncated
+ * @property {string} updatedAt - ISO
+ * @property {number} messageCount - all rows (both roles) in the conversation
+ */
+
+/**
+ * One message of `GET /conversations/:id`. `rating` is only ever set on an
+ * assistant row; `documents` are **references only, never content** — the
+ * frontend re-fetches each on expand (cross-cutting decision 7).
+ *
+ * @typedef {Object} ConversationMessage
+ * @property {string} id - message UUID (the handle for POST /feedback)
+ * @property {'user' | 'assistant'} role
+ * @property {string} content
+ * @property {string | null} language
+ * @property {string} createdAt - ISO
+ * @property {string | null} errorCode
+ * @property {number | null} documentCount
+ * @property {-1 | 1 | null} rating - current 👍/👎, null when never rated
+ * @property {{ name: string, type: 'md' | 'pdf' | null, url: string | null, score: number | null }[]} documents - in `position` order
+ */
+
+/**
+ * Body of `GET /conversations/:id` — one conversation, ready to re-render.
+ *
+ * @typedef {Object} ConversationDetail
+ * @property {string} id
+ * @property {'chat' | 'archiviste'} page
+ * @property {string} title
+ * @property {ConversationMessage[]} messages - chronological, user row before its answer
+ */
+
 module.exports = {}

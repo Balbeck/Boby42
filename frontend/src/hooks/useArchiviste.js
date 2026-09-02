@@ -1,8 +1,51 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { search, fetchDocument } from '../services/archivisteApi'
 import { sendFeedback } from '../services/feedbackApi'
+import { getConversation } from '../services/historyApi'
+import { readLastConversation, rememberConversation } from '../services/lastConversation'
 
-/** @import { ArchivisteExchange, ArchivisteDocument } from '../types/types.js' */
+/** @import { ArchivisteExchange, ArchivisteDocument, ConversationDetail } from '../types/types.js' */
+
+const PAGE = 'archiviste'
+
+/**
+ * Une conversation lue en base → les échanges de cette page. Même appariement
+ * que côté chat (chaque `user` avec l'`assistant` qui le suit), mais la forme
+ * diffère : ici pas de réponse ni de `phase`, seulement la liste de documents.
+ * Les documents repartent `{ loading: false, loaded: false, expanded: false }` —
+ * leur contenu n'est jamais stocké, il est refetché au dépli.
+ *
+ * @param {ConversationDetail} conversation
+ * @returns {ArchivisteExchange[]}
+ */
+function toExchanges(conversation) {
+  const exchanges = []
+
+  conversation.messages.forEach((message, index) => {
+    if (message.role !== 'user') return
+    const next = conversation.messages[index + 1]
+    const assistant = next && next.role === 'assistant' ? next : null
+
+    exchanges.push({
+      id: assistant?.id ?? message.id,
+      question: message.content,
+      documents: (assistant?.documents ?? []).map((doc) => ({
+        name: doc.name,
+        type: doc.type ?? 'md',
+        url: doc.url,
+        score: doc.score ?? 0,
+        loading: false,
+        loaded: false,
+        expanded: false,
+      })),
+      loading: false,
+      messageId: assistant?.id ?? null,
+      rating: assistant?.rating ?? 0,
+    })
+  })
+
+  return exchanges
+}
 
 /**
  * @param {ArchivisteExchange[]} exchanges
@@ -26,6 +69,9 @@ export function useArchiviste() {
   /** @type {[ArchivisteExchange[], Function]} */
   const [exchanges, setExchanges] = useState([])
   const [isSending, setIsSending] = useState(false)
+  // Unsent input for this page — lifted out of `ChatInput` so a page switch
+  // doesn't drop a half-typed search (same as useChat).
+  const [draft, setDraft] = useState('')
   // The conversation this page's searches belong to (T4). `null` until the
   // first response carries one; kept in a ref too so `sendQuestion` stays
   // referentially stable.
@@ -43,6 +89,8 @@ export function useArchiviste() {
   const sendQuestion = useCallback(async (question, language) => {
     const trimmed = question.trim()
     if (!trimmed) return
+
+    setDraft('')
 
     const id = crypto.randomUUID()
     pendingIdRef.current = id
@@ -63,6 +111,7 @@ export function useArchiviste() {
       if (response.conversationId && response.conversationId !== conversationIdRef.current) {
         conversationIdRef.current = response.conversationId
         setConversationId(response.conversationId)
+        rememberConversation(PAGE, response.conversationId)
       }
       const sorted = [...response.documents]
         .sort((a, b) => b.score - a.score)
@@ -137,6 +186,60 @@ export function useArchiviste() {
   }, [])
 
   /**
+   * Fold / unfold one document. `expanded` lives on the document (not in
+   * `ArchivisteDocument`) so an unfolded row survives a page switch; the first
+   * unfold also triggers the lazy content load.
+   *
+   * @param {string} exchangeId
+   * @param {ArchivisteDocument} doc
+   */
+  const toggleDocument = useCallback(
+    (exchangeId, doc) => {
+      const next = !doc.expanded
+      setExchanges((prev) => patchDocument(prev, exchangeId, doc.name, { expanded: next }))
+      if (next) loadDocument(exchangeId, doc)
+    },
+    [loadDocument],
+  )
+
+  /**
+   * Re-open a stored conversation: fetch it, rebuild this page's exchanges and
+   * adopt its id so the next search threads into it.
+   *
+   * @param {string} id
+   */
+  const loadConversation = useCallback(async (id) => {
+    const conversation = await getConversation(id)
+    setExchanges(toExchanges(conversation))
+    conversationIdRef.current = conversation.id
+    setConversationId(conversation.id)
+    rememberConversation(PAGE, conversation.id)
+  }, [])
+
+  /** Empty the page: a fresh thread, no draft, nothing to restore on refresh. */
+  const startNewConversation = useCallback(() => {
+    abortControllerRef.current?.abort()
+    abortControllerRef.current = null
+    pendingIdRef.current = null
+    setIsSending(false)
+    setExchanges([])
+    setDraft('')
+    conversationIdRef.current = null
+    setConversationId(null)
+    rememberConversation(PAGE, null)
+  }, [])
+
+  // On first mount, re-open the conversation this browser was last on (id only
+  // was persisted; the content comes from the database). Silent on failure.
+  const restoredRef = useRef(false)
+  useEffect(() => {
+    if (restoredRef.current) return
+    restoredRef.current = true
+    const last = readLastConversation(PAGE)
+    if (last) loadConversation(last).catch(() => {})
+  }, [loadConversation])
+
+  /**
    * Optimistic 👍 / 👎 on a search's result list (attached to its assistant
    * message). Flips instantly; a failed request rolls back silently.
    *
@@ -169,6 +272,11 @@ export function useArchiviste() {
     submitFeedback,
     isSending,
     loadDocument,
+    toggleDocument,
+    loadConversation,
+    startNewConversation,
+    draft,
+    setDraft,
     conversationId,
   }
 }

@@ -23,6 +23,9 @@ export default defineConfig({
       // bypass only forwards POST (same trap as '/archiviste/documents'). POST-only,
       // no SPA page collision → plain proxy.
       '/chat/documents': backendTarget,
+      // Visitor history for the drawer (GET only). No page at /conversations —
+      // plain proxy, no bypass.
+      '/conversations': backendTarget,
       // /lab is an SPA page, but the auth API lives under /auth/lab (no page
       // collision) so it proxies plainly — no bypass needed.
       '/auth/lab': backendTarget,

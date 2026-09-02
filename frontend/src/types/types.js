@@ -38,6 +38,7 @@
  * @property {string} [error] - message d'erreur brut si le chargement a échoué
  * @property {boolean} loading
  * @property {boolean} loaded
+ * @property {boolean} [expanded] - replié/déplié ; porté par le document (pas par ArchivisteDocument) pour survivre à une bascule de page
  */
 
 /**
@@ -65,6 +66,42 @@
  * @typedef {Object} FeedbackResponse
  * @property {boolean} ok
  * @property {-1 | 0 | 1} rating - la note désormais enregistrée (0 = retirée)
+ */
+
+/**
+ * Une ligne de `GET /conversations` — l'historique de ce navigateur (tiroir).
+ *
+ * @typedef {Object} ConversationSummary
+ * @property {string} id
+ * @property {'chat' | 'archiviste'} page - page d'origine ; le tiroir y navigue avant de rouvrir
+ * @property {string} title - première question, tronquée
+ * @property {string} updatedAt - ISO
+ * @property {number} messageCount
+ */
+
+/**
+ * Un message de `GET /conversations/:id`.
+ *
+ * @typedef {Object} ConversationMessage
+ * @property {string} id
+ * @property {'user' | 'assistant'} role
+ * @property {string} content
+ * @property {string | null} language
+ * @property {string} createdAt - ISO
+ * @property {string | null} errorCode
+ * @property {number | null} documentCount
+ * @property {-1 | 1 | null} rating
+ * @property {{ name: string, type: 'md' | 'pdf' | null, url: string | null, score: number | null }[]} documents - par `position` ; **références seules**, le contenu est refetché au dépli
+ */
+
+/**
+ * Corps de `GET /conversations/:id` — une conversation prête à réafficher.
+ *
+ * @typedef {Object} ConversationDetail
+ * @property {string} id
+ * @property {'chat' | 'archiviste'} page
+ * @property {string} title
+ * @property {ConversationMessage[]} messages - chronologiques, la question avant sa réponse
  */
 
 export {}

@@ -10,7 +10,7 @@ import FeedbackButtons from './FeedbackButtons'
  *   messageId?: string | null,
  *   rating?: -1 | 0 | 1,
  *   onRate?: (rating: -1 | 0 | 1, comment?: string) => void,
- *   onLoadDocument: (doc: import('../types/types.js').ArchivisteDocument) => void,
+ *   onToggleDocument: (doc: import('../types/types.js').ArchivisteDocument) => void,
  *   t: object,
  * }} props
  */
@@ -22,7 +22,7 @@ export default function ArchivisteMessage({
   messageId,
   rating = 0,
   onRate,
-  onLoadDocument,
+  onToggleDocument,
   t,
 }) {
   return (
@@ -63,7 +63,7 @@ export default function ArchivisteMessage({
                 <ArchivisteDocument
                   key={`${document.type ?? 'md'}:${document.name}`}
                   document={document}
-                  onExpand={() => onLoadDocument(document)}
+                  onToggle={() => onToggleDocument(document)}
                   t={t}
                 />
               ))}

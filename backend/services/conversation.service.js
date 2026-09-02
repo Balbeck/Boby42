@@ -1,5 +1,6 @@
 'use strict'
 
+const { QueryTypes } = require('sequelize')
 const {
   sequelize, Visitor, Conversation, Message, MessageDocument, Event, MessageFeedback
 } = require('../models')
@@ -203,6 +204,126 @@ async function setFeedback({ messageId, anonId, rating, comment }) {
 }
 
 /**
+ * The visitor's own conversations, most recently updated first — what the
+ * frontend drawer lists. Scoped by `anon_id`, so a visitor only ever sees their
+ * own threads (there is no auth; the join *is* the ownership check).
+ *
+ * Raw SQL rather than a Sequelize include: the message count is a correlated
+ * subquery, and the payload is a flat read-only list.
+ *
+ * @param {string | null | undefined} anonId
+ * @param {{ limit?: number }} [opts]
+ * @returns {Promise<import('../types/types').ConversationSummary[]>}
+ */
+async function listConversations (anonId, { limit = 50 } = {}) {
+  const key = String(anonId ?? '').trim() || FALLBACK_ANON_ID
+  const rows = await sequelize.query(
+    `SELECT c."id", c."page", c."title", c."updated_at",
+            (SELECT COUNT(*) FROM "messages" m WHERE m."conversation_id" = c."id") AS message_count
+       FROM "conversations" c
+       JOIN "visitors" v ON v."id" = c."visitor_id"
+      WHERE v."anon_id" = :key
+      ORDER BY c."updated_at" DESC
+      LIMIT :limit`,
+    { type: QueryTypes.SELECT, replacements: { key, limit } }
+  )
+
+  return rows.map((row) => ({
+    id: row.id,
+    page: row.page,
+    title: row.title,
+    updatedAt: row.updated_at,
+    messageCount: Number(row.message_count)
+  }))
+}
+
+/**
+ * One conversation with its messages and their referenced documents, so the
+ * frontend can re-render a past thread.
+ *
+ * Returns `null` when the conversation doesn't exist **or** belongs to another
+ * visitor — the id is a UUID in a system with no auth, so without this join
+ * anyone could enumerate other students' questions. Same "don't confirm it
+ * exists" stance as `setFeedback`; the route maps `null` to a 404.
+ *
+ * Each assistant message carries its current `rating` (LEFT JOIN on
+ * `message_feedback`) and each document its `type` — the restored row needs the
+ * type to pick the markdown renderer or the PDF <iframe>. Document **content**
+ * is never included (cross-cutting decision 7): the frontend re-fetches it
+ * lazily on expand, exactly like a fresh answer.
+ *
+ * @param {string} id
+ * @param {string | null | undefined} anonId
+ * @returns {Promise<import('../types/types').ConversationDetail | null>}
+ */
+async function getConversation (id, anonId) {
+  if (!id || !UUID_RE.test(id)) return null
+  const key = String(anonId ?? '').trim() || FALLBACK_ANON_ID
+
+  const [conversation] = await sequelize.query(
+    `SELECT c."id", c."page", c."title"
+       FROM "conversations" c
+       JOIN "visitors" v ON v."id" = c."visitor_id"
+      WHERE c."id" = :id AND v."anon_id" = :key`,
+    { type: QueryTypes.SELECT, replacements: { id, key } }
+  )
+  if (!conversation) return null
+
+  // Chronological; on a millisecond tie the user row still precedes its answer
+  // (same ordering as readConversationTree — the pairing depends on it).
+  const messages = await sequelize.query(
+    `SELECT m."id", m."role", m."content", m."language", m."created_at", m."error_code",
+            m."document_count", f."rating"
+       FROM "messages" m
+       LEFT JOIN "message_feedback" f ON f."message_id" = m."id"
+      WHERE m."conversation_id" = :id
+      ORDER BY m."created_at" ASC, (m."role" = 'user') DESC
+      LIMIT 1000`,
+    { type: QueryTypes.SELECT, replacements: { id } }
+  )
+
+  const messageIds = messages.map((message) => message.id)
+  let documents = []
+  if (messageIds.length) {
+    documents = await sequelize.query(
+      `SELECT "message_id", "name", "type", "url", "score"
+         FROM "message_documents"
+        WHERE "message_id" IN (:ids)
+        ORDER BY "position" ASC`,
+      { type: QueryTypes.SELECT, replacements: { ids: messageIds } }
+    )
+  }
+
+  const docsByMessage = new Map()
+  for (const doc of documents) {
+    if (!docsByMessage.has(doc.message_id)) docsByMessage.set(doc.message_id, [])
+    docsByMessage.get(doc.message_id).push({
+      name: doc.name,
+      type: doc.type,
+      url: doc.url,
+      score: doc.score
+    })
+  }
+
+  return {
+    id: conversation.id,
+    page: conversation.page,
+    title: conversation.title,
+    messages: messages.map((message) => ({
+      id: message.id,
+      role: message.role,
+      content: message.content,
+      language: message.language,
+      createdAt: message.created_at,
+      errorCode: message.error_code,
+      documentCount: message.document_count,
+      rating: message.rating ?? null,
+      documents: docsByMessage.get(message.id) || []
+    }))
+  }
+}
+
+/**
  * @param {string} question
  * @returns {string}
  */
@@ -213,4 +334,11 @@ function buildTitle(question) {
   return clean.slice(0, TITLE_MAX - 1).trimEnd() + '…'
 }
 
-module.exports = { ensureVisitor, recordExchange, logEvent, setFeedback }
+module.exports = {
+  ensureVisitor,
+  recordExchange,
+  logEvent,
+  setFeedback,
+  listConversations,
+  getConversation
+}

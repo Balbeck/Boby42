@@ -2,12 +2,10 @@ import { useState } from 'react'
 import ChatInput from './components/ChatInput'
 import Disclaimer from './components/Disclaimer'
 import Message from './components/Message'
-import PageSwitcher from './components/PageSwitcher'
-import LanguageSwitcher from './components/LanguageSwitcher'
 import ConstructionNotice from './components/ConstructionNotice'
 import { useAutoScroll } from './hooks/useAutoScroll'
 import { useChat } from './state/conversationsContext'
-import { messages, useLanguage, setLanguage } from './i18n'
+import { messages, useLanguage } from './i18n'
 import { withNotionLink } from './notionLink'
 
 // Vu une seule fois par chargement de page : le flag survit aux remontages de
@@ -15,8 +13,16 @@ import { withNotionLink } from './notionLink'
 let wipSeen = false
 
 function App() {
-  const { exchanges, sendQuestion, stopGeneration, submitFeedback, loadDocument, isSending } =
-    useChat()
+  const {
+    exchanges,
+    sendQuestion,
+    stopGeneration,
+    submitFeedback,
+    toggleDocument,
+    draft,
+    setDraft,
+    isSending,
+  } = useChat()
   const { containerRef, bottomRef } = useAutoScroll()
   const language = useLanguage()
   const t = messages[language] ?? messages.fr
@@ -30,12 +36,6 @@ function App() {
   return (
     <div className="flex min-h-svh justify-center bg-chat-bg">
       {showWip && <ConstructionNotice onClose={dismissWip} />}
-      <div className="fixed top-4 left-4 z-20">
-        <PageSwitcher t={t} />
-      </div>
-      <div className="fixed top-4 right-4 z-20">
-        <LanguageSwitcher language={language} onChange={setLanguage} />
-      </div>
       <div className="page-in flex w-full max-w-2xl flex-col px-4">
         {!hasStarted && (
           <div className="relative flex-1">
@@ -44,6 +44,8 @@ function App() {
             </h1>
             <div className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2">
               <ChatInput
+                value={draft}
+                onChange={setDraft}
                 onSend={(question) => sendQuestion(question, language)}
                 onStop={stopGeneration}
                 isSending={isSending}
@@ -69,12 +71,14 @@ function App() {
                   messageId={exchange.messageId}
                   rating={exchange.rating}
                   onRate={(rating, comment) => submitFeedback(exchange.id, rating, comment)}
-                  onLoadDocument={(doc) => loadDocument(exchange.id, doc)}
+                  onToggleDocument={(doc) => toggleDocument(exchange.id, doc)}
                   t={t}
                 />
               ))}
               <div className="pt-8">
                 <ChatInput
+                  value={draft}
+                  onChange={setDraft}
                   onSend={(question) => sendQuestion(question, language)}
                   onStop={stopGeneration}
                   isSending={isSending}

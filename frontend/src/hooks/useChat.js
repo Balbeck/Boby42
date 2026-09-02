@@ -1,8 +1,58 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { sendMessage, fetchChatDocuments, fetchDocumentContent } from '../services/chatApi'
 import { sendFeedback } from '../services/feedbackApi'
+import { getConversation } from '../services/historyApi'
+import { readLastConversation, rememberConversation } from '../services/lastConversation'
 
-/** @import { Exchange, ArchivisteDocument } from '../types/types.js' */
+/** @import { Exchange, ArchivisteDocument, ConversationDetail } from '../types/types.js' */
+
+const PAGE = 'chat'
+
+/**
+ * Une conversation lue en base → les échanges que la page rend déjà. Les
+ * messages arrivent à plat et chronologiques : chaque `user` est apparié au
+ * `assistant` qui le suit.
+ *
+ * Deux points non négociables : les documents repartent
+ * `{ loading: false, loaded: false, expanded: false }` — leur contenu n'est
+ * jamais stocké et sera refetché au dépli, exactement comme après une réponse
+ * fraîche ; et l'échange est marqué **`phase: 'done'`**, sinon la machine à
+ * étapes de `Message.jsx` afficherait « je cherche… » sous une question
+ * répondue il y a trois jours.
+ *
+ * @param {ConversationDetail} conversation
+ * @returns {Exchange[]}
+ */
+function toExchanges(conversation) {
+  const exchanges = []
+
+  conversation.messages.forEach((message, index) => {
+    if (message.role !== 'user') return
+    const next = conversation.messages[index + 1]
+    const assistant = next && next.role === 'assistant' ? next : null
+
+    exchanges.push({
+      id: assistant?.id ?? message.id,
+      question: message.content,
+      answer: assistant?.content ?? '',
+      documents: (assistant?.documents ?? []).map((doc) => ({
+        name: doc.name,
+        type: doc.type ?? 'md',
+        url: doc.url,
+        score: doc.score ?? 0,
+        loading: false,
+        loaded: false,
+        expanded: false,
+      })),
+      loading: false,
+      phase: 'done',
+      messageId: assistant?.id ?? null,
+      rating: assistant?.rating ?? 0,
+    })
+  })
+
+  return exchanges
+}
 
 /**
  * Patch one document (matched by type + name) on one exchange. Copied from
@@ -32,6 +82,10 @@ export function useChat() {
   /** @type {[Exchange[], Function]} */
   const [exchanges, setExchanges] = useState([])
   const [isSending, setIsSending] = useState(false)
+  // Unsent input for this page. Lifted out of `ChatInput` so a /chat ↔
+  // /archiviste switch (which unmounts the page) doesn't drop a half-typed
+  // question; both branches of the page render the same value.
+  const [draft, setDraft] = useState('')
   // The conversation this page's exchanges belong to (T4). `null` until the
   // first response comes back with one. Kept in a ref too so `sendQuestion`
   // stays referentially stable (same reason as `pendingIdRef`).
@@ -49,6 +103,8 @@ export function useChat() {
   const sendQuestion = useCallback(async (question, language) => {
     const trimmed = question.trim()
     if (!trimmed) return
+
+    setDraft('')
 
     const id = crypto.randomUUID()
     pendingIdRef.current = id
@@ -120,6 +176,7 @@ export function useChat() {
       if (response.conversationId && response.conversationId !== conversationIdRef.current) {
         conversationIdRef.current = response.conversationId
         setConversationId(response.conversationId)
+        rememberConversation(PAGE, response.conversationId)
       }
       setExchanges((prev) =>
         prev.map((exchange) =>
@@ -199,6 +256,65 @@ export function useChat() {
   }, [])
 
   /**
+   * Fold / unfold one matched document. `expanded` lives on the document (not in
+   * `ArchivisteDocument`) so an unfolded row survives a page switch; the first
+   * unfold also triggers the lazy content load.
+   *
+   * @param {string} exchangeId
+   * @param {ArchivisteDocument} doc
+   */
+  const toggleDocument = useCallback(
+    (exchangeId, doc) => {
+      const next = !doc.expanded
+      setExchanges((prev) =>
+        patchDocument(prev, exchangeId, doc.type, doc.name, { expanded: next }),
+      )
+      if (next) loadDocument(exchangeId, doc)
+    },
+    [loadDocument],
+  )
+
+  /**
+   * Re-open a stored conversation: fetch it, rebuild this page's exchanges from
+   * it and adopt its id, so the next question threads into the same
+   * conversation. Rejects like any fetch — the caller decides whether that is
+   * worth showing (the silent restore below decides it isn't).
+   *
+   * @param {string} id
+   */
+  const loadConversation = useCallback(async (id) => {
+    const conversation = await getConversation(id)
+    setExchanges(toExchanges(conversation))
+    conversationIdRef.current = conversation.id
+    setConversationId(conversation.id)
+    rememberConversation(PAGE, conversation.id)
+  }, [])
+
+  /** Empty the page: a fresh thread, no draft, nothing to restore on refresh. */
+  const startNewConversation = useCallback(() => {
+    abortControllerRef.current?.abort()
+    abortControllerRef.current = null
+    pendingIdRef.current = null
+    setIsSending(false)
+    setExchanges([])
+    setDraft('')
+    conversationIdRef.current = null
+    setConversationId(null)
+    rememberConversation(PAGE, null)
+  }, [])
+
+  // On first mount, re-open the conversation this browser was last on. Only the
+  // id was persisted — the content comes from the database. A deleted row or an
+  // unreachable backend leaves the page empty, silently.
+  const restoredRef = useRef(false)
+  useEffect(() => {
+    if (restoredRef.current) return
+    restoredRef.current = true
+    const last = readLastConversation(PAGE)
+    if (last) loadConversation(last).catch(() => {})
+  }, [loadConversation])
+
+  /**
    * Optimistic 👍 / 👎 on an exchange's answer. The rating flips instantly;
    * a failed request rolls it back silently (no dialog).
    *
@@ -224,5 +340,18 @@ export function useChat() {
     }
   }, [])
 
-  return { exchanges, sendQuestion, stopGeneration, submitFeedback, loadDocument, isSending, conversationId }
+  return {
+    exchanges,
+    sendQuestion,
+    stopGeneration,
+    submitFeedback,
+    loadDocument,
+    toggleDocument,
+    loadConversation,
+    startNewConversation,
+    draft,
+    setDraft,
+    isSending,
+    conversationId,
+  }
 }
