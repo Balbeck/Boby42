@@ -10,6 +10,7 @@ import TopDocuments from './TopDocuments'
 import Breakdowns from './Breakdowns'
 import UnmatchedQuestions from './UnmatchedQuestions'
 import ConversationBrowser from './ConversationBrowser'
+import VisitorExplorer from './VisitorExplorer'
 
 const ERR = 'text-[#cf9186]'
 
@@ -118,6 +119,11 @@ export default function VizDashboard() {
       <section className="flex flex-col gap-3">
         <SectionLabel>Browse</SectionLabel>
         <ConversationBrowser />
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <SectionLabel>By visitor</SectionLabel>
+        <VisitorExplorer />
       </section>
     </div>
   )
