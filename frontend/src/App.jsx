@@ -8,8 +8,9 @@ import { useChat } from './state/conversationsContext'
 import { messages, useLanguage } from './i18n'
 import { withNotionLink } from './notionLink'
 
-// Vu une seule fois par chargement de page : le flag survit aux remontages de
-// <App> (bascule /chat ↔ /archiviste) mais est remis à zéro par un vrai reload.
+// Ouverte une seule fois par chargement de page, au tout premier envoi d'une
+// question. Le flag survit aux remontages de <App> (bascule /chat ↔ /archiviste)
+// mais est remis à zéro par un vrai reload.
 let wipSeen = false
 
 function App() {
@@ -27,10 +28,14 @@ function App() {
   const language = useLanguage()
   const t = messages[language] ?? messages.fr
   const hasStarted = exchanges.length > 0
-  const [showWip, setShowWip] = useState(!wipSeen)
-  const dismissWip = () => {
-    wipSeen = true
-    setShowWip(false)
+  const [showWip, setShowWip] = useState(false)
+  const dismissWip = () => setShowWip(false)
+  const handleSend = (question) => {
+    if (!wipSeen) {
+      wipSeen = true
+      setShowWip(true)
+    }
+    sendQuestion(question, language, t.chatNotFound)
   }
 
   return (
@@ -49,7 +54,7 @@ function App() {
               <ChatInput
                 value={draft}
                 onChange={setDraft}
-                onSend={(question) => sendQuestion(question, language, t.chatNotFound)}
+                onSend={handleSend}
                 onStop={stopGeneration}
                 isSending={isSending}
                 autoFocus
@@ -82,7 +87,7 @@ function App() {
                 <ChatInput
                   value={draft}
                   onChange={setDraft}
-                  onSend={(question) => sendQuestion(question, language, t.chatNotFound)}
+                  onSend={handleSend}
                   onStop={stopGeneration}
                   isSending={isSending}
                   autoFocus
