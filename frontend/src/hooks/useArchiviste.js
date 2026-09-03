@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef } from 'react'
 import { search, fetchDocument } from '../services/archivisteApi'
-import { sendFeedback } from '../services/feedbackApi'
-import { getConversation } from '../services/historyApi'
 import { useSendQueue } from './useSendQueue'
+import { useConversationBase } from './useConversationBase'
 
-/** @import { ArchivisteExchange, ArchivisteDocument, ConversationDetail, Language } from '../types/types.js' */
+/** @import { ArchivisteExchange, ConversationDetail, Language } from '../types/types.js' */
 
 /**
  * Une conversation lue en base → les échanges de cette page. Même appariement
@@ -12,6 +11,10 @@ import { useSendQueue } from './useSendQueue'
  * diffère : ici pas de réponse ni de `phase`, seulement la liste de documents.
  * Les documents repartent `{ loading: false, loaded: false, expanded: false }` —
  * leur contenu n'est jamais stocké, il est refetché au dépli.
+ *
+ * Ce sont exactement les champs `answer` / `phase` en moins qui séparent ce
+ * `toExchanges` de celui de `useChat.js` — d'où le passage en paramètre à
+ * `useConversationBase`.
  *
  * @param {ConversationDetail} conversation
  * @returns {ArchivisteExchange[]}
@@ -49,34 +52,26 @@ function toExchanges(conversation) {
   return exchanges
 }
 
-/**
- * Patch un document (apparié par type **et** nom) d'un échange. Même
- * appariement que `useChat.js` : une recherche fusionne les deux magasins et
- * `ArchivisteMessage` clé ses lignes par `` `${type}:${name}` ``, donc un `md`
- * et un `pdf` de même nom peuvent coexister à l'écran — sur le nom seul,
- * déplier l'un déplierait les deux et le markdown du premier serait écrit dans
- * les deux.
- *
- * @param {ArchivisteExchange[]} exchanges
- * @param {string} exchangeId
- * @param {'md' | 'pdf'} docType
- * @param {string} docName
- * @param {Partial<ArchivisteDocument>} patch
- */
-function patchDocument(exchanges, exchangeId, docType, docName, patch) {
-  return exchanges.map((exchange) => {
-    if (exchange.id !== exchangeId) return exchange
-    return {
-      ...exchange,
-      documents: exchange.documents.map((doc) =>
-        doc.type === docType && doc.name === docName ? { ...doc, ...patch } : doc,
-      ),
-    }
-  })
-}
-
 export function useArchiviste() {
-  const [exchanges, setExchanges] = useState(/** @type {ArchivisteExchange[]} */ ([]))
+  // Conversation-UI plumbing shared with `useChat` (exchange list + ref mirror,
+  // draft, conversation id, per-doc lazy loading, feedback, history reopening).
+  // Everything below — `sendQuestion`, the send queue, the abort refs,
+  // `stopGeneration`, the queue-and-abort half of `startNewConversation` —
+  // stays here because it knows how this page fetches. See useConversationBase.js.
+  const {
+    exchanges,
+    setExchanges,
+    draft,
+    setDraft,
+    conversationId,
+    conversationIdRef,
+    adoptConversationId,
+    submitFeedback,
+    toggleDocument,
+    loadConversation,
+    reset,
+  } = useConversationBase({ fetchDocumentContent: fetchDocument, toExchanges })
+
   // Un envoi en vol plus au plus un en attente (F5), même primitive que
   // `useChat`. `isSending` est **dérivé** de la profondeur de la file : elle
   // possède déjà cette information, deux sources de vérité divergeraient.
@@ -85,22 +80,8 @@ export function useArchiviste() {
   const { depth, isBusy, isFull, enqueue, clear } = useSendQueue()
   const isSending = depth > 0
   const isQueueFull = depth >= 2
-  // Unsent input for this page — lifted out of `ChatInput` so a page switch
-  // doesn't drop a half-typed search (same as useChat).
-  const [draft, setDraft] = useState('')
-  // The conversation this page's searches belong to (T4). `null` until the
-  // first response carries one; kept in a ref too so `sendQuestion` stays
-  // referentially stable.
-  const [conversationId, setConversationId] = useState(/** @type {string | null} */ (null))
-  const conversationIdRef = useRef(/** @type {string | null} */ (null))
   const abortControllerRef = useRef(/** @type {AbortController | null} */ (null))
   const pendingIdRef = useRef(/** @type {string | null} */ (null))
-  // Mirror of `exchanges` so `submitFeedback` can read the current messageId /
-  // rating without a stale closure and without depending on `exchanges`.
-  const exchangesRef = useRef(exchanges)
-  useEffect(() => {
-    exchangesRef.current = exchanges
-  }, [exchanges])
 
   /**
    * @param {string} question
@@ -155,10 +136,7 @@ export function useArchiviste() {
         signal: controller.signal,
         conversationId: conversationIdRef.current,
       })
-      if (response.conversationId && response.conversationId !== conversationIdRef.current) {
-        conversationIdRef.current = response.conversationId
-        setConversationId(response.conversationId)
-      }
+      adoptConversationId(response.conversationId)
       const sorted = [...response.documents]
         .sort((a, b) => b.score - a.score)
         .map((doc) => ({ ...doc, loading: false, loaded: false }))
@@ -191,7 +169,7 @@ export function useArchiviste() {
       }
     }
     })
-  }, [enqueue, isBusy, isFull])
+  }, [adoptConversationId, conversationIdRef, enqueue, isBusy, isFull, setDraft, setExchanges])
 
   /**
    * Un stop est un stop : il annule la recherche en cours **et** abandonne
@@ -207,115 +185,19 @@ export function useArchiviste() {
     )
     pendingIdRef.current = null
     abortControllerRef.current = null
-  }, [clear])
+  }, [clear, setExchanges])
 
   /**
-   * @param {string} exchangeId
-   * @param {ArchivisteDocument} doc
+   * Empty the page: a fresh thread, no draft. Aborts anything in flight and
+   * clears the queue, then hands the state reset to `useConversationBase`.
    */
-  const loadDocument = useCallback(
-    async (/** @type {string} */ exchangeId, /** @type {ArchivisteDocument} */ doc) => {
-    if (doc.loaded || doc.loading) return
-
-    // PDFs aren't fetched as JSON — the <iframe> loads doc.url itself. Just mark
-    // it loaded so the no-op guard above holds on further expands.
-    if (doc.type === 'pdf') {
-      setExchanges((prev) => patchDocument(prev, exchangeId, doc.type, doc.name, { loaded: true }))
-      return
-    }
-
-    setExchanges((prev) => patchDocument(prev, exchangeId, doc.type, doc.name, { loading: true }))
-
-    try {
-      const { content } = await fetchDocument(doc.url)
-      setExchanges((prev) =>
-        patchDocument(prev, exchangeId, doc.type, doc.name, { content, loading: false, loaded: true }),
-      )
-    } catch (err) {
-      setExchanges((prev) =>
-        patchDocument(prev, exchangeId, doc.type, doc.name, {
-          loading: false,
-          error: /** @type {Error} */ (err).message,
-        }),
-      )
-    }
-  }, [])
-
-  /**
-   * Fold / unfold one document. `expanded` lives on the document (not in
-   * `ArchivisteDocument`) so an unfolded row survives a page switch; the first
-   * unfold also triggers the lazy content load.
-   *
-   * @param {string} exchangeId
-   * @param {ArchivisteDocument} doc
-   */
-  const toggleDocument = useCallback(
-    (/** @type {string} */ exchangeId, /** @type {ArchivisteDocument} */ doc) => {
-      const next = !doc.expanded
-      setExchanges((prev) =>
-        patchDocument(prev, exchangeId, doc.type, doc.name, { expanded: next }),
-      )
-      if (next) loadDocument(exchangeId, doc)
-    },
-    [loadDocument],
-  )
-
-  /**
-   * Re-open a conversation on demand (the history drawer, when AUTH is on):
-   * fetch it, rebuild this page's exchanges and adopt its id so the next search
-   * threads into it. Nothing is persisted — a refresh always starts empty.
-   *
-   * @param {string} id
-   */
-  const loadConversation = useCallback(async (/** @type {string} */ id) => {
-    const conversation = await getConversation(id)
-    setExchanges(toExchanges(conversation))
-    conversationIdRef.current = conversation.id
-    setConversationId(conversation.id)
-  }, [])
-
-  /** Empty the page: a fresh thread, no draft. */
   const startNewConversation = useCallback(() => {
     abortControllerRef.current?.abort()
     clear()
     abortControllerRef.current = null
     pendingIdRef.current = null
-    setExchanges([])
-    setDraft('')
-    conversationIdRef.current = null
-    setConversationId(null)
-  }, [clear])
-
-  /**
-   * Optimistic 👍 / 👎 on a search's result list (attached to its assistant
-   * message). Flips instantly; a failed request rolls back silently.
-   *
-   * @param {string} exchangeId
-   * @param {-1 | 0 | 1} rating
-   * @param {string} [comment] - only sent with a -1
-   */
-  const submitFeedback = useCallback(
-    async (
-      /** @type {string} */ exchangeId,
-      /** @type {-1 | 0 | 1} */ rating,
-      /** @type {string | undefined} */ comment,
-    ) => {
-    const exchange = exchangesRef.current.find((e) => e.id === exchangeId)
-    if (!exchange || !exchange.messageId) return
-
-    const previousRating = exchange.rating ?? 0
-    setExchanges((prev) =>
-      prev.map((e) => (e.id === exchangeId ? { ...e, rating } : e)),
-    )
-
-    try {
-      await sendFeedback(exchange.messageId, rating, comment)
-    } catch {
-      setExchanges((prev) =>
-        prev.map((e) => (e.id === exchangeId ? { ...e, rating: previousRating } : e)),
-      )
-    }
-  }, [])
+    reset()
+  }, [clear, reset])
 
   return {
     exchanges,
