@@ -29,6 +29,9 @@ function ArchivisteApp() {
           <div className="relative flex-1">
             <div className="absolute top-[25%] left-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center">
               <h1 className="text-3xl font-medium text-chat-text">{t.archivisteTitle}</h1>
+              <Disclaimer>
+                <span className="text-white/75">{t.archivisteTagline}</span>
+              </Disclaimer>
             </div>
             <div className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2">
               <ChatInput

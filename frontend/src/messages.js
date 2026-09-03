@@ -9,10 +9,13 @@ export const NOTION_RTFM_URL = 'https://ft42.notion.site/rtfm-stud'
 export const messages = {
   fr: {
     chatGreeting: '🎋 Bonjour',
+    chatTagline: 'Une question sur l\'administratif et les projets de 42.',
+    chatTaglineSub:
+      'Une bourse, un blackhole, c\'est quoi minishell ? Demande, je source mes réponses.',
     chatInputPlaceholder: 'Comment puis je vous aider ?',
     chatDisclaimer:
-      'Boby42 est un assistant administratif qui répond à partir du RTFM - Notion du Bocal.\nPour l\'instant, seuls les sujets du Old Common Core et de la branche Machine Learning sont indexés.\nIl est encore en formation et peut se tromper - Vérifiez ce qu\'il vous conte 🤖 !',
-    chatDisclaimerNotion: 'RTFM - Notion du Bocal',
+      'Deux sources indexées : RTFM - Notion (complet)\net sujets de projets 42 (Ancien Tronc Commun + branche Machine Learning). Le reste arrive.',
+    chatDisclaimerNotion: 'RTFM - Notion',
     intro: 'Laissez-moi voir ce que je peux faire',
     searching: "Je consulte la base documentaire de l'école",
     chatReading: 'Je lis les documents et je prépare ma réponse',
@@ -20,9 +23,11 @@ export const messages = {
     chatDocsSubjectsLabel: 'Sujets Projet 42',
     chatDocsCount: (n) => `${n} document${n > 1 ? 's' : ''} trouvé${n > 1 ? 's' : ''}`,
     archivisteTitle: '🕵️‍♂️ Archiviste 42',
+    archivisteTagline:
+      'Décris ce que tu cherches, je te renvoie les documents classés par pertinence.',
     archivisteInputPlaceholder: 'Quels documents souhaitez-vous ?',
     archivisteDisclaimer:
-      'Je fouille les docs administratifs du RTFM - Notion, tenus à jour par le Bocal de 42 Paris 📚\nPour l\'instant, seuls les sujets du Old Common Core et de la branche Machine Learning sont indexés.',
+      'Deux sources indexées : RTFM - Notion (complet)\net sujets de projets 42 (Ancien Tronc Commun + branche Machine Learning). Le reste arrive.',
     archivisteDisclaimerNotion: 'RTFM - Notion',
     archivisteSearching: "Je consulte la base documentaire de l'école...",
     documentsFound: (n) => `${n} document${n > 1 ? 's' : ''} trouvé${n > 1 ? 's' : ''} dans le Notion`,
@@ -51,10 +56,12 @@ export const messages = {
   },
   en: {
     chatGreeting: '🎋 Bonjour',
+    chatTagline: "Any question about 42's admin and projects.",
+    chatTaglineSub: 'Grant, blackhole, what is minishell? Just ask — I source my answers.',
     chatInputPlaceholder: 'How can I help you?',
     chatDisclaimer:
-      "Boby42 is an administrative assistant answering from the Bocal's RTFM - Notion.\nFor now, only the Old Common Core and Machine Learning branch subjects are indexed.\nHe is still in training and can be wrong — double-check what he tells you 🤖 !",
-    chatDisclaimerNotion: "Bocal's RTFM - Notion",
+      'Two indexed sources: RTFM - Notion (complete)\nand 42 project subjects (Old Common Core + Machine Learning branch). The rest is coming.',
+    chatDisclaimerNotion: 'RTFM - Notion',
     intro: 'Let me see what I can do',
     searching: "Searching the school's document base",
     chatReading: 'Reading the documents and writing my answer',
@@ -62,9 +69,10 @@ export const messages = {
     chatDocsSubjectsLabel: '42 Project Subjects',
     chatDocsCount: (n) => `${n} document${n === 1 ? '' : 's'} found`,
     archivisteTitle: '🕵️‍♂️ 42 Archivist',
+    archivisteTagline: 'Describe what you need, I return the matching documents ranked by relevance.',
     archivisteInputPlaceholder: 'Which documents are you looking for?',
     archivisteDisclaimer:
-      "I search the administrative RTFM - Notion docs, kept up to date by 42 Paris's Bocal 📚\nFor now, only the Old Common Core and Machine Learning branch subjects are indexed.",
+      'Two indexed sources: RTFM - Notion (complete)\nand 42 project subjects (Old Common Core + Machine Learning branch). The rest is coming.',
     archivisteDisclaimerNotion: 'RTFM - Notion',
     archivisteSearching: "Searching the school's document base...",
     documentsFound: (n) => `${n} document${n > 1 ? 's' : ''} found in Notion`,
