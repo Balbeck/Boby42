@@ -256,7 +256,6 @@ export function useArchiviste() {
     stopGeneration,
     submitFeedback,
     isSending,
-    loadDocument,
     toggleDocument,
     loadConversation,
     startNewConversation,

@@ -9,10 +9,10 @@ import { useEffect, useRef } from 'react'
  *   onClose: () => void,
  *   children: import('react').ReactNode,
  *   label?: string,
- *   closeLabel?: string,
+ *   closeLabel: string,
  * }} props
  */
-export default function Modal({ onClose, children, label, closeLabel = 'Fermer' }) {
+export default function Modal({ onClose, children, label, closeLabel }) {
   const closeRef = useRef(null)
 
   useEffect(() => {

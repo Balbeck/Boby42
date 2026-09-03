@@ -60,7 +60,7 @@ function App() {
                 autoFocus
                 t={t}
               />
-              <Disclaimer>{withNotionLink(t.chatDisclaimer, t.chatDisclaimerNotion)}</Disclaimer>
+              <Disclaimer>{withNotionLink(t.chatDisclaimer, t.notionLinkLabel)}</Disclaimer>
             </div>
           </div>
         )}
@@ -93,7 +93,7 @@ function App() {
                   autoFocus
                   t={t}
                 />
-                <Disclaimer>{withNotionLink(t.chatDisclaimer, t.chatDisclaimerNotion)}</Disclaimer>
+                <Disclaimer>{withNotionLink(t.chatDisclaimer, t.notionLinkLabel)}</Disclaimer>
               </div>
             </div>
             <div ref={bottomRef} />

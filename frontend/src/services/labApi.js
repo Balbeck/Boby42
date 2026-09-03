@@ -55,11 +55,11 @@ export async function ollamaKey() {
   return body?.key ?? null
 }
 
-// db-viz inspector (GET /lab-data/*). Same contract as me(): a non-OK status is
-// an expected outcome — returned as null, never thrown — and the caller renders
-// an error state. These routes are ungated for now; the cookie still rides
-// along (credentials: 'include') so they keep working once a later task gates
-// them.
+// db-viz inspector (GET /lab-data/*). All three are gated backend-side by
+// fastify.verifyLab, which is why the cookie rides along (credentials:
+// 'include'). Same contract as me(): a non-OK status — 401 without a session,
+// 404 when the gate is unconfigured — is an expected outcome, returned as null
+// and never thrown; the caller renders an error state.
 
 /**
  * @returns {Promise<Array<{ name: string, columns: object[], rowCount: number }> | null>}
@@ -119,7 +119,9 @@ function qs(params) {
  * series, score histogram, top documents, language + error splits.
  *
  * @param {{ from?: string, to?: string }} [range]
- * @returns {Promise<import('../types/types').AnalyticsOverview | null>}
+ * @returns {Promise<object | null>} the payload's exact shape lives in
+ *   `backend/routes/analytics/overview.js` — six independent blocks, not typed
+ *   here.
  */
 export async function analyticsOverview(range) {
   const response = await fetch(`${API_URL}/analytics/overview${qs(range)}`, {

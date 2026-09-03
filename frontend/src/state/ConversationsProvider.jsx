@@ -13,7 +13,7 @@ import { ChatContext, ArchivisteContext } from './conversationsContext'
  * Deux contextes distincts (un par page) plutôt qu'une valeur combinée : une
  * mise à jour du chat ne re-rend pas le consommateur archiviste.
  */
-export function ConversationsProvider({ children }) {
+function ConversationsProvider({ children }) {
   const chat = useChatState()
   const archiviste = useArchivisteState()
   return (

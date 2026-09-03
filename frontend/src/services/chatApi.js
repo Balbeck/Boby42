@@ -83,6 +83,10 @@ export async function sendMessage(
     }
   }
 
+  // `sources` is passed through deliberately although no caller reads it today:
+  // the documents on screen come from phase 1 (`POST /chat/documents`), and this
+  // is the handle for a later reconciliation between what was shown and what the
+  // prompt actually used.
   return {
     answer: final?.answer ?? full,
     sources: final?.sources ?? [],

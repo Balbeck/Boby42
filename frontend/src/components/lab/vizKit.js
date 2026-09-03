@@ -24,7 +24,7 @@ export const C = {
   bar: SERIES.blue,
 }
 
-export const AXIS = '#a39e93' // --color-chat-text-muted
+const AXIS = '#a39e93' // --color-chat-text-muted
 export const GRID = '#3d3a34' // --color-chat-border
 
 /** Shared recharts axis props for a recessive, label-light look. */

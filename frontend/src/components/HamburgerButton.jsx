@@ -1,3 +1,9 @@
+// ⚠️ Fichier dormant. Il n'est atteignable que si `AUTH` (`src/auth.js`) vaut
+// `true` : c'est `layout/PersistentNav.jsx` qui décide de monter — ou non — le
+// bouton et le tiroir d'historique. Avec `AUTH === false` (l'état actuel), rien
+// ici ne s'exécute. Ce n'est pas du code mort : c'est un choix produit assumé,
+// en attendant l'OAuth2 42. Ne pas supprimer.
+
 /**
  * Le bouton du tiroir des conversations. Volontairement discret : trois traits
  * fins dans une pastille ronde de 40 px, cerclée d'un gris clair (plus léger

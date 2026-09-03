@@ -97,11 +97,12 @@ export function useChat() {
     exchangesRef.current = exchanges
   }, [exchanges])
 
-  // `notFoundText` is the UI-language "no document found" message, passed in by
-  // the page (hooks hold no user-facing text). When phase 1 finds nothing the
-  // backend skips the LLM and returns a fixed French fallback — we freeze this
-  // localized version into the exchange instead, so it never re-translates on a
-  // later language switch (session history is frozen text).
+  // sendQuestion(question, language, notFoundText) — `notFoundText` is the
+  // UI-language "no document found" message, passed in by the page (hooks hold
+  // no user-facing text). When phase 1 finds nothing the backend skips the LLM
+  // and returns a fixed French fallback — we freeze this localized version into
+  // the exchange instead, so it never re-translates on a later language switch
+  // (session history is frozen text).
   const sendQuestion = useCallback(async (question, language, notFoundText) => {
     const trimmed = question.trim()
     if (!trimmed) return
@@ -334,7 +335,6 @@ export function useChat() {
     sendQuestion,
     stopGeneration,
     submitFeedback,
-    loadDocument,
     toggleDocument,
     loadConversation,
     startNewConversation,

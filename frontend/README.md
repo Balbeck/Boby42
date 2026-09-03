@@ -1,16 +1,32 @@
-# React + Vite
+# Boby 42 — frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The single-page React app of Boby 42, a RAG chatbot for 42 students. Three
+routes: `/chat` (ask a question, get a sourced answer), `/archiviste` (search the
+document base without the LLM — also the landing page), and `/lab`, a
+password-gated maintenance page (usage dashboard, DB inspector, Ollama console).
 
-Currently, two official plugins are available:
+## Running it
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+This frontend is **not** started on its own in normal use. From the repository
+root:
 
-## React Compiler
+```bash
+make localMac   # Docker Desktop on macOS
+make prod       # the 42AI host
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Either way the container serves the app on **port 8421**, and in both modes it
+currently runs `npm run dev` — the Vite dev server, not a static build. That is
+also what makes the backend reachable: `vite.config.js` proxies the API paths
+server-side, so the browser only ever talks to this origin.
 
-## Expanding the ESLint configuration
+Environment variables and per-host setup: `Launch&EnvReadme.md` at the
+repository root.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Scripts
+
+```bash
+npm run dev     # Vite dev server on 8421
+npm run lint    # ESLint over the project
+npm run build   # production build — a compile check for now, nothing serves it
+```

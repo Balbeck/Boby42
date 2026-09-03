@@ -23,7 +23,7 @@
 /**
  * @typedef {Object} ChatResponse
  * @property {string} answer
- * @property {Source[]} sources
+ * @property {Source[]} sources - documents retenus par le prompt ; transmis à dessein alors qu'aucun appelant ne le lit (les documents affichés viennent de la phase 1), gardé comme handle pour un futur rapprochement affiché/utilisé
  * @property {string} [conversationId] - conversation à laquelle l'échange a été rattaché (T4) ; le hook le renvoie à la question suivante
  * @property {string} [messageId] - id du message assistant ; handle pour /feedback (absent si l'écriture de log a échoué)
  */

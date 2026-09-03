@@ -15,7 +15,10 @@ export const messages = {
     chatInputPlaceholder: 'Comment puis je vous aider ?',
     chatDisclaimer:
       'Deux sources indexées : RTFM - Notion (complet)\net sujets de projets 42 (Ancien Tronc Commun + branche Machine Learning). Le reste arrive.',
-    chatDisclaimerNotion: 'RTFM - Notion',
+    // Libellé du lien Notion inséré dans les deux disclaimers (/chat et /archiviste).
+    // Distinct de `chatDocsNotionLabel`, qui titre une famille de sources : même
+    // valeur aujourd'hui, deux rôles bien séparés.
+    notionLinkLabel: 'RTFM - Notion',
     intro: 'Laissez-moi voir ce que je peux faire',
     searching: "Je consulte la base documentaire de l'école",
     chatReading: 'Je lis les documents et je prépare ma réponse',
@@ -29,10 +32,7 @@ export const messages = {
     archivisteInputPlaceholder: 'Quels documents souhaitez-vous ?',
     archivisteDisclaimer:
       'Deux sources indexées : RTFM - Notion (complet)\net sujets de projets 42 (Ancien Tronc Commun + branche Machine Learning). Le reste arrive.',
-    archivisteDisclaimerNotion: 'RTFM - Notion',
     archivisteSearching: "Je consulte la base documentaire de l'école...",
-    documentsFound: (n) => `${n} document${n > 1 ? 's' : ''} trouvé${n > 1 ? 's' : ''} dans le Notion`,
-    subjectsPdfFound: (n) => `${n} sujet${n > 1 ? 's' : ''} 42 trouvé${n > 1 ? 's' : ''} dans la base`,
     archivisteEmpty:
       'Rien trouvé. Essaie d\'autres mots, ou vérifie que ton sujet est dans le périmètre indexé.',
     openInNewTab: 'Ouvrir dans un nouvel onglet',
@@ -66,7 +66,7 @@ export const messages = {
     chatInputPlaceholder: 'How can I help you?',
     chatDisclaimer:
       'Two indexed sources: RTFM - Notion (complete)\nand 42 project subjects (Old Common Core + Machine Learning branch). The rest is coming.',
-    chatDisclaimerNotion: 'RTFM - Notion',
+    notionLinkLabel: 'RTFM - Notion',
     intro: 'Let me see what I can do',
     searching: "Searching the school's document base",
     chatReading: 'Reading the documents and writing my answer',
@@ -79,10 +79,7 @@ export const messages = {
     archivisteInputPlaceholder: 'Which documents are you looking for?',
     archivisteDisclaimer:
       'Two indexed sources: RTFM - Notion (complete)\nand 42 project subjects (Old Common Core + Machine Learning branch). The rest is coming.',
-    archivisteDisclaimerNotion: 'RTFM - Notion',
     archivisteSearching: "Searching the school's document base...",
-    documentsFound: (n) => `${n} document${n > 1 ? 's' : ''} found in Notion`,
-    subjectsPdfFound: (n) => `${n} subject${n > 1 ? 's' : ''} from 42 found in the base`,
     archivisteEmpty:
       'Nothing found. Try other words, or check that your topic is within the indexed scope.',
     openInNewTab: 'Open in a new tab',

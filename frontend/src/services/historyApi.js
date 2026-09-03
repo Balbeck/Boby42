@@ -1,3 +1,9 @@
+// ⚠️ Fichier dormant. Il n'est atteignable que si `AUTH` (`src/auth.js`) vaut
+// `true` : son seul appelant est `components/Drawer.jsx`, que
+// `layout/PersistentNav.jsx` ne monte pas tant que le flag est `false` (l'état
+// actuel). Rien ici ne s'exécute donc aujourd'hui. Ce n'est pas du code mort :
+// c'est un choix produit assumé, en attendant l'OAuth2 42. Ne pas supprimer.
+
 import { getVisitorId } from './identity'
 
 const API_URL = import.meta.env.VITE_API_URL || ''

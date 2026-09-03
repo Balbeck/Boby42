@@ -19,12 +19,10 @@ import { axisProps, GRID, shortDay } from './vizKit'
  *   title: string,
  *   hint?: string,
  *   data: Array<Record<string, any>>,
- *   series: Array<{ key: string, label: string, color: string }>,
- *   valueFormat?: (v: number) => string,
- *   yDomain?: [number | string, number | string]
+ *   series: Array<{ key: string, label: string, color: string }>
  * }} props
  */
-export default function TimeSeries({ title, hint, data, series, valueFormat, yDomain }) {
+export default function TimeSeries({ title, hint, data, series }) {
   const empty =
     !data ||
     data.length === 0 ||
@@ -41,17 +39,8 @@ export default function TimeSeries({ title, hint, data, series, valueFormat, yDo
         <LineChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -8 }}>
           <CartesianGrid stroke={GRID} strokeOpacity={0.5} vertical={false} />
           <XAxis dataKey="day" tickFormatter={shortDay} minTickGap={24} {...axisProps} />
-          <YAxis
-            allowDecimals={false}
-            width={44}
-            domain={yDomain}
-            tickFormatter={valueFormat}
-            {...axisProps}
-          />
-          <Tooltip
-            content={<VizTooltip valueFormat={valueFormat} />}
-            cursor={{ stroke: GRID }}
-          />
+          <YAxis allowDecimals={false} width={44} {...axisProps} />
+          <Tooltip content={<VizTooltip />} cursor={{ stroke: GRID }} />
           {series.map((s) => (
             <Line
               key={s.key}

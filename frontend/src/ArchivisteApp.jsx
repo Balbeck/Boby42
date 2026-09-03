@@ -44,7 +44,7 @@ function ArchivisteApp() {
                 placeholder={t.archivisteInputPlaceholder}
                 t={t}
               />
-              <Disclaimer>{withNotionLink(t.archivisteDisclaimer, t.archivisteDisclaimerNotion)}</Disclaimer>
+              <Disclaimer>{withNotionLink(t.archivisteDisclaimer, t.notionLinkLabel)}</Disclaimer>
             </div>
           </div>
         )}
@@ -77,7 +77,7 @@ function ArchivisteApp() {
                   placeholder={t.archivisteInputPlaceholder}
                   t={t}
                 />
-                <Disclaimer>{withNotionLink(t.archivisteDisclaimer, t.archivisteDisclaimerNotion)}</Disclaimer>
+                <Disclaimer>{withNotionLink(t.archivisteDisclaimer, t.notionLinkLabel)}</Disclaimer>
               </div>
             </div>
             <div ref={bottomRef} />

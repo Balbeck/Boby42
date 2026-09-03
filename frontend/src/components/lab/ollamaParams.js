@@ -91,7 +91,7 @@ export const PARAM_GROUPS = [
 ]
 
 /** Flat list of every param, for lookups. */
-export const ALL_PARAMS = PARAM_GROUPS.flatMap((g) => g.params)
+const ALL_PARAMS = PARAM_GROUPS.flatMap((g) => g.params)
 
 /**
  * Fold the raw `{ name: rawValue }` form state into an Ollama request body.

@@ -13,7 +13,7 @@ const listeners = new Set()
  *
  * @returns {'fr' | 'en' | 'origin'}
  */
-export function getLanguage() {
+function getLanguage() {
   return localStorage.getItem(KEY) || 'fr'
 }
 
