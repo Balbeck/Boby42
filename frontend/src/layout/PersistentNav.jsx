@@ -5,7 +5,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher'
 import HamburgerButton from '../components/HamburgerButton'
 import Drawer from '../components/Drawer'
 import { useChat, useArchiviste } from '../state/conversationsContext'
-import { messages, useLanguage, setLanguage } from '../i18n'
+import { useLanguage, useMessages, setLanguage } from '../i18n'
 import { AUTH } from '../auth'
 
 /**
@@ -33,7 +33,7 @@ export default function PersistentNav() {
   const chat = useChat()
   const archiviste = useArchiviste()
   const language = useLanguage()
-  const t = messages[/** @type {import('../types/types.js').MessagesLocale} */ (language)] ?? messages.fr
+  const t = useMessages()
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const page = location.pathname === '/chat' ? 'chat' : 'archiviste'

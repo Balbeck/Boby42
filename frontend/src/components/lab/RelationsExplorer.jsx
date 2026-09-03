@@ -15,7 +15,6 @@ import { chipColor, fmtTimestamp } from './format'
  * Read-only. English-only, like the rest of /lab.
  */
 
-const ERR = 'text-[#cf9186]'
 
 export default function RelationsExplorer() {
   const [convos, setConvos] = useState(null) // null loading | 'error' | rows[]
@@ -94,7 +93,7 @@ export default function RelationsExplorer() {
       </div>
 
       {convos === 'error' && (
-        <p className={`text-xs ${ERR}`}>Couldn&rsquo;t load the conversation list — you can still paste an id.</p>
+        <p className="text-xs text-chat-error">Couldn&rsquo;t load the conversation list — you can still paste an id.</p>
       )}
 
       {!choice.trim() && (
@@ -106,7 +105,7 @@ export default function RelationsExplorer() {
       )}
 
       {loaded && !tree && (
-        <p className={`text-sm ${ERR}`}>No conversation with that id.</p>
+        <p className="text-sm text-chat-error">No conversation with that id.</p>
       )}
 
       {tree && <Tree tree={tree} />}
@@ -152,7 +151,7 @@ export function Tree({ tree }) {
               {m.role === 'assistant' && m.latency_ms != null && (
                 <span className="text-xs text-chat-text-muted tabular-nums">{m.latency_ms} ms</span>
               )}
-              {m.error_code && <span className={`text-xs ${ERR}`}>{m.error_code}</span>}
+              {m.error_code && <span className="text-xs text-chat-error">{m.error_code}</span>}
               <IdChip id={m.id} />
             </div>
 
@@ -179,7 +178,7 @@ export function Tree({ tree }) {
             )}
 
             {m.feedback ? (
-              <p className={`ml-1 text-xs ${m.feedback.rating > 0 ? 'text-chat-green' : ERR}`}>
+              <p className={`ml-1 text-xs ${m.feedback.rating > 0 ? 'text-chat-green' : 'text-chat-error'}`}>
                 {m.feedback.rating > 0 ? '👍 +1' : '👎 −1'}
                 {m.feedback.comment ? ` — “${m.feedback.comment}”` : ''}
               </p>

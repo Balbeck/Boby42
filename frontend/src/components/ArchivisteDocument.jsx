@@ -47,6 +47,16 @@ export default function ArchivisteDocument({ document, onToggle, t }) {
         <div className="border-t border-chat-border px-4 py-3">
           {document.type === 'pdf' ? (
             <div className="flex flex-col gap-2">
+              {/* ⚠️ Pas de `sandbox` ici, et c'est délibéré (F4). L'attribut a été
+                  essayé (`sandbox="allow-same-origin"`) puis retiré : un cadre
+                  bac-à-sable neutralise la visionneuse PDF intégrée des
+                  navigateurs Chromium (bug Chromium 413851 « Sandbox breaks PDF
+                  rendering » — Chrome sert un document HTML portant un plugin,
+                  que le bac à sable bloque) ; Safari a le même comportement, et
+                  pdf.js (Firefox) est lui aussi piloté par du script. Le risque
+                  couvert est de toute façon nul ici : le PDF vient de notre
+                  propre backend, servi par `GET /subjectspdf/:file` derrière une
+                  liste blanche. */}
               <iframe
                 src={document.url}
                 title={document.name}

@@ -5,7 +5,24 @@ import tailwindcss from '@tailwindcss/vite'
 // BACKEND_HOST + PORT come from the container environment (see docker-compose.yml
 // and .env.localMac / .env.prod) — "localhost" in prod (network_mode: host),
 // "host.docker.internal" in local Mac dev (Docker Desktop's own network namespace).
-const backendTarget = `http://${process.env.BACKEND_HOST}:${process.env.PORT}`
+//
+// Both are unset when a documented host command runs (`npm run build`,
+// `npm run dev` from frontend/ — see frontend/CLAUDE.md → Commands), which used
+// to build the proxy target `http://undefined:undefined` in silence. Defaults +
+// a named warning rather than a throw: throwing would break those two commands.
+const DEFAULT_BACKEND_HOST = 'localhost'
+const DEFAULT_BACKEND_PORT = '8420'
+
+if (!process.env.BACKEND_HOST) {
+  console.warn(`[vite] BACKEND_HOST is not set — proxying to ${DEFAULT_BACKEND_HOST}`)
+}
+if (!process.env.PORT) {
+  console.warn(`[vite] PORT is not set — proxying to port ${DEFAULT_BACKEND_PORT}`)
+}
+
+const backendHost = process.env.BACKEND_HOST || DEFAULT_BACKEND_HOST
+const backendPort = process.env.PORT || DEFAULT_BACKEND_PORT
+const backendTarget = `http://${backendHost}:${backendPort}`
 
 // https://vite.dev/config/
 export default defineConfig({

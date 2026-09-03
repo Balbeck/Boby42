@@ -26,7 +26,6 @@ import { PARAM_GROUPS, buildRequestBody } from './ollamaParams'
 const INPUT =
   'w-full rounded-md border border-chat-border bg-chat-surface-2 px-2.5 py-1.5 text-sm text-chat-text outline-none placeholder:text-chat-text-muted/50 focus:border-chat-green/60 focus:ring-1 focus:ring-chat-green/30 transition-colors'
 const HEADING = 'text-[0.7rem] font-medium uppercase tracking-wider text-chat-text-muted'
-const ERR = 'text-[#cf9186]'
 
 export default function OllamaPanel({ apiKey }) {
   const [models, setModels] = useState(null) // null loading | 'error' | string[]
@@ -77,10 +76,7 @@ export default function OllamaPanel({ apiKey }) {
   async function submit() {
     if (!canSend) return
 
-    const id =
-      typeof crypto !== 'undefined' && crypto.randomUUID
-        ? crypto.randomUUID()
-        : String(Date.now())
+    const id = crypto.randomUUID()
     const body = buildRequestBody(model, prompt, values)
 
     setExchanges((prev) => [
@@ -142,7 +138,7 @@ export default function OllamaPanel({ apiKey }) {
   if (!apiKey) {
     return (
       <div className="mx-auto max-w-2xl">
-        <p className={`text-sm ${ERR}`}>
+        <p className="text-sm text-chat-error">
           Ollama proxy unavailable — <code>OLLAMA_PROXY_KEY</code> is unset on the backend, or
           this session has expired.
         </p>
@@ -316,7 +312,7 @@ function Exchange({ ex }) {
       </p>
       <div className="border-t border-chat-border pt-2">
         {ex.error ? (
-          <p className={`text-sm ${ERR}`}>{ex.error}</p>
+          <p className="text-sm text-chat-error">{ex.error}</p>
         ) : (
           <p className="text-sm leading-relaxed whitespace-pre-wrap text-chat-text">
             {ex.text || (

@@ -46,14 +46,16 @@ const DOT_INTERVAL = 500
 // (md context) or ~9 s (pdf-only: the prompt carries no document text). Without
 // it a fast answer makes the documents and the answer land together and the
 // "reading" step is never seen.
-const STEP_DURATIONS = { intro: 3000, searching: 1000, reading: 3000 }
+// `queued` is 0: an exchange waiting behind another must leave the step the
+// instant its own run starts, with no minimum on-screen time.
+const STEP_DURATIONS = { queued: 0, intro: 3000, searching: 1000, reading: 3000 }
 
-/** @typedef {'intro' | 'searching' | 'reading' | 'done' | 'error'} GuidedStep */
+/** @typedef {'queued' | 'intro' | 'searching' | 'reading' | 'done' | 'error'} GuidedStep */
 
 /** @type {GuidedStep[]} */
-const FULL_ORDER = ['intro', 'searching', 'reading', 'done']
+const FULL_ORDER = ['queued', 'intro', 'searching', 'reading', 'done']
 /** @type {GuidedStep[]} */
-const NO_DOCUMENTS_ORDER = ['intro', 'searching', 'done']
+const NO_DOCUMENTS_ORDER = ['queued', 'intro', 'searching', 'done']
 
 /** @param {{ text: string }} props */
 function AnimatedText({ text }) {
@@ -113,13 +115,16 @@ function DocumentsBlock({ documents, onToggleDocument, t }) {
 }
 
 /**
- * Drives the message through `intro → searching → reading → done` as a
+ * Drives the message through `queued → intro → searching → reading → done` as a
  * forward-only sequence. `phase` says how far the backend has got; the step
  * never skips ahead and never leaves a step before its minimum on-screen time
  * (counted from when it was entered, so a slow generation adds no extra wait).
  * With no documents found the `reading` step is dropped — nothing to read.
+ * `queued` (F5) heads both orders and only ever shows for an exchange the send
+ * queue is holding back; its minimum duration is 0, so it is left the instant
+ * the phase moves to `retrieving`.
  *
- * @param {'retrieving' | 'reading' | 'done' | 'error'} phase
+ * @param {'queued' | 'retrieving' | 'reading' | 'done' | 'error'} phase
  * @param {boolean} hasDocuments
  * @returns {GuidedStep}
  */
@@ -127,10 +132,11 @@ function useGuidedStep(phase, hasDocuments) {
   const order = hasDocuments ? FULL_ORDER : NO_DOCUMENTS_ORDER
 
   const target =
-    phase === 'error' ? 'error'
-      : phase === 'done' ? 'done'
-        : phase === 'reading' && hasDocuments ? 'reading'
-          : 'searching'
+    phase === 'queued' ? 'queued'
+      : phase === 'error' ? 'error'
+        : phase === 'done' ? 'done'
+          : phase === 'reading' && hasDocuments ? 'reading'
+            : 'searching'
 
   // Mount at the step matching the phase we're handed, so an exchange revisited
   // after a tab switch (already 'done' / 'error', or mid-generation 'reading')
@@ -139,10 +145,11 @@ function useGuidedStep(phase, hasDocuments) {
   const [step, setStep] = useState(
     /** @returns {GuidedStep} */
     () =>
-      phase === 'done' ? 'done'
-        : phase === 'error' ? 'error'
-          : phase === 'reading' && hasDocuments ? 'reading'
-            : 'intro',
+      phase === 'queued' ? 'queued'
+        : phase === 'done' ? 'done'
+          : phase === 'error' ? 'error'
+            : phase === 'reading' && hasDocuments ? 'reading'
+              : 'intro',
   )
   // Wall-clock time the current step was entered. Set from an effect (never
   // during render) so the minimum-duration maths below is measured from entry.
@@ -191,7 +198,7 @@ function useGuidedStep(phase, hasDocuments) {
  *   question: string,
  *   answer: string,
  *   documents?: import('../types/types.js').ArchivisteDocument[],
- *   phase?: 'retrieving' | 'reading' | 'done' | 'error',
+ *   phase?: 'queued' | 'retrieving' | 'reading' | 'done' | 'error',
  *   error?: string,
  *   messageId?: string | null,
  *   rating?: -1 | 0 | 1,
@@ -221,6 +228,13 @@ export default function Message({
         {question}
       </div>
       <div className="flex max-w-[85%] flex-col gap-5">
+        {/* Statique, sans points animés : les points d'`AnimatedText` disent
+            « il se passe quelque chose » — ici, rien n'a encore commencé. */}
+        {step === 'queued' && (
+          <div className="min-h-5 max-w-[85%] text-sm italic text-chat-text-muted">
+            {t.chatQueued}
+          </div>
+        )}
         {step === 'intro' && <AnimatedText text={t.intro} />}
         {step === 'searching' && <AnimatedText text={t.searching} />}
 

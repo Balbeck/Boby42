@@ -5,7 +5,7 @@ import Message from './components/Message'
 import ConstructionNotice from './components/ConstructionNotice'
 import { useAutoScroll } from './hooks/useAutoScroll'
 import { useChat } from './state/conversationsContext'
-import { messages, useLanguage } from './i18n'
+import { useLanguage, useMessages } from './i18n'
 import { withNotionLink } from './notionLink'
 
 // Ouverte une seule fois par chargement de page, au tout premier envoi d'une
@@ -23,10 +23,11 @@ function App() {
     draft,
     setDraft,
     isSending,
+    isQueueFull,
   } = useChat()
   const { containerRef, bottomRef } = useAutoScroll()
   const language = useLanguage()
-  const t = messages[/** @type {import('./types/types.js').MessagesLocale} */ (language)] ?? messages.fr
+  const t = useMessages()
   const hasStarted = exchanges.length > 0
   const [showWip, setShowWip] = useState(false)
   const dismissWip = () => setShowWip(false)
@@ -57,6 +58,7 @@ function App() {
                 onSend={handleSend}
                 onStop={stopGeneration}
                 isSending={isSending}
+                queueFull={isQueueFull}
                 autoFocus
                 t={t}
               />
@@ -90,6 +92,7 @@ function App() {
                   onSend={handleSend}
                   onStop={stopGeneration}
                   isSending={isSending}
+                queueFull={isQueueFull}
                   autoFocus
                   t={t}
                 />

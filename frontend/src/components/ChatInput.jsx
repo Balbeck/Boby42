@@ -11,6 +11,7 @@
  *   onSend: (value: string) => void,
  *   onStop?: () => void,
  *   isSending?: boolean,
+ *   queueFull?: boolean,
  *   autoFocus?: boolean,
  *   placeholder?: string,
  *   t: import('../types/types.js').Messages,
@@ -22,11 +23,15 @@ export default function ChatInput({
   onSend,
   onStop,
   isSending = false,
+  queueFull = false,
   autoFocus = false,
   placeholder,
   t,
 }) {
-  const canSend = value.trim().length > 0
+  // La file accepte un envoi en vol + un en attente (cf. `hooks/useSendQueue.js`) :
+  // pleine, la saisie reste possible mais l'envoi est refusé — y compris par
+  // Entrée, `handleKeyDown` passant par `handleSend`.
+  const canSend = !queueFull && value.trim().length > 0
 
   function handleSend() {
     if (!canSend) return
@@ -44,51 +49,60 @@ export default function ChatInput({
   }
 
   return (
-    <div className="relative w-full rounded-2xl border-2 border-chat-green/50 bg-chat-surface shadow-lg shadow-black/20 transition-colors focus-within:border-chat-green">
-      <textarea
-        autoFocus={autoFocus}
-        rows={1}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder ?? t.chatInputPlaceholder}
-        className="max-h-48 w-full resize-none bg-transparent py-4 pr-14 pl-5 text-chat-text placeholder:text-chat-text-muted focus:outline-none"
-      />
+    <div className="w-full">
+      <div className="relative w-full rounded-2xl border-2 border-chat-green/50 bg-chat-surface shadow-lg shadow-black/20 transition-colors focus-within:border-chat-green">
+        <textarea
+          autoFocus={autoFocus}
+          rows={1}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder ?? t.chatInputPlaceholder}
+          className="max-h-48 w-full resize-none bg-transparent py-4 pr-14 pl-5 text-chat-text placeholder:text-chat-text-muted focus:outline-none"
+        />
 
-      {isSending ? (
-        <button
-          type="button"
-          onClick={onStop}
-          aria-label={t.stopAria}
-          className="absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full bg-chat-green text-chat-bg transition-colors hover:bg-chat-green/80"
-        >
-          <span className="h-3 w-3 rounded-[3px] bg-chat-bg" />
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={handleSend}
-          disabled={!canSend}
-          aria-label={t.sendAria}
-          className={`absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
-            canSend
-              ? 'bg-chat-green text-chat-bg hover:bg-chat-green/80'
-              : 'cursor-not-allowed bg-chat-surface-2 text-chat-text-muted'
-          }`}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-4 w-4"
+        {isSending ? (
+          <button
+            type="button"
+            onClick={onStop}
+            aria-label={t.stopAria}
+            className="absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full bg-chat-green text-chat-bg transition-colors hover:bg-chat-green/80"
           >
-            <path d="M12 19V5" />
-            <path d="M5 12l7-7 7 7" />
-          </svg>
-        </button>
+            <span className="h-3 w-3 rounded-[3px] bg-chat-bg" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={!canSend}
+            aria-label={t.sendAria}
+            className={`absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
+              canSend
+                ? 'bg-chat-green text-chat-bg hover:bg-chat-green/80'
+                : 'cursor-not-allowed bg-chat-surface-2 text-chat-text-muted'
+            }`}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-4 w-4"
+            >
+              <path d="M12 19V5" />
+              <path d="M5 12l7-7 7 7" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {/* Seule sortie visible de la file pleine : une ligne discrète sous le
+          cadre. Le wrapper ci-dessus n'ajoute aucun style — le cadre reste
+          `w-full` dans un conteneur bloc, la mise en page est inchangée. */}
+      {queueFull && (
+        <p className="mt-1.5 px-1 text-xs text-chat-text-muted">{t.chatQueueFull}</p>
       )}
     </div>
   )

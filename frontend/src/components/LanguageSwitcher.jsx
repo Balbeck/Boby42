@@ -17,7 +17,12 @@ export default function LanguageSwitcher({ language, onChange }) {
   const containerRef = useRef(/** @type {HTMLDivElement | null} */ (null))
   const current = LANGUAGES.find((lang) => lang.code === language) ?? LANGUAGES[0]
 
+  // Écouteur global monté **uniquement** tant que le menu est ouvert : fermé, il
+  // n'a rien à fermer, et un écouteur `mousedown` posé pour la vie de la page
+  // sur chaque page montée n'a pas de raison d'être.
   useEffect(() => {
+    if (!open) return
+
     /** @param {MouseEvent} event */
     function handleClickOutside(event) {
       if (
@@ -29,7 +34,7 @@ export default function LanguageSwitcher({ language, onChange }) {
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  }, [open])
 
   /** @param {Language} code */
   function handleSelect(code) {

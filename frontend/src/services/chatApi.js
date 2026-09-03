@@ -56,7 +56,30 @@ export async function sendMessage(
   const decoder = new TextDecoder()
   let buffer = ''
   let full = ''
-  let final = null
+  let final = /** @type {any} */ (null)
+
+  /**
+   * Parse and dispatch one NDJSON line. Written once so the trailing-buffer
+   * flush below runs exactly the same logic as the read loop.
+   *
+   * @param {string} line
+   */
+  function handleLine(line) {
+    let obj
+    try {
+      obj = JSON.parse(line)
+    } catch {
+      return
+    }
+    if (obj.type === 'token') {
+      full += obj.value
+      onToken?.(obj.value, full)
+    } else if (obj.type === 'done') {
+      final = obj
+    } else if (obj.type === 'error') {
+      throw new Error(obj.message || 'Error contacting the server')
+    }
+  }
 
   for (;;) {
     const { value, done } = await reader.read()
@@ -67,22 +90,18 @@ export async function sendMessage(
       const line = buffer.slice(0, nl).trim()
       buffer = buffer.slice(nl + 1)
       if (!line) continue
-      let obj
-      try {
-        obj = JSON.parse(line)
-      } catch {
-        continue
-      }
-      if (obj.type === 'token') {
-        full += obj.value
-        onToken?.(obj.value, full)
-      } else if (obj.type === 'done') {
-        final = obj
-      } else if (obj.type === 'error') {
-        throw new Error(obj.message || 'Error contacting the server')
-      }
+      handleLine(line)
     }
   }
+
+  // The loop exits on the reader's `done` and would drop whatever is left in
+  // `buffer`. The backend does terminate every line with a \n, but a writer or
+  // proxy that ever omits the final newline would silently cost us the terminal
+  // `done` frame — and with it `messageId` + `conversationId`: the answer would
+  // still show (the concatenated tokens) while the 👍/👎 buttons vanish and the
+  // next question opens a new conversation.
+  buffer += decoder.decode()
+  if (buffer.trim()) handleLine(buffer.trim())
 
   // `sources` is passed through deliberately although no caller reads it today:
   // the documents on screen come from phase 1 (`POST /chat/documents`), and this

@@ -3,7 +3,7 @@ import Disclaimer from './components/Disclaimer'
 import ArchivisteMessage from './components/ArchivisteMessage'
 import { useAutoScroll } from './hooks/useAutoScroll'
 import { useArchiviste } from './state/conversationsContext'
-import { messages, useLanguage } from './i18n'
+import { useLanguage, useMessages } from './i18n'
 import { withNotionLink } from './notionLink'
 
 function ArchivisteApp() {
@@ -16,10 +16,11 @@ function ArchivisteApp() {
     draft,
     setDraft,
     isSending,
+    isQueueFull,
   } = useArchiviste()
   const { containerRef, bottomRef } = useAutoScroll()
   const language = useLanguage()
-  const t = messages[/** @type {import('./types/types.js').MessagesLocale} */ (language)] ?? messages.fr
+  const t = useMessages()
   const hasStarted = exchanges.length > 0
 
   return (
@@ -40,6 +41,7 @@ function ArchivisteApp() {
                 onSend={(question) => sendQuestion(question, language)}
                 onStop={stopGeneration}
                 isSending={isSending}
+                queueFull={isQueueFull}
                 autoFocus
                 placeholder={t.archivisteInputPlaceholder}
                 t={t}
@@ -58,6 +60,7 @@ function ArchivisteApp() {
                   question={exchange.question}
                   documents={exchange.documents}
                   loading={exchange.loading}
+                  queued={exchange.queued}
                   error={exchange.error}
                   messageId={exchange.messageId}
                   rating={exchange.rating}
@@ -73,6 +76,7 @@ function ArchivisteApp() {
                   onSend={(question) => sendQuestion(question, language)}
                   onStop={stopGeneration}
                   isSending={isSending}
+                queueFull={isQueueFull}
                   autoFocus
                   placeholder={t.archivisteInputPlaceholder}
                   t={t}

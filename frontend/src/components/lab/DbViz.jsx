@@ -16,10 +16,6 @@ import RelationsExplorer from './RelationsExplorer'
  * normalised and the raw rows don't show how they relate. English-only.
  */
 
-// Warm muted red for hard errors — sits with the #1a1915 ground, not a pure
-// alert red. The only colour here outside the chat-* tokens.
-const ERR = 'text-[#cf9186]'
-
 // How each table relates to the others — backticks mark column names.
 const TABLE_HINTS = {
   visitors:
@@ -85,7 +81,7 @@ export default function DbViz() {
   }
   if (tables === 'error') {
     return (
-      <p className={`text-sm ${ERR}`}>Couldn&rsquo;t load the table list. Check the backend is up.</p>
+      <p className="text-sm text-chat-error">Couldn&rsquo;t load the table list. Check the backend is up.</p>
     )
   }
 
@@ -126,7 +122,7 @@ export default function DbViz() {
       )}
 
       {loaded && !data && (
-        <p className={`text-sm ${ERR}`}>Couldn&rsquo;t load &ldquo;{selected}&rdquo;.</p>
+        <p className="text-sm text-chat-error">Couldn&rsquo;t load &ldquo;{selected}&rdquo;.</p>
       )}
 
       {data && (

@@ -20,7 +20,6 @@ import { chipColor, fmtTimestamp } from './format'
  * cap bites). English-only, like the rest of /lab.
  */
 
-const ERR = 'text-[#cf9186]'
 
 export default function VisitorExplorer() {
   const [visitors, setVisitors] = useState(/** @type {null | 'error' | object[]} */ (null))
@@ -161,7 +160,7 @@ export default function VisitorExplorer() {
       </div>
 
       {visitors === 'error' && (
-        <p className={`text-xs ${ERR}`}>
+        <p className="text-xs text-chat-error">
           Couldn&rsquo;t load the visitor list — you can still paste a numeric visitors.id.
         </p>
       )}
@@ -179,14 +178,14 @@ export default function VisitorExplorer() {
         <p className="text-sm text-chat-text-muted">Loading history…</p>
       )}
 
-      {cv === 'notfound' && <p className={`text-sm ${ERR}`}>No visitor with that id.</p>}
+      {cv === 'notfound' && <p className="text-sm text-chat-error">No visitor with that id.</p>}
       {cv === 'listerror' && (
-        <p className={`text-sm ${ERR}`}>
+        <p className="text-sm text-chat-error">
           Can&rsquo;t resolve that id — the visitor list didn&rsquo;t load. Paste a numeric visitors.id.
         </p>
       )}
       {cv === 'error' && (
-        <p className={`text-sm ${ERR}`}>Couldn&rsquo;t load this visitor&rsquo;s conversations.</p>
+        <p className="text-sm text-chat-error">Couldn&rsquo;t load this visitor&rsquo;s conversations.</p>
       )}
 
       {cv && typeof cv === 'object' && !openConvo && (
@@ -217,7 +216,7 @@ export default function VisitorExplorer() {
           {treeReady && !treeRes.tree && (
             <>
               <BackBtn onBack={() => setOpenConvo(null)} />
-              <p className={`text-sm ${ERR}`}>Couldn&rsquo;t load that conversation.</p>
+              <p className="text-sm text-chat-error">Couldn&rsquo;t load that conversation.</p>
             </>
           )}
           {treeReady && treeRes.tree && (
@@ -424,7 +423,7 @@ const EXCHANGE_COLUMNS = [
     sort: 'text',
     get: (x) => x.error || '',
     render: (x) =>
-      x.error ? <span className={ERR}>{x.error}</span> : <span className="text-chat-text-muted">—</span>,
+      x.error ? <span className="text-chat-error">{x.error}</span> : <span className="text-chat-text-muted">—</span>,
   },
 ]
 
@@ -466,7 +465,7 @@ function ExchangeDetail({ x }) {
       )}
       <div
         className={`text-xs ${
-          x.rating == null ? 'text-chat-text-muted' : x.rating > 0 ? 'text-chat-green' : ERR
+          x.rating == null ? 'text-chat-text-muted' : x.rating > 0 ? 'text-chat-green' : 'text-chat-error'
         }`}
       >
         {x.rating == null ? 'no feedback' : x.rating > 0 ? '👍 +1' : '👎 −1'}

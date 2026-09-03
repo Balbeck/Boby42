@@ -58,8 +58,28 @@ export async function generate(key, body, { signal, onToken } = {}) {
   const reader = /** @type {ReadableStream<Uint8Array>} */ (response.body).getReader()
   const decoder = new TextDecoder()
   let buffer = ''
-  let last = {}
+  let last = /** @type {any} */ ({})
   let fullText = ''
+
+  /**
+   * Parse and dispatch one NDJSON line. Written once so the trailing-buffer
+   * flush below runs exactly the same logic as the read loop.
+   *
+   * @param {string} line
+   */
+  function handleLine(line) {
+    let obj
+    try {
+      obj = JSON.parse(line)
+    } catch {
+      return
+    }
+    last = obj
+    if (obj.response) {
+      fullText += obj.response
+      onToken?.(obj.response)
+    }
+  }
 
   for (;;) {
     const { value, done } = await reader.read()
@@ -70,19 +90,15 @@ export async function generate(key, body, { signal, onToken } = {}) {
       const line = buffer.slice(0, nl).trim()
       buffer = buffer.slice(nl + 1)
       if (!line) continue
-      let obj
-      try {
-        obj = JSON.parse(line)
-      } catch {
-        continue
-      }
-      last = obj
-      if (obj.response) {
-        fullText += obj.response
-        onToken?.(obj.response)
-      }
+      handleLine(line)
     }
   }
+
+  // Same guard as chatApi.sendMessage: the loop exits on `done` and would drop
+  // an unterminated last line — here that is the object carrying `done: true`
+  // and the timing stats.
+  buffer += decoder.decode()
+  if (buffer.trim()) handleLine(buffer.trim())
 
   return { ...last, response: fullText }
 }

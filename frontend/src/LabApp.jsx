@@ -29,12 +29,22 @@ export default function LabApp() {
   // is off (OLLAMA_PROXY_KEY unset → 404) or the session lapsed.
   const [proxyKey, setProxyKey] = useState(/** @type {string | null} */ (null))
 
+  /**
+   * What a GET /auth/lab/me answer means for the page — written once and used
+   * by both the mount check and the post-login recheck.
+   *
+   * @param {unknown} session
+   */
+  function applySession(session) {
+    setStatus(session ? 'in' : 'out')
+    setShowLogin(!session)
+  }
+
   useEffect(() => {
     let cancelled = false
     me().then((session) => {
       if (cancelled) return
-      setStatus(session ? 'in' : 'out')
-      setShowLogin(!session)
+      applySession(session)
     })
     return () => {
       cancelled = true
@@ -52,10 +62,7 @@ export default function LabApp() {
   }, [status])
 
   function recheck() {
-    me().then((session) => {
-      setStatus(session ? 'in' : 'out')
-      setShowLogin(!session)
-    })
+    me().then(applySession)
   }
 
   async function handleLogout() {

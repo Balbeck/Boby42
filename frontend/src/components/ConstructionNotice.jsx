@@ -1,5 +1,5 @@
 import Modal from './Modal'
-import { messages, useLanguage } from '../i18n'
+import { useMessages } from '../i18n'
 
 /**
  * Encart « section en construction », à poser sur n'importe quelle page en
@@ -13,8 +13,7 @@ import { messages, useLanguage } from '../i18n'
  * @param {{ onClose: () => void, title?: string, body?: string }} props
  */
 export default function ConstructionNotice({ onClose, title, body }) {
-  const language = useLanguage()
-  const t = messages[/** @type {import('../types/types.js').MessagesLocale} */ (language)] ?? messages.fr
+  const t = useMessages()
   const heading = title ?? t.wipTitle
   const text = body ?? t.wipBody
 

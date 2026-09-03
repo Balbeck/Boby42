@@ -7,7 +7,6 @@ import { Card, PageBadge, Pager } from './VizChrome'
 import { fmtAgo, fmtInt } from './vizKit'
 
 const PAGE_SIZE = 25
-const ERR = 'text-[#cf9186]'
 
 /**
  * The list of what the document base is missing: every `no_match` question in
@@ -111,7 +110,7 @@ export default function UnmatchedQuestions({ range }) {
       </div>
 
       {loading && <p className="text-sm text-chat-text-muted">Loading…</p>}
-      {data === 'error' && <p className={`text-sm ${ERR}`}>Couldn’t load the unmatched list.</p>}
+      {data === 'error' && <p className="text-sm text-chat-error">Couldn’t load the unmatched list.</p>}
 
       {data && data !== 'error' && (
         <>

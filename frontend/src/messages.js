@@ -22,6 +22,9 @@ export const messages = {
     intro: 'Laissez-moi voir ce que je peux faire',
     searching: "Je consulte la base documentaire de l'école",
     chatReading: 'Je lis les documents et je prépare ma réponse',
+    // File d'envoi (F5) : une question en vol + une en attente au maximum.
+    chatQueued: 'En attente de la réponse précédente',
+    chatQueueFull: 'Une question est déjà en attente.',
     chatNotFound: `🤔 Je n'ai malheureusement aucune information à ce sujet dans mes données.\nJe vous conseille la ${NOTION_RTFM_URL} .\nVous y trouverez peut-être votre réponse !`,
     chatDocsNotionLabel: 'RTFM - Notion',
     chatDocsSubjectsLabel: 'Sujets Projet 42',
@@ -71,6 +74,8 @@ export const messages = {
     intro: 'Let me see what I can do',
     searching: "Searching the school's document base",
     chatReading: 'Reading the documents and writing my answer',
+    chatQueued: 'Waiting for the previous answer',
+    chatQueueFull: 'A question is already waiting.',
     chatNotFound: `🤔 Sorry, I don't have any information about this in my data.\nI'd suggest checking ${NOTION_RTFM_URL} .\nYou might find your answer there!`,
     chatDocsNotionLabel: 'RTFM - Notion',
     chatDocsSubjectsLabel: '42 Project Subjects',

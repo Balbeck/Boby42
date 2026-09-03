@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { search, fetchDocument } from '../services/archivisteApi'
 import { sendFeedback } from '../services/feedbackApi'
 import { getConversation } from '../services/historyApi'
+import { useSendQueue } from './useSendQueue'
 
 /** @import { ArchivisteExchange, ArchivisteDocument, ConversationDetail, Language } from '../types/types.js' */
 
@@ -49,18 +50,26 @@ function toExchanges(conversation) {
 }
 
 /**
+ * Patch un document (apparié par type **et** nom) d'un échange. Même
+ * appariement que `useChat.js` : une recherche fusionne les deux magasins et
+ * `ArchivisteMessage` clé ses lignes par `` `${type}:${name}` ``, donc un `md`
+ * et un `pdf` de même nom peuvent coexister à l'écran — sur le nom seul,
+ * déplier l'un déplierait les deux et le markdown du premier serait écrit dans
+ * les deux.
+ *
  * @param {ArchivisteExchange[]} exchanges
  * @param {string} exchangeId
+ * @param {'md' | 'pdf'} docType
  * @param {string} docName
  * @param {Partial<ArchivisteDocument>} patch
  */
-function patchDocument(exchanges, exchangeId, docName, patch) {
+function patchDocument(exchanges, exchangeId, docType, docName, patch) {
   return exchanges.map((exchange) => {
     if (exchange.id !== exchangeId) return exchange
     return {
       ...exchange,
       documents: exchange.documents.map((doc) =>
-        doc.name === docName ? { ...doc, ...patch } : doc,
+        doc.type === docType && doc.name === docName ? { ...doc, ...patch } : doc,
       ),
     }
   })
@@ -68,7 +77,14 @@ function patchDocument(exchanges, exchangeId, docName, patch) {
 
 export function useArchiviste() {
   const [exchanges, setExchanges] = useState(/** @type {ArchivisteExchange[]} */ ([]))
-  const [isSending, setIsSending] = useState(false)
+  // Un envoi en vol plus au plus un en attente (F5), même primitive que
+  // `useChat`. `isSending` est **dérivé** de la profondeur de la file : elle
+  // possède déjà cette information, deux sources de vérité divergeraient.
+  // Différence avec /chat : les échanges d'ici n'ont pas de `phase`, et cette
+  // tâche n'en ajoute pas — l'attente est un booléen `queued` sur l'échange.
+  const { depth, isBusy, isFull, enqueue, clear } = useSendQueue()
+  const isSending = depth > 0
+  const isQueueFull = depth >= 2
   // Unsent input for this page — lifted out of `ChatInput` so a page switch
   // doesn't drop a half-typed search (same as useChat).
   const [draft, setDraft] = useState('')
@@ -94,19 +110,45 @@ export function useArchiviste() {
     async (/** @type {string} */ question, /** @type {Language} */ language) => {
     const trimmed = question.trim()
     if (!trimmed) return
+    // Déjà une recherche en vol et une en attente : on refuse. Rien n'est créé
+    // et le brouillon est laissé tel quel, l'utilisateur ne perd pas sa saisie.
+    if (isFull()) return
+
+    const willWait = isBusy()
 
     setDraft('')
 
     const id = crypto.randomUUID()
+
+    // ⚠️ L'échange doit être dans l'état **avant** que son run démarre : la
+    // première action du run est un setExchanges sur cet id, et une mise à jour
+    // qui vise un échange absent de la liste est perdue en silence (symptôme :
+    // une question bloquée sur « en attente » pour toujours). D'où l'ordre :
+    // décider depuis les refs de la file, ajouter, *puis* enfiler.
+    setExchanges((prev) => [
+      ...prev,
+      {
+        id,
+        question: trimmed,
+        documents: [],
+        loading: true,
+        ...(willWait ? { queued: true } : {}),
+        messageId: null,
+        rating: 0,
+      },
+    ])
+
+    enqueue(async () => {
+    // Sortie de l'attente (sans effet si le run a démarré tout de suite).
+    setExchanges((prev) =>
+      prev.map((exchange) =>
+        exchange.id === id ? { ...exchange, queued: false } : exchange,
+      ),
+    )
+
     pendingIdRef.current = id
     const controller = new AbortController()
     abortControllerRef.current = controller
-
-    setExchanges((prev) => [
-      ...prev,
-      { id, question: trimmed, documents: [], loading: true, messageId: null, rating: 0 },
-    ])
-    setIsSending(true)
 
     try {
       const response = await search(trimmed, language, {
@@ -144,21 +186,28 @@ export function useArchiviste() {
       )
     } finally {
       if (pendingIdRef.current === id) {
-        setIsSending(false)
         pendingIdRef.current = null
         abortControllerRef.current = null
       }
     }
-  }, [])
+    })
+  }, [enqueue, isBusy, isFull])
 
+  /**
+   * Un stop est un stop : il annule la recherche en cours **et** abandonne
+   * celle qui attendait derrière. Les deux échanges disparaissent, comme un
+   * échange stoppé disparaît déjà aujourd'hui.
+   */
   const stopGeneration = useCallback(() => {
     abortControllerRef.current?.abort()
     const id = pendingIdRef.current
-    setExchanges((prev) => prev.filter((exchange) => exchange.id !== id))
-    setIsSending(false)
+    clear()
+    setExchanges((prev) =>
+      prev.filter((exchange) => exchange.id !== id && !exchange.queued),
+    )
     pendingIdRef.current = null
     abortControllerRef.current = null
-  }, [])
+  }, [clear])
 
   /**
    * @param {string} exchangeId
@@ -171,20 +220,20 @@ export function useArchiviste() {
     // PDFs aren't fetched as JSON — the <iframe> loads doc.url itself. Just mark
     // it loaded so the no-op guard above holds on further expands.
     if (doc.type === 'pdf') {
-      setExchanges((prev) => patchDocument(prev, exchangeId, doc.name, { loaded: true }))
+      setExchanges((prev) => patchDocument(prev, exchangeId, doc.type, doc.name, { loaded: true }))
       return
     }
 
-    setExchanges((prev) => patchDocument(prev, exchangeId, doc.name, { loading: true }))
+    setExchanges((prev) => patchDocument(prev, exchangeId, doc.type, doc.name, { loading: true }))
 
     try {
       const { content } = await fetchDocument(doc.url)
       setExchanges((prev) =>
-        patchDocument(prev, exchangeId, doc.name, { content, loading: false, loaded: true }),
+        patchDocument(prev, exchangeId, doc.type, doc.name, { content, loading: false, loaded: true }),
       )
     } catch (err) {
       setExchanges((prev) =>
-        patchDocument(prev, exchangeId, doc.name, {
+        patchDocument(prev, exchangeId, doc.type, doc.name, {
           loading: false,
           error: /** @type {Error} */ (err).message,
         }),
@@ -203,7 +252,9 @@ export function useArchiviste() {
   const toggleDocument = useCallback(
     (/** @type {string} */ exchangeId, /** @type {ArchivisteDocument} */ doc) => {
       const next = !doc.expanded
-      setExchanges((prev) => patchDocument(prev, exchangeId, doc.name, { expanded: next }))
+      setExchanges((prev) =>
+        patchDocument(prev, exchangeId, doc.type, doc.name, { expanded: next }),
+      )
       if (next) loadDocument(exchangeId, doc)
     },
     [loadDocument],
@@ -226,14 +277,14 @@ export function useArchiviste() {
   /** Empty the page: a fresh thread, no draft. */
   const startNewConversation = useCallback(() => {
     abortControllerRef.current?.abort()
+    clear()
     abortControllerRef.current = null
     pendingIdRef.current = null
-    setIsSending(false)
     setExchanges([])
     setDraft('')
     conversationIdRef.current = null
     setConversationId(null)
-  }, [])
+  }, [clear])
 
   /**
    * Optimistic 👍 / 👎 on a search's result list (attached to its assistant
@@ -272,6 +323,7 @@ export function useArchiviste() {
     stopGeneration,
     submitFeedback,
     isSending,
+    isQueueFull,
     toggleDocument,
     loadConversation,
     startNewConversation,

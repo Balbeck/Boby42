@@ -8,7 +8,6 @@ import { fmtAgo, fmtInt } from './vizKit'
 import { Tree } from './RelationsExplorer'
 
 const PAGE_SIZE = 20
-const ERR = 'text-[#cf9186]'
 
 /**
  * Admin-wide conversation browser: a filterable, paginated list (by page, by
@@ -88,7 +87,7 @@ export default function ConversationBrowser() {
         </button>
         {!ready && <p className="text-sm text-chat-text-muted">Loading transcript…</p>}
         {ready && !detailRes.tree && (
-          <p className={`text-sm ${ERR}`}>Couldn’t load that conversation.</p>
+          <p className="text-sm text-chat-error">Couldn’t load that conversation.</p>
         )}
         {ready && detailRes.tree && (
           <div className="max-w-full overflow-x-auto">
@@ -138,7 +137,7 @@ export default function ConversationBrowser() {
       </div>
 
       {listLoading && <p className="text-sm text-chat-text-muted">Loading…</p>}
-      {list === 'error' && <p className={`text-sm ${ERR}`}>Couldn’t load conversations.</p>}
+      {list === 'error' && <p className="text-sm text-chat-error">Couldn’t load conversations.</p>}
 
       {list && list !== 'error' && (
         <>

@@ -26,7 +26,7 @@
  * @property {string} question
  * @property {string} answer
  * @property {ArchivisteDocument[]} documents - lignes trouvées par POST /chat/documents (phase 1), rendues comme sur /archiviste ; chargées paresseusement au dépli
- * @property {'retrieving' | 'reading' | 'done' | 'error'} phase - étape du flux à deux appels : 'retrieving' (phase 1), 'reading' (phase 2 en cours), 'done', 'error'
+ * @property {'queued' | 'retrieving' | 'reading' | 'done' | 'error'} phase - étape du flux à deux appels : 'queued' (en attente derrière un envoi en cours, F5), 'retrieving' (phase 1), 'reading' (phase 2 en cours), 'done', 'error'
  * @property {boolean} loading
  * @property {string} [error] - message d'erreur brut ; le préfixe traduit est ajouté à l'affichage
  * @property {string | null} [messageId] - id du message assistant renvoyé par /chat ; handle pour /feedback (null tant que la réponse n'est pas revenue)
@@ -69,6 +69,7 @@
  * @property {string} question
  * @property {ArchivisteDocument[]} documents
  * @property {boolean} loading
+ * @property {boolean} [queued] - en attente derrière un envoi en cours (F5) ; cette page n'a pas de `phase`, d'où un booléen
  * @property {string} [error]
  * @property {string | null} [messageId] - id du message assistant renvoyé par /archiviste ; handle pour /feedback
  * @property {-1 | 0 | 1} [rating] - note courante de la liste de résultats (0 = pas de note)

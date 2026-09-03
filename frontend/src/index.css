@@ -9,6 +9,8 @@
   --color-chat-text: #e8e6e1;
   --color-chat-text-muted: #a39e93;
   --color-chat-green: #8fb178;
+  /* Rouge d'erreur du /lab : un jeton de thème plutôt que sept copies du hex. */
+  --color-chat-error: #cf9186;
 }
 
 body {

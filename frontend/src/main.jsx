@@ -38,6 +38,11 @@ createRoot(/** @type {HTMLElement} */ (document.getElementById('root'))).render(
           <Route path="/chat" element={<App />} />
           <Route path="/archiviste" element={<ArchivisteApp />} />
         </Route>
+        {/* Anything else — a typo'd path, a dead link, /Chat with a capital —
+            lands on the landing page instead of rendering nothing at all.
+            Deliberately outside ConversationsLayout: an unmatched URL must not
+            mount the conversation provider. */}
+        <Route path="*" element={<Navigate to="/archiviste" replace />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

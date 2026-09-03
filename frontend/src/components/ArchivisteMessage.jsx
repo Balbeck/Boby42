@@ -6,6 +6,7 @@ import FeedbackButtons from './FeedbackButtons'
  *   question: string,
  *   documents?: import('../types/types.js').ArchivisteDocument[],
  *   loading?: boolean,
+ *   queued?: boolean,
  *   error?: string,
  *   messageId?: string | null,
  *   rating?: -1 | 0 | 1,
@@ -18,6 +19,7 @@ export default function ArchivisteMessage({
   question,
   documents = [],
   loading = false,
+  queued = false,
   error,
   messageId,
   rating = 0,
@@ -31,7 +33,12 @@ export default function ArchivisteMessage({
         {question}
       </div>
 
-      {loading ? (
+      {queued ? (
+        // Statique, sans points animés : la recherche n'a pas encore commencé.
+        <div className="min-h-5 max-w-[85%] text-sm italic text-chat-text-muted">
+          {t.chatQueued}
+        </div>
+      ) : loading ? (
         <div className="min-h-5 max-w-[85%] text-sm italic text-chat-text-muted">
           {t.archivisteSearching}
         </div>

@@ -15,7 +15,6 @@ import UnmatchedQuestions from './UnmatchedQuestions'
 import ConversationBrowser from './ConversationBrowser'
 import VisitorExplorer from './VisitorExplorer'
 
-const ERR = 'text-[#cf9186]'
 
 /**
  * The 🔬 tab: a usage dashboard (period selector → counter tiles + charts) plus
@@ -60,7 +59,7 @@ export default function VizDashboard() {
 
       {overview === null && <p className="text-sm text-chat-text-muted">Loading dashboard…</p>}
       {overview === 'error' && (
-        <p className={`text-sm ${ERR}`}>Couldn’t load analytics. Check you’re still signed in.</p>
+        <p className="text-sm text-chat-error">Couldn’t load analytics. Check you’re still signed in.</p>
       )}
 
       {overview && overview !== 'error' && (

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { sendMessage, fetchChatDocuments, fetchDocumentContent } from '../services/chatApi'
 import { sendFeedback } from '../services/feedbackApi'
 import { getConversation } from '../services/historyApi'
+import { useSendQueue } from './useSendQueue'
 
 /** @import { Exchange, ArchivisteDocument, ConversationDetail, Language } from '../types/types.js' */
 
@@ -81,7 +82,12 @@ function patchDocument(exchanges, exchangeId, docType, docName, patch) {
 
 export function useChat() {
   const [exchanges, setExchanges] = useState(/** @type {Exchange[]} */ ([]))
-  const [isSending, setIsSending] = useState(false)
+  // One send in flight plus at most one waiting (F5). `isSending` is **derived**
+  // from the queue's depth rather than stored: the queue already owns that fact
+  // and two sources of truth for it would drift.
+  const { depth, isBusy, isFull, enqueue, clear } = useSendQueue()
+  const isSending = depth > 0
+  const isQueueFull = depth >= 2
   // Unsent input for this page. Lifted out of `ChatInput` so a /chat ↔
   // /archiviste switch (which unmounts the page) doesn't drop a half-typed
   // question; both branches of the page render the same value.
@@ -119,16 +125,21 @@ export function useChat() {
     ) => {
     const trimmed = question.trim()
     if (!trimmed) return
+    // Already one running and one waiting: refuse. Nothing is created and the
+    // draft is left alone, so the user doesn't lose what they typed.
+    if (isFull()) return
+
+    const willWait = isBusy()
 
     setDraft('')
 
     const id = crypto.randomUUID()
-    pendingIdRef.current = id
-    // One controller for the whole two-call flow — the stop button must cancel
-    // whichever of retrieval / generation is in flight.
-    const controller = new AbortController()
-    abortControllerRef.current = controller
 
+    // ⚠️ The exchange must be in state **before** its run starts: the run's first
+    // action is a setExchanges on this id, and an update targeting an exchange
+    // that isn't in the list yet is silently lost (the symptom would be a
+    // question stuck on "waiting" forever). Hence: decide the phase from the
+    // queue's refs, append, *then* enqueue.
     setExchanges((prev) => [
       ...prev,
       {
@@ -137,12 +148,25 @@ export function useChat() {
         documents: [],
         answer: '',
         loading: true,
-        phase: 'retrieving',
+        phase: willWait ? 'queued' : 'retrieving',
         messageId: null,
         rating: 0,
       },
     ])
-    setIsSending(true)
+
+    enqueue(async () => {
+    // Leaving the waiting step (a no-op when this run started immediately).
+    setExchanges((prev) =>
+      prev.map((exchange) =>
+        exchange.id === id ? { ...exchange, phase: 'retrieving' } : exchange,
+      ),
+    )
+
+    pendingIdRef.current = id
+    // One controller for the whole two-call flow — the stop button must cancel
+    // whichever of retrieval / generation is in flight.
+    const controller = new AbortController()
+    abortControllerRef.current = controller
 
     try {
       // Phase 1 — retrieval only (~2 s), shown while the model works.
@@ -223,21 +247,28 @@ export function useChat() {
       )
     } finally {
       if (pendingIdRef.current === id) {
-        setIsSending(false)
         pendingIdRef.current = null
         abortControllerRef.current = null
       }
     }
-  }, [])
+    })
+  }, [enqueue, isBusy, isFull])
 
+  /**
+   * A stop is a stop: it cancels the running generation **and** drops the
+   * question waiting behind it. Both exchanges disappear, exactly as a single
+   * stopped exchange does today.
+   */
   const stopGeneration = useCallback(() => {
     abortControllerRef.current?.abort()
     const id = pendingIdRef.current
-    setExchanges((prev) => prev.filter((exchange) => exchange.id !== id))
-    setIsSending(false)
+    clear()
+    setExchanges((prev) =>
+      prev.filter((exchange) => exchange.id !== id && exchange.phase !== 'queued'),
+    )
     pendingIdRef.current = null
     abortControllerRef.current = null
-  }, [])
+  }, [clear])
 
   /**
    * Lazy-load one matched document's content on first expand. Copied from
@@ -314,14 +345,14 @@ export function useChat() {
   /** Empty the page: a fresh thread, no draft. */
   const startNewConversation = useCallback(() => {
     abortControllerRef.current?.abort()
+    clear()
     abortControllerRef.current = null
     pendingIdRef.current = null
-    setIsSending(false)
     setExchanges([])
     setDraft('')
     conversationIdRef.current = null
     setConversationId(null)
-  }, [])
+  }, [clear])
 
   /**
    * Optimistic 👍 / 👎 on an exchange's answer. The rating flips instantly;
@@ -365,6 +396,7 @@ export function useChat() {
     draft,
     setDraft,
     isSending,
+    isQueueFull,
     conversationId,
   }
 }
