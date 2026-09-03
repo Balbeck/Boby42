@@ -22,7 +22,7 @@ export default function ConstructionNotice({ onClose, title, body }) {
     <Modal onClose={onClose} label={heading} closeLabel={t.close}>
       <div className="flex flex-col items-center gap-4 text-center">
         <h2 className="text-lg font-medium text-chat-text">{heading}</h2>
-        <p className="text-sm leading-relaxed text-chat-text-muted">{text}</p>
+        <p className="text-sm leading-relaxed whitespace-pre-line text-chat-text-muted">{text}</p>
       </div>
     </Modal>
   )

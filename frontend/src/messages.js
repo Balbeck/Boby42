@@ -50,9 +50,9 @@ export const messages = {
     newConversation: 'Nouvelle conversation',
     conversationsEmpty: 'Vos conversations apparaîtront ici.',
     justNow: "à l'instant",
-    wipTitle: '🏗️ Section en construction 🛠️',
+    wipTitle: '🚧 Boby42 vous souhaite la bienvenue 🏗️',
     wipBody:
-      "Cette partie de Boby42 est encore en développement — ce qui peut expliquer des réponses parfois décevantes. Laissez-lui quand même sa chance, il apprend vite 👨🏻‍🏭",
+      "🤖 💬 « Je suis actuellement en phase de test, encore en apprentissage.\nMa base documentaire est en cours d'élargissement.\nN'hésitez pas à me donner votre avis ! »",
   },
   en: {
     chatGreeting: '🎋 Bonjour',
@@ -95,8 +95,8 @@ export const messages = {
     newConversation: 'New conversation',
     conversationsEmpty: 'Your conversations will show up here.',
     justNow: 'just now',
-    wipTitle: '🏗️ Section under construction 🛠️',
+    wipTitle: '🚧 Boby42 welcomes you 🏗️',
     wipBody:
-      "This part of Boby42 is still under development — which can explain some disappointing answers. Give him a chance anyway, he learns fast 👨🏻‍🏭",
+      '🤖 💬 "I\'m currently in a testing phase, still learning.\nMy document base is being expanded.\nFeel free to share your feedback!"',
   },
 }
