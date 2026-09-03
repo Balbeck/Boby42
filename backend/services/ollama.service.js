@@ -12,6 +12,30 @@ const OLLAMA_EMBEDDING_MODEL = process.env.OLLAMA_EMBEDDING_MODEL
 const GENERATION_OPTIONS = { num_ctx: 16384, temperature: 0.2, num_predict: 600 }
 
 /**
+ * `fetch` wrapper that tells "Ollama is down" apart from "Ollama answered with
+ * an error". undici raises `TypeError('fetch failed')` — with the real socket
+ * error on `.cause` (ECONNREFUSED / ENOTFOUND / timeout…) — when nothing is
+ * listening at OLLAMA_BASE_URL. We re-throw that as a tagged error so callers
+ * (routes) can surface a precise message; a non-ok HTTP response is left alone
+ * (Ollama is reachable, just unhappy). An AbortError is passed through untouched.
+ *
+ * @param {string} url
+ * @param {RequestInit} [init]
+ * @returns {Promise<Response>}
+ */
+async function ollamaFetch(url, init) {
+  try {
+    return await fetch(url, init)
+  } catch (err) {
+    if (err && err.name === 'AbortError') throw err
+    const wrapped = new Error(`Ollama is unreachable at ${OLLAMA_BASE_URL} (service down?)`)
+    wrapped.code = 'OLLAMA_UNREACHABLE'
+    wrapped.cause = err
+    throw wrapped
+  }
+}
+
+/**
  * Asks Ollama to generate an answer to the given prompt.
  *
  * Non-streaming by default. Pass `hooks.onToken` to stream: the request is then
@@ -29,7 +53,7 @@ const GENERATION_OPTIONS = { num_ctx: 16384, temperature: 0.2, num_predict: 600 
 async function generateAnswer(prompt, options = {}, { onToken, signal } = {}) {
   const streaming = typeof onToken === 'function'
 
-  const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
+  const response = await ollamaFetch(`${OLLAMA_BASE_URL}/api/generate`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
@@ -89,7 +113,7 @@ async function generateAnswer(prompt, options = {}, { onToken, signal } = {}) {
  * @returns {Promise<number[]>} the embedding vector
  */
 async function generateEmbedding(text) {
-  const response = await fetch(`${OLLAMA_BASE_URL}/api/embeddings`, {
+  const response = await ollamaFetch(`${OLLAMA_BASE_URL}/api/embeddings`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({

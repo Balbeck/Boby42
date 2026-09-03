@@ -48,7 +48,11 @@ module.exports = async function (fastify, opts) {
       } catch (recErr) {
         request.log.error({ err: recErr }, 'chat/documents: failed to record exchange (error path)')
       }
-      return reply.badGateway('Failed to search the document base')
+      return reply.badGateway(
+        err.code === 'OLLAMA_UNREACHABLE'
+          ? 'Document search failed - Ollama server is unreachable'
+          : 'Failed to search the document base'
+      )
     }
   })
 }
