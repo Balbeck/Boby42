@@ -1,8 +1,8 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 
 const OPTIONS = [
-  { path: '/archiviste', flag: '🕵️‍♂️' },
-  { path: '/chat', flag: '👨🏻‍🏭' },
+  { path: '/archiviste', flag: '🕵️‍♂️', labelKey: 'pageSwitchArchiviste' },
+  { path: '/chat', flag: '👨🏻‍🏭', labelKey: 'pageSwitchChat' },
 ]
 
 /**
@@ -31,6 +31,7 @@ export default function PageSwitcher({ t }) {
       {OPTIONS.map((option, index) => (
         <span
           key={option.path}
+          title={t[option.labelKey]}
           className={`relative z-10 flex h-8 w-8 items-center justify-center text-base transition-opacity duration-200 ${index === activeIndex ? 'opacity-100' : 'opacity-40'
             }`}
         >

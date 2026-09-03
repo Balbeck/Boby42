@@ -59,6 +59,9 @@ export default function ArchivisteMessage({
                   <span>{t.chatDocsCount(pdfDocs.length)}</span>
                 </div>
               </div>
+              {documents.length === 0 && (
+                <p className="text-xs italic text-chat-text-muted">{t.archivisteEmpty}</p>
+              )}
               {[...mdDocs, ...pdfDocs].map((document) => (
                 <ArchivisteDocument
                   key={`${document.type ?? 'md'}:${document.name}`}

@@ -49,7 +49,7 @@ function App() {
               <ChatInput
                 value={draft}
                 onChange={setDraft}
-                onSend={(question) => sendQuestion(question, language)}
+                onSend={(question) => sendQuestion(question, language, t.chatNotFound)}
                 onStop={stopGeneration}
                 isSending={isSending}
                 autoFocus
@@ -82,7 +82,7 @@ function App() {
                 <ChatInput
                   value={draft}
                   onChange={setDraft}
-                  onSend={(question) => sendQuestion(question, language)}
+                  onSend={(question) => sendQuestion(question, language, t.chatNotFound)}
                   onStop={stopGeneration}
                   isSending={isSending}
                   autoFocus
