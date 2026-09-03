@@ -2,11 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { sendMessage, fetchChatDocuments, fetchDocumentContent } from '../services/chatApi'
 import { sendFeedback } from '../services/feedbackApi'
 import { getConversation } from '../services/historyApi'
-import { readLastConversation, rememberConversation } from '../services/lastConversation'
 
 /** @import { Exchange, ArchivisteDocument, ConversationDetail } from '../types/types.js' */
-
-const PAGE = 'chat'
 
 /**
  * Une conversation lue en base → les échanges que la page rend déjà. Les
@@ -176,7 +173,6 @@ export function useChat() {
       if (response.conversationId && response.conversationId !== conversationIdRef.current) {
         conversationIdRef.current = response.conversationId
         setConversationId(response.conversationId)
-        rememberConversation(PAGE, response.conversationId)
       }
       setExchanges((prev) =>
         prev.map((exchange) =>
@@ -275,10 +271,10 @@ export function useChat() {
   )
 
   /**
-   * Re-open a stored conversation: fetch it, rebuild this page's exchanges from
-   * it and adopt its id, so the next question threads into the same
-   * conversation. Rejects like any fetch — the caller decides whether that is
-   * worth showing (the silent restore below decides it isn't).
+   * Re-open a conversation on demand (the history drawer, when AUTH is on):
+   * fetch it, rebuild this page's exchanges from it and adopt its id so the next
+   * question threads into the same conversation. Nothing is persisted — a
+   * refresh always starts empty.
    *
    * @param {string} id
    */
@@ -287,10 +283,9 @@ export function useChat() {
     setExchanges(toExchanges(conversation))
     conversationIdRef.current = conversation.id
     setConversationId(conversation.id)
-    rememberConversation(PAGE, conversation.id)
   }, [])
 
-  /** Empty the page: a fresh thread, no draft, nothing to restore on refresh. */
+  /** Empty the page: a fresh thread, no draft. */
   const startNewConversation = useCallback(() => {
     abortControllerRef.current?.abort()
     abortControllerRef.current = null
@@ -300,19 +295,7 @@ export function useChat() {
     setDraft('')
     conversationIdRef.current = null
     setConversationId(null)
-    rememberConversation(PAGE, null)
   }, [])
-
-  // On first mount, re-open the conversation this browser was last on. Only the
-  // id was persisted — the content comes from the database. A deleted row or an
-  // unreachable backend leaves the page empty, silently.
-  const restoredRef = useRef(false)
-  useEffect(() => {
-    if (restoredRef.current) return
-    restoredRef.current = true
-    const last = readLastConversation(PAGE)
-    if (last) loadConversation(last).catch(() => {})
-  }, [loadConversation])
 
   /**
    * Optimistic 👍 / 👎 on an exchange's answer. The rating flips instantly;

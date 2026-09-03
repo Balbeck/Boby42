@@ -2,11 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { search, fetchDocument } from '../services/archivisteApi'
 import { sendFeedback } from '../services/feedbackApi'
 import { getConversation } from '../services/historyApi'
-import { readLastConversation, rememberConversation } from '../services/lastConversation'
 
 /** @import { ArchivisteExchange, ArchivisteDocument, ConversationDetail } from '../types/types.js' */
-
-const PAGE = 'archiviste'
 
 /**
  * Une conversation lue en base → les échanges de cette page. Même appariement
@@ -111,7 +108,6 @@ export function useArchiviste() {
       if (response.conversationId && response.conversationId !== conversationIdRef.current) {
         conversationIdRef.current = response.conversationId
         setConversationId(response.conversationId)
-        rememberConversation(PAGE, response.conversationId)
       }
       const sorted = [...response.documents]
         .sort((a, b) => b.score - a.score)
@@ -203,8 +199,9 @@ export function useArchiviste() {
   )
 
   /**
-   * Re-open a stored conversation: fetch it, rebuild this page's exchanges and
-   * adopt its id so the next search threads into it.
+   * Re-open a conversation on demand (the history drawer, when AUTH is on):
+   * fetch it, rebuild this page's exchanges and adopt its id so the next search
+   * threads into it. Nothing is persisted — a refresh always starts empty.
    *
    * @param {string} id
    */
@@ -213,10 +210,9 @@ export function useArchiviste() {
     setExchanges(toExchanges(conversation))
     conversationIdRef.current = conversation.id
     setConversationId(conversation.id)
-    rememberConversation(PAGE, conversation.id)
   }, [])
 
-  /** Empty the page: a fresh thread, no draft, nothing to restore on refresh. */
+  /** Empty the page: a fresh thread, no draft. */
   const startNewConversation = useCallback(() => {
     abortControllerRef.current?.abort()
     abortControllerRef.current = null
@@ -226,18 +222,7 @@ export function useArchiviste() {
     setDraft('')
     conversationIdRef.current = null
     setConversationId(null)
-    rememberConversation(PAGE, null)
   }, [])
-
-  // On first mount, re-open the conversation this browser was last on (id only
-  // was persisted; the content comes from the database). Silent on failure.
-  const restoredRef = useRef(false)
-  useEffect(() => {
-    if (restoredRef.current) return
-    restoredRef.current = true
-    const last = readLastConversation(PAGE)
-    if (last) loadConversation(last).catch(() => {})
-  }, [loadConversation])
 
   /**
    * Optimistic 👍 / 👎 on a search's result list (attached to its assistant
