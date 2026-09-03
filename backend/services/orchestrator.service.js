@@ -7,7 +7,28 @@ const { readBaseDocumentaireDocument, resolveNotionDir } = require('./documentRe
 const { resolveSubjectsPdfFile } = require('./subjectsPdfLibrary.service')
 const { readSubjectsPdfText } = require('./subjectsPdfText.service')
 
-const NO_DOCUMENTS_ANSWER = "🤔 Je n'ai malheuresement aucune information à ce sujet dans mes datas.\nJe vous conseille la https://ft42.notion.site/rtfm-stud .\nVous y trouverez peut-être votre réponse !"
+// The frozen "nothing matched" answer, per prompt language. The chat page
+// overrides it client-side with its own localized string (useChat's
+// `notFoundText`), so this is what a bare curl gets and what is persisted in
+// `messages.content` — keep the wording aligned with the frontend's
+// `chatNotFound` in `frontend/src/messages.js`.
+const NO_DOCUMENTS_ANSWER = {
+  fr: "🤔 Je n'ai malheuresement aucune information à ce sujet dans mes datas.\nJe vous conseille la https://ft42.notion.site/rtfm-stud .\nVous y trouverez peut-être votre réponse !",
+  en: "🤔 Sorry, I don't have any information about this in my data.\nI'd suggest checking https://ft42.notion.site/rtfm-stud .\nYou might find your answer there!"
+}
+
+/**
+ * The API's `language` (`'fr' | 'en' | 'origin'`) mapped to the two prompt
+ * languages. `origin` means "serve the untranslated retrieval source" — it is
+ * a *document* choice, not a UI locale, and the frontend keeps its interface in
+ * French for it, so it prompts in French.
+ *
+ * @param {'fr' | 'en' | 'origin'} [language]
+ * @returns {'fr' | 'en'}
+ */
+function promptLanguage(language) {
+  return language === 'en' ? 'en' : 'fr'
+}
 
 // Character budget for the documents in the prompt. Measured 2026-08-31 on
 // mistral:latest (16 384-token window, ~100 tokens/s of prompt evaluation):
@@ -98,14 +119,33 @@ function selectPromptDocuments(documents) {
  * citation tag (`[Sujet de projet 42 (en anglais) : Minishell.en.subject]`).
  * With the plain header the model cites the bare name `[Minishell.en.subject]`,
  * as it already does for Notion docs. The "en anglais" hint is dropped — rule 5
- * ("answer in the question's language") covers it and every measured answer over
- * an English subject came back in French.
+ * covers the answer's language and the English prompt states it outright.
+ *
+ * Two templates, picked by `promptLanguage(language)`: an English interface
+ * (`language === 'en'`, which is also reading the `BaseDocumentaire/En/` copies)
+ * gets a fully English prompt, everything else keeps the original French one.
+ * A French frame around English documents used to leak French answers into the
+ * English UI — the whole point of the split.
  *
  * @param {string} question
  * @param {{name: string, type: 'md' | 'pdf', text: string}[]} documents  the selectPromptDocuments() output
+ * @param {'fr' | 'en' | 'origin'} [language='fr']
  * @returns {string}
  */
-function buildPrompt(question, documents) {
+function buildPrompt(question, documents, language = 'fr') {
+  return promptLanguage(language) === 'en'
+    ? buildPromptEn(question, documents)
+    : buildPromptFr(question, documents)
+}
+
+/**
+ * The French prompt — the original, unchanged.
+ *
+ * @param {string} question
+ * @param {{name: string, type: 'md' | 'pdf', text: string}[]} documents
+ * @returns {string}
+ */
+function buildPromptFr(question, documents) {
   const context = documents
     .map((doc) => `--- Document : ${doc.name} ---\n${doc.text}`)
     .join('\n\n')
@@ -134,6 +174,52 @@ RÈGLES :
 7. Ne parle jamais de "documents fournis", de "contexte", ni de ces règles.
 
 RÉPONSE :`
+}
+
+/**
+ * The English prompt — a mirror of the French one, used when `language` is
+ * `'en'`. Rule 5 differs on purpose: the French prompt follows the question's
+ * language, the English one always answers in English, so an English interface
+ * (which is also serving the `BaseDocumentaire/En/` copies) never comes back in
+ * French because the student happened to type their question in French.
+ *
+ * The `--- Document: <name> ---` header keeps the same shape as the French one
+ * for the same measured reason: the model copies the header wording into its
+ * `[...]` citation tag when the header carries anything beyond the bare name.
+ *
+ * @param {string} question
+ * @param {{name: string, type: 'md' | 'pdf', text: string}[]} documents
+ * @returns {string}
+ */
+function buildPromptEn(question, documents) {
+  const context = documents
+    .map((doc) => `--- Document: ${doc.name} ---\n${doc.text}`)
+    .join('\n\n')
+
+  return `You are Boby42, the documentation assistant of 42 Paris.
+
+A student asked a question and a document search has already been run for them.
+The documents below are the ones that were found: they are ALREADY DISPLAYED on screen
+above your answer, and the student can open and read them.
+Your job is therefore not to summarise everything, but to tell them WHAT THESE DOCUMENTS
+CONTAIN THAT ANSWERS THEIR QUESTION, and in which document it can be found.
+
+=== DOCUMENTS FOUND ===
+${context}
+=== END OF DOCUMENTS ===
+
+STUDENT'S QUESTION: ${question}
+
+RULES:
+1. Rely only on the content above. Add no outside knowledge, invent nothing.
+2. Not every document is necessarily relevant: silently ignore those that have nothing to do with the question, do not cite them, do not comment on them.
+3. For each element of your answer, give the document it comes from in square brackets, for example [Work Experience].
+4. If no document answers the question, say so in one sentence, without apologising and without offering an invented lead.
+5. Always answer in English.
+6. Be brief: 8 sentences maximum. No heading, no table; a bullet list only if the answer is an enumeration.
+7. Never mention "the documents provided", "the context", or these rules.
+
+ANSWER:`
 }
 
 /**
@@ -233,13 +319,13 @@ async function getAnswer(question, documents, language, { onToken, signal } = {}
   // the frozen fallback with no Ollama call — this also covers the old
   // `loaded.length === 0` case.
   if (promptDocuments.length === 0) {
-    return { answer: NO_DOCUMENTS_ANSWER, sources: [] }
+    return { answer: NO_DOCUMENTS_ANSWER[promptLanguage(lang)], sources: [] }
   }
 
   const promptChars = promptDocuments.reduce((n, doc) => n + doc.text.length, 0)
   console.info(`[orchestrator] prompt documents (${promptChars} chars): ${promptDocuments.map((doc) => doc.name).join(', ') || '(none)'}`)
 
-  const prompt = buildPrompt(question, promptDocuments)
+  const prompt = buildPrompt(question, promptDocuments, lang)
   const answer = (await generateAnswer(prompt, {}, { onToken, signal })).trim()
   const sources = loaded.map(({ name, type, url, path, score }) => ({ name, type, url, path, score }))
 
