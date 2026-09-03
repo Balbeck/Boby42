@@ -1,6 +1,6 @@
 import { getVisitorId } from './identity'
-
-const API_URL = import.meta.env.VITE_API_URL || ''
+import { apiUrl, getJson, postJson, throwIfNotOk } from './http'
+import { readNdjson } from './ndjson'
 
 /** @import { ChatResponse } from '../types/types.js' */
 
@@ -13,6 +13,10 @@ const API_URL = import.meta.env.VITE_API_URL || ''
  * `{type:'done', answer, sources, conversationId, messageId}` line. `onToken` is
  * called with each fragment (and the running full text) as it arrives; the
  * resolved value is the same `ChatResponse` shape the JSON path returned.
+ *
+ * The NDJSON reader loop (and its trailing-buffer guard) lives in
+ * `services/ndjson.js`, shared with `ollamaApi.generate`; only the per-frame
+ * handling below is chat-specific.
  *
  * @param {string} question
  * @param {{
@@ -28,7 +32,8 @@ export async function sendMessage(
   question,
   { signal, conversationId, language, documents, onToken } = {},
 ) {
-  const response = await fetch(`${API_URL}/chat`, {
+  // Its own fetch (not postJson): the raw Response is needed to stream the body.
+  const response = await fetch(apiUrl('/chat'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -45,32 +50,14 @@ export async function sendMessage(
     signal,
   })
 
-  if (!response.ok) {
-    const body = await response.json().catch(() => null)
-    throw new Error(body?.message || 'Error contacting the server')
-  }
+  await throwIfNotOk(response)
 
   // NDJSON: {type:'token'} lines then a terminal {type:'done'} (or {type:'error'}).
-  // `body` is non-null on a streamed 2xx response — asserted, not guarded.
-  const reader = /** @type {ReadableStream<Uint8Array>} */ (response.body).getReader()
-  const decoder = new TextDecoder()
-  let buffer = ''
+  // A {type:'error'} frame throws from this callback; `readNdjson` does not catch
+  // it, so it aborts the read and rejects this call.
   let full = ''
   let final = /** @type {any} */ (null)
-
-  /**
-   * Parse and dispatch one NDJSON line. Written once so the trailing-buffer
-   * flush below runs exactly the same logic as the read loop.
-   *
-   * @param {string} line
-   */
-  function handleLine(line) {
-    let obj
-    try {
-      obj = JSON.parse(line)
-    } catch {
-      return
-    }
+  await readNdjson(response, (obj) => {
     if (obj.type === 'token') {
       full += obj.value
       onToken?.(obj.value, full)
@@ -79,29 +66,7 @@ export async function sendMessage(
     } else if (obj.type === 'error') {
       throw new Error(obj.message || 'Error contacting the server')
     }
-  }
-
-  for (;;) {
-    const { value, done } = await reader.read()
-    if (done) break
-    buffer += decoder.decode(value, { stream: true })
-    let nl
-    while ((nl = buffer.indexOf('\n')) !== -1) {
-      const line = buffer.slice(0, nl).trim()
-      buffer = buffer.slice(nl + 1)
-      if (!line) continue
-      handleLine(line)
-    }
-  }
-
-  // The loop exits on the reader's `done` and would drop whatever is left in
-  // `buffer`. The backend does terminate every line with a \n, but a writer or
-  // proxy that ever omits the final newline would silently cost us the terminal
-  // `done` frame — and with it `messageId` + `conversationId`: the answer would
-  // still show (the concatenated tokens) while the 👍/👎 buttons vanish and the
-  // next question opens a new conversation.
-  buffer += decoder.decode()
-  if (buffer.trim()) handleLine(buffer.trim())
+  })
 
   // `sources` is passed through deliberately although no caller reads it today:
   // the documents on screen come from phase 1 (`POST /chat/documents`), and this
@@ -125,23 +90,11 @@ export async function sendMessage(
  * @returns {Promise<{ count: number, documents: {name: string, score: number, type: 'md' | 'pdf', url: string}[] }>}
  */
 export async function fetchChatDocuments(question, language, { signal } = {}) {
-  const response = await fetch(`${API_URL}/chat/documents`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      question,
-      language,
-      visitorId: getVisitorId(),
-    }),
-    signal,
-  })
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => null)
-    throw new Error(body?.message || 'Error contacting the server')
-  }
-
-  return response.json()
+  return postJson(
+    '/chat/documents',
+    { question, language, visitorId: getVisitorId() },
+    { signal },
+  )
 }
 
 /**
@@ -155,12 +108,5 @@ export async function fetchChatDocuments(question, language, { signal } = {}) {
  * @returns {Promise<{ name: string, content: string }>}
  */
 export async function fetchDocumentContent(url, { signal } = {}) {
-  const response = await fetch(`${API_URL}${url}`, { signal })
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => null)
-    throw new Error(body?.message || 'Error contacting the server')
-  }
-
-  return response.json()
+  return getJson(url, { signal })
 }

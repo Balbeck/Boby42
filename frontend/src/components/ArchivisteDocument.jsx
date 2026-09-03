@@ -11,13 +11,13 @@ import remarkGfm from 'remark-gfm'
  * démonte ce composant, et un document déplié doit le rester.
  *
  * @param {{
- *   document: import('../types/types.js').ArchivisteDocument,
+ *   doc: import('../types/types.js').ArchivisteDocument,
  *   onToggle: () => void,
  *   t: import('../types/types.js').Messages,
  * }} props
  */
-export default function ArchivisteDocument({ document, onToggle, t }) {
-  const expanded = document.expanded ?? false
+export default function ArchivisteDocument({ doc, onToggle, t }) {
+  const expanded = doc.expanded ?? false
 
   return (
     <div className="rounded-xl border border-chat-border bg-chat-surface">
@@ -26,9 +26,9 @@ export default function ArchivisteDocument({ document, onToggle, t }) {
         onClick={onToggle}
         className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
       >
-        <span className="text-sm font-medium text-chat-text">{document.name}</span>
+        <span className="text-sm font-medium text-chat-text">{doc.name}</span>
         <span className="flex items-center gap-3 text-xs text-chat-text-muted">
-          {document.score.toFixed(2)}
+          {doc.score.toFixed(2)}
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -45,7 +45,7 @@ export default function ArchivisteDocument({ document, onToggle, t }) {
 
       {expanded && (
         <div className="border-t border-chat-border px-4 py-3">
-          {document.type === 'pdf' ? (
+          {doc.type === 'pdf' ? (
             <div className="flex flex-col gap-2">
               {/* ⚠️ Pas de `sandbox` ici, et c'est délibéré (F4). L'attribut a été
                   essayé (`sandbox="allow-same-origin"`) puis retiré : un cadre
@@ -58,12 +58,12 @@ export default function ArchivisteDocument({ document, onToggle, t }) {
                   propre backend, servi par `GET /subjectspdf/:file` derrière une
                   liste blanche. */}
               <iframe
-                src={document.url}
-                title={document.name}
+                src={doc.url}
+                title={doc.name}
                 className="h-[70vh] w-full rounded-lg border border-chat-border bg-white"
               />
               <a
-                href={document.url}
+                href={doc.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-chat-green underline"
@@ -71,16 +71,16 @@ export default function ArchivisteDocument({ document, onToggle, t }) {
                 {t.openInNewTab}
               </a>
             </div>
-          ) : document.loading ? (
+          ) : doc.loading ? (
             <div className="text-sm italic text-chat-text-muted">{t.loading}</div>
-          ) : document.error ? (
+          ) : doc.error ? (
             <div className="text-sm text-chat-text">
               {t.errorPrefix}
-              {document.error}
+              {doc.error}
             </div>
           ) : (
             <div className="prose prose-invert prose-sm max-w-none prose-a:text-chat-green">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{document.content}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{doc.content}</ReactMarkdown>
             </div>
           )}
         </div>

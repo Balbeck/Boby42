@@ -5,15 +5,15 @@
 // c'est un choix produit assumé, en attendant l'OAuth2 42. Ne pas supprimer.
 
 import { getVisitorId } from './identity'
-
-const API_URL = import.meta.env.VITE_API_URL || ''
+import { getJson } from './http'
 
 /** @import { ConversationSummary, ConversationDetail } from '../types/types.js' */
 
 /**
  * Le visiteur anonyme est le seul périmètre de lecture côté backend : il est
  * donc envoyé en query param sur les deux appels, jamais dans un body (ce sont
- * des GET).
+ * des GET). Le contrat d'erreur (message du backend, throw) est celui de
+ * `getJson` — voir `services/http.js`.
  *
  * @param {string} path
  * @param {{ signal?: AbortSignal }} [options]
@@ -21,17 +21,10 @@ const API_URL = import.meta.env.VITE_API_URL || ''
  */
 async function get(path, { signal } = {}) {
   const separator = path.includes('?') ? '&' : '?'
-  const response = await fetch(
-    `${API_URL}${path}${separator}visitorId=${encodeURIComponent(getVisitorId())}`,
+  return getJson(
+    `${path}${separator}visitorId=${encodeURIComponent(getVisitorId())}`,
     { signal },
   )
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => null)
-    throw new Error(body?.message || 'Error contacting the server')
-  }
-
-  return response.json()
 }
 
 /**

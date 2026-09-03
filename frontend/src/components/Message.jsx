@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import ArchivisteDocument from './ArchivisteDocument'
+import DocumentsBlock from './DocumentsBlock'
 import FeedbackButtons from './FeedbackButtons'
 
 /**
@@ -70,46 +70,6 @@ function AnimatedText({ text }) {
     <div className="min-h-5 max-w-[85%] text-sm italic text-chat-text-muted">
       {text}
       {DOTS[dotIndex]}
-    </div>
-  )
-}
-
-/**
- * The source documents found for this question — the same count lines and
- * collapsible rows as `/archiviste`, shown before (and kept above) the answer.
- *
- * @param {{
- *   documents: import('../types/types.js').ArchivisteDocument[],
- *   onToggleDocument: (doc: import('../types/types.js').ArchivisteDocument) => void,
- *   t: import('../types/types.js').Messages,
- * }} props
- */
-function DocumentsBlock({ documents, onToggleDocument, t }) {
-  const mdDocs = documents.filter((doc) => doc.type !== 'pdf')
-  const pdfDocs = documents.filter((doc) => doc.type === 'pdf')
-
-  return (
-    <div className="fade-in flex flex-col gap-3">
-      <div className="flex flex-col gap-1 text-xs text-chat-text-muted">
-        <div className="flex items-baseline gap-1.5">
-          <span className="font-medium italic text-chat-text">{t.chatDocsNotionLabel}</span>
-          <span aria-hidden>·</span>
-          <span>{t.chatDocsCount(mdDocs.length)}</span>
-        </div>
-        <div className="flex items-baseline gap-1.5">
-          <span className="font-medium italic text-chat-text">{t.chatDocsSubjectsLabel}</span>
-          <span aria-hidden>·</span>
-          <span>{t.chatDocsCount(pdfDocs.length)}</span>
-        </div>
-      </div>
-      {[...mdDocs, ...pdfDocs].map((doc) => (
-        <ArchivisteDocument
-          key={`${doc.type}:${doc.name}`}
-          document={doc}
-          onToggle={() => onToggleDocument(doc)}
-          t={t}
-        />
-      ))}
     </div>
   )
 }
@@ -239,7 +199,12 @@ export default function Message({
         {step === 'searching' && <AnimatedText text={t.searching} />}
 
         {showDocuments && (
-          <DocumentsBlock documents={documents} onToggleDocument={onToggleDocument} t={t} />
+          <DocumentsBlock
+            documents={documents}
+            onToggleDocument={onToggleDocument}
+            t={t}
+            className="fade-in flex flex-col gap-3"
+          />
         )}
 
         {step === 'reading' && <AnimatedText text={t.chatReading} />}

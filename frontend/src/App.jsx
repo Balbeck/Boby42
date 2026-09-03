@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import ChatInput from './components/ChatInput'
+import Composer from './components/Composer'
 import Disclaimer from './components/Disclaimer'
 import Message from './components/Message'
 import ConstructionNotice from './components/ConstructionNotice'
@@ -52,7 +52,7 @@ function App() {
               </Disclaimer>
             </div>
             <div className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2">
-              <ChatInput
+              <Composer
                 value={draft}
                 onChange={setDraft}
                 onSend={handleSend}
@@ -61,8 +61,8 @@ function App() {
                 queueFull={isQueueFull}
                 autoFocus
                 t={t}
+                disclaimer={withNotionLink(t.chatDisclaimer, t.notionLinkLabel)}
               />
-              <Disclaimer>{withNotionLink(t.chatDisclaimer, t.notionLinkLabel)}</Disclaimer>
             </div>
           </div>
         )}
@@ -86,17 +86,17 @@ function App() {
                 />
               ))}
               <div className="pt-8">
-                <ChatInput
+                <Composer
                   value={draft}
                   onChange={setDraft}
                   onSend={handleSend}
                   onStop={stopGeneration}
                   isSending={isSending}
-                queueFull={isQueueFull}
+                  queueFull={isQueueFull}
                   autoFocus
                   t={t}
+                  disclaimer={withNotionLink(t.chatDisclaimer, t.notionLinkLabel)}
                 />
-                <Disclaimer>{withNotionLink(t.chatDisclaimer, t.notionLinkLabel)}</Disclaimer>
               </div>
             </div>
             <div ref={bottomRef} />

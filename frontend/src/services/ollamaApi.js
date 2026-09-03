@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || ''
+import { apiUrl } from './http'
+import { readNdjson } from './ndjson'
 
 // Transport for the /lab 💬 console — talks straight to the backend's
 // `ALL /ollama/*` reverse-proxy, nothing else. The shared key is not baked in
@@ -7,14 +8,16 @@ const API_URL = import.meta.env.VITE_API_URL || ''
 //
 // Two Ollama endpoints are used: GET /api/tags (installed models) and
 // POST /api/generate (single-prompt completion). Non-OK upstream statuses are
-// surfaced as thrown Errors — unlike labApi, here the caller wants the message.
+// surfaced as thrown Errors — unlike labApi, here the caller wants the message,
+// so this file keeps its own fetch + error handling (only the NDJSON loop is
+// shared, via services/ndjson.js).
 
 /**
  * @param {string} key
  * @returns {Promise<string[]>} installed model names, e.g. ["llama3:latest", …]
  */
 export async function listModels(key) {
-  const response = await fetch(`${API_URL}/ollama/api/tags`, {
+  const response = await fetch(apiUrl('/ollama/api/tags'), {
     headers: { 'x-ollama-key': key },
   })
   if (!response.ok) {
@@ -27,7 +30,9 @@ export async function listModels(key) {
 /**
  * POST /ollama/api/generate. Handles both `stream: false` (one JSON object) and
  * `stream: true` (NDJSON) — in the streaming case `onToken` is called with each
- * incremental piece of text as it arrives.
+ * incremental piece of text as it arrives. The NDJSON reader loop (and its
+ * trailing-buffer guard) lives in `services/ndjson.js`, shared with
+ * `chatApi.sendMessage`; only the per-object handling below is Ollama-specific.
  *
  * @param {string} key
  * @param {{ model?: string, prompt?: string, stream?: boolean, [key: string]: unknown }} body
@@ -37,7 +42,7 @@ export async function listModels(key) {
  *   streaming) — carries `response` and the timing/eval stats.
  */
 export async function generate(key, body, { signal, onToken } = {}) {
-  const response = await fetch(`${API_URL}/ollama/api/generate`, {
+  const response = await fetch(apiUrl('/ollama/api/generate'), {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-ollama-key': key },
     body: JSON.stringify(body),
@@ -54,51 +59,15 @@ export async function generate(key, body, { signal, onToken } = {}) {
   }
 
   // NDJSON: one JSON object per line, the last with done: true + stats.
-  // `body` is non-null on a streamed 2xx response — asserted, not guarded.
-  const reader = /** @type {ReadableStream<Uint8Array>} */ (response.body).getReader()
-  const decoder = new TextDecoder()
-  let buffer = ''
   let last = /** @type {any} */ ({})
   let fullText = ''
-
-  /**
-   * Parse and dispatch one NDJSON line. Written once so the trailing-buffer
-   * flush below runs exactly the same logic as the read loop.
-   *
-   * @param {string} line
-   */
-  function handleLine(line) {
-    let obj
-    try {
-      obj = JSON.parse(line)
-    } catch {
-      return
-    }
+  await readNdjson(response, (obj) => {
     last = obj
     if (obj.response) {
       fullText += obj.response
       onToken?.(obj.response)
     }
-  }
-
-  for (;;) {
-    const { value, done } = await reader.read()
-    if (done) break
-    buffer += decoder.decode(value, { stream: true })
-    let nl
-    while ((nl = buffer.indexOf('\n')) !== -1) {
-      const line = buffer.slice(0, nl).trim()
-      buffer = buffer.slice(nl + 1)
-      if (!line) continue
-      handleLine(line)
-    }
-  }
-
-  // Same guard as chatApi.sendMessage: the loop exits on `done` and would drop
-  // an unterminated last line — here that is the object carrying `done: true`
-  // and the timing stats.
-  buffer += decoder.decode()
-  if (buffer.trim()) handleLine(buffer.trim())
+  })
 
   return { ...last, response: fullText }
 }

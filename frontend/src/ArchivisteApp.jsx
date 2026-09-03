@@ -1,4 +1,4 @@
-import ChatInput from './components/ChatInput'
+import Composer from './components/Composer'
 import Disclaimer from './components/Disclaimer'
 import ArchivisteMessage from './components/ArchivisteMessage'
 import { useAutoScroll } from './hooks/useAutoScroll'
@@ -35,7 +35,7 @@ function ArchivisteApp() {
               </Disclaimer>
             </div>
             <div className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2">
-              <ChatInput
+              <Composer
                 value={draft}
                 onChange={setDraft}
                 onSend={(question) => sendQuestion(question, language)}
@@ -45,8 +45,8 @@ function ArchivisteApp() {
                 autoFocus
                 placeholder={t.archivisteInputPlaceholder}
                 t={t}
+                disclaimer={withNotionLink(t.archivisteDisclaimer, t.notionLinkLabel)}
               />
-              <Disclaimer>{withNotionLink(t.archivisteDisclaimer, t.notionLinkLabel)}</Disclaimer>
             </div>
           </div>
         )}
@@ -70,18 +70,18 @@ function ArchivisteApp() {
                 />
               ))}
               <div className="pt-8">
-                <ChatInput
+                <Composer
                   value={draft}
                   onChange={setDraft}
                   onSend={(question) => sendQuestion(question, language)}
                   onStop={stopGeneration}
                   isSending={isSending}
-                queueFull={isQueueFull}
+                  queueFull={isQueueFull}
                   autoFocus
                   placeholder={t.archivisteInputPlaceholder}
                   t={t}
+                  disclaimer={withNotionLink(t.archivisteDisclaimer, t.notionLinkLabel)}
                 />
-                <Disclaimer>{withNotionLink(t.archivisteDisclaimer, t.notionLinkLabel)}</Disclaimer>
               </div>
             </div>
             <div ref={bottomRef} />

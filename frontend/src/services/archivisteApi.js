@@ -1,6 +1,5 @@
 import { getVisitorId } from './identity'
-
-const API_URL = import.meta.env.VITE_API_URL || ''
+import { getJson, postJson } from './http'
 
 /** @import { ArchivisteSearchResponse } from '../types/types.js' */
 
@@ -11,24 +10,16 @@ const API_URL = import.meta.env.VITE_API_URL || ''
  * @returns {Promise<ArchivisteSearchResponse>}
  */
 export async function search(question, language, { signal, conversationId } = {}) {
-  const response = await fetch(`${API_URL}/archiviste`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postJson(
+    '/archiviste',
+    {
       question,
       language,
       visitorId: getVisitorId(),
       ...(conversationId ? { conversationId } : {}),
-    }),
-    signal,
-  })
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => null)
-    throw new Error(body?.message || 'Error contacting the server')
-  }
-
-  return response.json()
+    },
+    { signal },
+  )
 }
 
 /**
@@ -38,12 +29,5 @@ export async function search(question, language, { signal, conversationId } = {}
  * @returns {Promise<{ name: string, content: string }>}
  */
 export async function fetchDocument(url, { signal } = {}) {
-  const response = await fetch(`${API_URL}${url}`, { signal })
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => null)
-    throw new Error(body?.message || 'Error contacting the server')
-  }
-
-  return response.json()
+  return getJson(url, { signal })
 }

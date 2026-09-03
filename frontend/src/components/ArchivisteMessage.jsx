@@ -1,4 +1,4 @@
-import ArchivisteDocument from './ArchivisteDocument'
+import DocumentsBlock from './DocumentsBlock'
 import FeedbackButtons from './FeedbackButtons'
 
 /**
@@ -48,41 +48,17 @@ export default function ArchivisteMessage({
           {error}
         </div>
       ) : (
-        (() => {
-          const mdDocs = documents.filter((doc) => doc.type !== 'pdf')
-          const pdfDocs = documents.filter((doc) => doc.type === 'pdf')
-
-          return (
-            <div className="flex max-w-[85%] flex-col gap-3">
-              <div className="flex flex-col gap-1 text-xs text-chat-text-muted">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-medium italic text-chat-text">{t.chatDocsNotionLabel}</span>
-                  <span aria-hidden>·</span>
-                  <span>{t.chatDocsCount(mdDocs.length)}</span>
-                </div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-medium italic text-chat-text">{t.chatDocsSubjectsLabel}</span>
-                  <span aria-hidden>·</span>
-                  <span>{t.chatDocsCount(pdfDocs.length)}</span>
-                </div>
-              </div>
-              {documents.length === 0 && (
-                <p className="text-xs italic text-chat-text-muted">{t.archivisteEmpty}</p>
-              )}
-              {[...mdDocs, ...pdfDocs].map((document) => (
-                <ArchivisteDocument
-                  key={`${document.type ?? 'md'}:${document.name}`}
-                  document={document}
-                  onToggle={() => onToggleDocument(document)}
-                  t={t}
-                />
-              ))}
-              {messageId && onRate && (
-                <FeedbackButtons rating={rating} onRate={onRate} t={t} />
-              )}
-            </div>
-          )
-        })()
+        <DocumentsBlock
+          documents={documents}
+          onToggleDocument={onToggleDocument}
+          t={t}
+          className="flex max-w-[85%] flex-col gap-3"
+          emptyMessage={t.archivisteEmpty}
+        >
+          {messageId && onRate && (
+            <FeedbackButtons rating={rating} onRate={onRate} t={t} />
+          )}
+        </DocumentsBlock>
       )}
     </div>
   )
