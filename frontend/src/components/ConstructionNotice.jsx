@@ -14,7 +14,7 @@ import { messages, useLanguage } from '../i18n'
  */
 export default function ConstructionNotice({ onClose, title, body }) {
   const language = useLanguage()
-  const t = messages[language] ?? messages.fr
+  const t = messages[/** @type {import('../types/types.js').MessagesLocale} */ (language)] ?? messages.fr
   const heading = title ?? t.wipTitle
   const text = body ?? t.wipBody
 

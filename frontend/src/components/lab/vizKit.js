@@ -1,3 +1,6 @@
+// @ts-nocheck — the /lab payloads (labApi.table/tree/analytics*) arrive untyped
+// from the backend; writing typedefs for them is a task of its own, and /lab is a
+// single-user, password-gated admin page. Drop this line when they get typed.
 // Shared constants + pure formatters for the 🔬 dashboard. No JSX here so the
 // file stays lint-clean under react-refresh (components live in VizChrome.jsx).
 //

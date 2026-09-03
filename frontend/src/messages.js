@@ -25,7 +25,8 @@ export const messages = {
     chatNotFound: `🤔 Je n'ai malheureusement aucune information à ce sujet dans mes données.\nJe vous conseille la ${NOTION_RTFM_URL} .\nVous y trouverez peut-être votre réponse !`,
     chatDocsNotionLabel: 'RTFM - Notion',
     chatDocsSubjectsLabel: 'Sujets Projet 42',
-    chatDocsCount: (n) => `${n} document${n > 1 ? 's' : ''} trouvé${n > 1 ? 's' : ''}`,
+    chatDocsCount: (/** @type {number} */ n) =>
+      `${n} document${n > 1 ? 's' : ''} trouvé${n > 1 ? 's' : ''}`,
     archivisteTitle: '🕵️‍♂️ Archiviste 42',
     archivisteTagline:
       'Décris ce que tu cherches, je te renvoie les documents classés par pertinence.',
@@ -73,7 +74,7 @@ export const messages = {
     chatNotFound: `🤔 Sorry, I don't have any information about this in my data.\nI'd suggest checking ${NOTION_RTFM_URL} .\nYou might find your answer there!`,
     chatDocsNotionLabel: 'RTFM - Notion',
     chatDocsSubjectsLabel: '42 Project Subjects',
-    chatDocsCount: (n) => `${n} document${n === 1 ? '' : 's'} found`,
+    chatDocsCount: (/** @type {number} */ n) => `${n} document${n === 1 ? '' : 's'} found`,
     archivisteTitle: '🕵️‍♂️ 42 Archivist',
     archivisteTagline: 'Describe what you need, I return the matching documents ranked by relevance.',
     archivisteInputPlaceholder: 'Which documents are you looking for?',

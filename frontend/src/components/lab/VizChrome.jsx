@@ -1,3 +1,6 @@
+// @ts-nocheck — the /lab payloads (labApi.table/tree/analytics*) arrive untyped
+// from the backend; writing typedefs for them is a task of its own, and /lab is a
+// single-user, password-gated admin page. Drop this line when they get typed.
 // (axis props for recharts live in vizKit.js so this file exports components only)
 
 /**

@@ -10,7 +10,7 @@
  * que la bordure des deux pastilles du coin opposé) et sans fond au repos. Ce
  * n'est pas une action principale : la page reste la conversation.
  *
- * @param {{ open: boolean, onClick: () => void, t: object }} props
+ * @param {{ open: boolean, onClick: () => void, t: import('../types/types.js').Messages }} props
  */
 export default function HamburgerButton({ open, onClick, t }) {
   return (

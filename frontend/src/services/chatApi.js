@@ -51,7 +51,8 @@ export async function sendMessage(
   }
 
   // NDJSON: {type:'token'} lines then a terminal {type:'done'} (or {type:'error'}).
-  const reader = response.body.getReader()
+  // `body` is non-null on a streamed 2xx response — asserted, not guarded.
+  const reader = /** @type {ReadableStream<Uint8Array>} */ (response.body).getReader()
   const decoder = new TextDecoder()
   let buffer = ''
   let full = ''

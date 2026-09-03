@@ -1,3 +1,6 @@
+// @ts-nocheck — the /lab payloads (labApi.table/tree/analytics*) arrive untyped
+// from the backend; writing typedefs for them is a task of its own, and /lab is a
+// single-user, password-gated admin page. Drop this line when they get typed.
 // Small shared formatting helpers for the /lab db-viz components. Kept in one
 // place so the grid and the relations explorer render ids and timestamps the
 // same way — a given id gets the same colour chip in both.

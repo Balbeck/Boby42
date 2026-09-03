@@ -1,7 +1,7 @@
 const STORAGE_KEY = 'boby42.visitorId'
 
 /** In-memory fallback when localStorage is unavailable (private mode, blocked). */
-let memoryId = null
+let memoryId = /** @type {string | null} */ (null)
 
 /**
  * Stable anonymous id for this browser. Read once from localStorage, created on

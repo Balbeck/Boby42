@@ -13,7 +13,7 @@
  *   isSending?: boolean,
  *   autoFocus?: boolean,
  *   placeholder?: string,
- *   t: object,
+ *   t: import('../types/types.js').Messages,
  * }} props
  */
 export default function ChatInput({
@@ -35,6 +35,7 @@ export default function ChatInput({
     onSend(value)
   }
 
+  /** @param {import('react').KeyboardEvent<HTMLTextAreaElement>} event */
   function handleKeyDown(event) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()

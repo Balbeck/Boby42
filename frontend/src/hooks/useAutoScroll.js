@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 /** Scrolle automatiquement vers le bas dès que le contenu du conteneur change de taille. */
 export function useAutoScroll() {
-  const [container, setContainer] = useState(null)
-  const bottomRef = useRef(null)
-  const containerRef = useCallback((node) => setContainer(node), [])
+  const [container, setContainer] = useState(/** @type {Element | null} */ (null))
+  const bottomRef = useRef(/** @type {HTMLDivElement | null} */ (null))
+  const containerRef = useCallback((/** @type {Element | null} */ node) => setContainer(node), [])
 
   useEffect(() => {
     if (!container) return

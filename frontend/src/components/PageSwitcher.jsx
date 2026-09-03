@@ -1,12 +1,13 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 
+/** @type {{ path: string, flag: string, labelKey: 'pageSwitchArchiviste' | 'pageSwitchChat' }[]} */
 const OPTIONS = [
   { path: '/archiviste', flag: '🕵️‍♂️', labelKey: 'pageSwitchArchiviste' },
   { path: '/chat', flag: '👨🏻‍🏭', labelKey: 'pageSwitchChat' },
 ]
 
 /**
- * @param {{ t: object }} props
+ * @param {{ t: import('../types/types.js').Messages }} props
  */
 export default function PageSwitcher({ t }) {
   const location = useLocation()

@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 
+/** @import { Language } from '../types/types.js' */
+
+/** @type {{ code: Language, flag: string, label: string }[]} */
 const LANGUAGES = [
   { code: 'fr', flag: '🇫🇷', label: 'Français' },
   { code: 'en', flag: '🇬🇧', label: 'English' },
@@ -7,16 +10,20 @@ const LANGUAGES = [
 ]
 
 /**
- * @param {{ language: string, onChange: (language: string) => void }} props
+ * @param {{ language: Language, onChange: (language: Language) => void }} props
  */
 export default function LanguageSwitcher({ language, onChange }) {
   const [open, setOpen] = useState(false)
-  const containerRef = useRef(null)
+  const containerRef = useRef(/** @type {HTMLDivElement | null} */ (null))
   const current = LANGUAGES.find((lang) => lang.code === language) ?? LANGUAGES[0]
 
   useEffect(() => {
+    /** @param {MouseEvent} event */
     function handleClickOutside(event) {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(/** @type {Node} */ (event.target))
+      ) {
         setOpen(false)
       }
     }
@@ -24,6 +31,7 @@ export default function LanguageSwitcher({ language, onChange }) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  /** @param {Language} code */
   function handleSelect(code) {
     onChange(code)
     setOpen(false)

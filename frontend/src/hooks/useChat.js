@@ -3,7 +3,7 @@ import { sendMessage, fetchChatDocuments, fetchDocumentContent } from '../servic
 import { sendFeedback } from '../services/feedbackApi'
 import { getConversation } from '../services/historyApi'
 
-/** @import { Exchange, ArchivisteDocument, ConversationDetail } from '../types/types.js' */
+/** @import { Exchange, ArchivisteDocument, ConversationDetail, Language } from '../types/types.js' */
 
 /**
  * Une conversation lue en base → les échanges que la page rend déjà. Les
@@ -21,6 +21,7 @@ import { getConversation } from '../services/historyApi'
  * @returns {Exchange[]}
  */
 function toExchanges(conversation) {
+  /** @type {Exchange[]} */
   const exchanges = []
 
   conversation.messages.forEach((message, index) => {
@@ -35,7 +36,10 @@ function toExchanges(conversation) {
       documents: (assistant?.documents ?? []).map((doc) => ({
         name: doc.name,
         type: doc.type ?? 'md',
-        url: doc.url,
+        // The column is nullable, but a logged row always carries the url the
+        // backend built for it — asserted rather than defaulted, so no runtime
+        // behaviour is added here.
+        url: /** @type {string} */ (doc.url),
         score: doc.score ?? 0,
         loading: false,
         loaded: false,
@@ -76,8 +80,7 @@ function patchDocument(exchanges, exchangeId, docType, docName, patch) {
 }
 
 export function useChat() {
-  /** @type {[Exchange[], Function]} */
-  const [exchanges, setExchanges] = useState([])
+  const [exchanges, setExchanges] = useState(/** @type {Exchange[]} */ ([]))
   const [isSending, setIsSending] = useState(false)
   // Unsent input for this page. Lifted out of `ChatInput` so a /chat ↔
   // /archiviste switch (which unmounts the page) doesn't drop a half-typed
@@ -86,10 +89,10 @@ export function useChat() {
   // The conversation this page's exchanges belong to (T4). `null` until the
   // first response comes back with one. Kept in a ref too so `sendQuestion`
   // stays referentially stable (same reason as `pendingIdRef`).
-  const [conversationId, setConversationId] = useState(null)
-  const conversationIdRef = useRef(null)
-  const abortControllerRef = useRef(null)
-  const pendingIdRef = useRef(null)
+  const [conversationId, setConversationId] = useState(/** @type {string | null} */ (null))
+  const conversationIdRef = useRef(/** @type {string | null} */ (null))
+  const abortControllerRef = useRef(/** @type {AbortController | null} */ (null))
+  const pendingIdRef = useRef(/** @type {string | null} */ (null))
   // Mirror of `exchanges` so `submitFeedback` can read the current messageId /
   // rating without a stale closure and without depending on `exchanges`.
   const exchangesRef = useRef(exchanges)
@@ -97,13 +100,23 @@ export function useChat() {
     exchangesRef.current = exchanges
   }, [exchanges])
 
-  // sendQuestion(question, language, notFoundText) — `notFoundText` is the
-  // UI-language "no document found" message, passed in by the page (hooks hold
-  // no user-facing text). When phase 1 finds nothing the backend skips the LLM
-  // and returns a fixed French fallback — we freeze this localized version into
-  // the exchange instead, so it never re-translates on a later language switch
-  // (session history is frozen text).
-  const sendQuestion = useCallback(async (question, language, notFoundText) => {
+  /**
+   * `notFoundText` is the UI-language "no document found" message, passed in by
+   * the page (hooks hold no user-facing text). When phase 1 finds nothing the
+   * backend skips the LLM and returns a fixed French fallback — we freeze this
+   * localized version into the exchange instead, so it never re-translates on a
+   * later language switch (session history is frozen text).
+   *
+   * @param {string} question
+   * @param {Language} language
+   * @param {string} [notFoundText]
+   */
+  const sendQuestion = useCallback(
+    async (
+      /** @type {string} */ question,
+      /** @type {Language} */ language,
+      /** @type {string | undefined} */ notFoundText,
+    ) => {
     const trimmed = question.trim()
     if (!trimmed) return
 
@@ -195,11 +208,16 @@ export function useChat() {
         ),
       )
     } catch (err) {
-      if (err.name === 'AbortError') return
+      if (/** @type {Error} */ (err).name === 'AbortError') return
       setExchanges((prev) =>
         prev.map((exchange) =>
           exchange.id === id
-            ? { ...exchange, error: err.message, loading: false, phase: 'error' }
+            ? {
+                ...exchange,
+                error: /** @type {Error} */ (err).message,
+                loading: false,
+                phase: 'error',
+              }
             : exchange,
         ),
       )
@@ -229,7 +247,8 @@ export function useChat() {
    * @param {string} exchangeId
    * @param {ArchivisteDocument} doc
    */
-  const loadDocument = useCallback(async (exchangeId, doc) => {
+  const loadDocument = useCallback(
+    async (/** @type {string} */ exchangeId, /** @type {ArchivisteDocument} */ doc) => {
     if (doc.loaded || doc.loading) return
 
     if (doc.type === 'pdf') {
@@ -252,7 +271,7 @@ export function useChat() {
       setExchanges((prev) =>
         patchDocument(prev, exchangeId, doc.type, doc.name, {
           loading: false,
-          error: err.message,
+          error: /** @type {Error} */ (err).message,
         }),
       )
     }
@@ -267,7 +286,7 @@ export function useChat() {
    * @param {ArchivisteDocument} doc
    */
   const toggleDocument = useCallback(
-    (exchangeId, doc) => {
+    (/** @type {string} */ exchangeId, /** @type {ArchivisteDocument} */ doc) => {
       const next = !doc.expanded
       setExchanges((prev) =>
         patchDocument(prev, exchangeId, doc.type, doc.name, { expanded: next }),
@@ -285,7 +304,7 @@ export function useChat() {
    *
    * @param {string} id
    */
-  const loadConversation = useCallback(async (id) => {
+  const loadConversation = useCallback(async (/** @type {string} */ id) => {
     const conversation = await getConversation(id)
     setExchanges(toExchanges(conversation))
     conversationIdRef.current = conversation.id
@@ -312,7 +331,12 @@ export function useChat() {
    * @param {-1 | 0 | 1} rating
    * @param {string} [comment] - only sent with a -1
    */
-  const submitFeedback = useCallback(async (exchangeId, rating, comment) => {
+  const submitFeedback = useCallback(
+    async (
+      /** @type {string} */ exchangeId,
+      /** @type {-1 | 0 | 1} */ rating,
+      /** @type {string | undefined} */ comment,
+    ) => {
     const exchange = exchangesRef.current.find((e) => e.id === exchangeId)
     if (!exchange || !exchange.messageId) return
 

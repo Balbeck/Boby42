@@ -33,7 +33,7 @@ export default function PersistentNav() {
   const chat = useChat()
   const archiviste = useArchiviste()
   const language = useLanguage()
-  const t = messages[language] ?? messages.fr
+  const t = messages[/** @type {import('../types/types.js').MessagesLocale} */ (language)] ?? messages.fr
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const page = location.pathname === '/chat' ? 'chat' : 'archiviste'
@@ -61,7 +61,7 @@ export default function PersistentNav() {
 
   /** Rouvrir une conversation, sur la page à laquelle elle appartient. */
   const openConversation = useCallback(
-    (conversation) => {
+    (/** @type {import('../types/types.js').ConversationSummary} */ conversation) => {
       const target = conversation.page === 'chat' ? chat : archiviste
       if (location.pathname !== `/${conversation.page}`) navigate(`/${conversation.page}`)
       target.loadConversation(conversation.id).catch(() => {})

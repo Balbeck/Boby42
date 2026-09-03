@@ -15,7 +15,7 @@ import { login as apiLogin } from '../services/labApi'
  */
 export default function LabLogin({ onClose, onSuccess }) {
   const navigate = useNavigate()
-  const firstFieldRef = useRef(null)
+  const firstFieldRef = useRef(/** @type {HTMLInputElement | null} */ (null))
   const [identifiant, setIdentifiant] = useState('')
   const [motDePasse, setMotDePasse] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -26,6 +26,7 @@ export default function LabLogin({ onClose, onSuccess }) {
     firstFieldRef.current?.focus()
   }, [])
 
+  /** @param {import('react').FormEvent<HTMLFormElement>} event */
   async function handleSubmit(event) {
     event.preventDefault()
     if (submitting) return

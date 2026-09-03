@@ -21,7 +21,7 @@ export async function listModels(key) {
     throw new Error(`Model list failed (${response.status})`)
   }
   const body = await response.json().catch(() => ({}))
-  return (body.models ?? []).map((m) => m.name).filter(Boolean)
+  return (body.models ?? []).map((/** @type {{ name: string }} */ m) => m.name).filter(Boolean)
 }
 
 /**
@@ -30,7 +30,8 @@ export async function listModels(key) {
  * incremental piece of text as it arrives.
  *
  * @param {string} key
- * @param {object} body  the raw Ollama request body ({ model, prompt, options, … })
+ * @param {{ model?: string, prompt?: string, stream?: boolean, [key: string]: unknown }} body
+ *   the raw Ollama request body ({ model, prompt, options, … })
  * @param {{ signal?: AbortSignal, onToken?: (text: string) => void }} [opts]
  * @returns {Promise<object>} the final Ollama object (last NDJSON line when
  *   streaming) — carries `response` and the timing/eval stats.
@@ -53,7 +54,8 @@ export async function generate(key, body, { signal, onToken } = {}) {
   }
 
   // NDJSON: one JSON object per line, the last with done: true + stats.
-  const reader = response.body.getReader()
+  // `body` is non-null on a streamed 2xx response — asserted, not guarded.
+  const reader = /** @type {ReadableStream<Uint8Array>} */ (response.body).getReader()
   const decoder = new TextDecoder()
   let buffer = ''
   let last = {}

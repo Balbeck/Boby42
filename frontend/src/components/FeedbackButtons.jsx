@@ -10,7 +10,7 @@ import { useState } from 'react'
  * @param {{
  *   rating: -1 | 0 | 1,
  *   onRate: (rating: -1 | 0 | 1, comment?: string) => void,
- *   t: object,
+ *   t: import('../types/types.js').Messages,
  * }} props
  */
 export default function FeedbackButtons({ rating, onRate, t }) {
@@ -41,6 +41,7 @@ export default function FeedbackButtons({ rating, onRate, t }) {
     setShowComment(true)
   }
 
+  /** @param {import('react').FormEvent<HTMLFormElement>} event */
   function handleSubmitComment(event) {
     event.preventDefault()
     onRate(-1, comment.trim() || undefined)

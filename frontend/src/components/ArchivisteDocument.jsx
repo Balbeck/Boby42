@@ -13,7 +13,7 @@ import remarkGfm from 'remark-gfm'
  * @param {{
  *   document: import('../types/types.js').ArchivisteDocument,
  *   onToggle: () => void,
- *   t: object,
+ *   t: import('../types/types.js').Messages,
  * }} props
  */
 export default function ArchivisteDocument({ document, onToggle, t }) {

@@ -23,7 +23,7 @@ const DAY = 24 * HOUR
  *
  * @param {string} iso
  * @param {'fr' | 'en' | 'origin'} language
- * @param {object} t
+ * @param {import('../types/types.js').Messages} t
  * @returns {string}
  */
 function relativeDate(iso, language, t) {
@@ -34,6 +34,10 @@ function relativeDate(iso, language, t) {
   const locale = language === 'en' ? 'en' : 'fr'
   const format = new Intl.RelativeTimeFormat(locale, { numeric: 'auto', style: 'narrow' })
 
+  /**
+   * @param {number} value
+   * @param {Intl.RelativeTimeFormatUnit} unit
+   */
   const ago = (value, unit) => format.format(-Math.round(value), unit)
   if (elapsed < HOUR) return ago(elapsed / MINUTE, 'minute')
   if (elapsed < DAY) return ago(elapsed / HOUR, 'hour')
@@ -59,12 +63,11 @@ function relativeDate(iso, language, t) {
  *   onNew: () => void,
  *   activeIds: { chat: string | null, archiviste: string | null },
  *   language: 'fr' | 'en' | 'origin',
- *   t: object,
+ *   t: import('../types/types.js').Messages,
  * }} props
  */
 export default function Drawer({ open, onClose, onSelect, onNew, activeIds, language, t }) {
-  /** @type {[ConversationSummary[], Function]} */
-  const [conversations, setConversations] = useState([])
+  const [conversations, setConversations] = useState(/** @type {ConversationSummary[]} */ ([]))
 
   useEffect(() => {
     if (!open) return
@@ -77,7 +80,7 @@ export default function Drawer({ open, onClose, onSelect, onNew, activeIds, lang
 
   useEffect(() => {
     if (!open) return
-    const onKeyDown = (event) => {
+    const onKeyDown = (/** @type {KeyboardEvent} */ event) => {
       if (event.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', onKeyDown)

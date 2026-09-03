@@ -11,7 +11,7 @@ import FeedbackButtons from './FeedbackButtons'
  *   rating?: -1 | 0 | 1,
  *   onRate?: (rating: -1 | 0 | 1, comment?: string) => void,
  *   onToggleDocument: (doc: import('../types/types.js').ArchivisteDocument) => void,
- *   t: object,
+ *   t: import('../types/types.js').Messages,
  * }} props
  */
 export default function ArchivisteMessage({

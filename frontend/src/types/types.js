@@ -1,4 +1,26 @@
 /**
+ * Langue choisie dans l'interface : `'origin'` veut dire « ne traduis pas,
+ * sers la source de récupération » (voir le `CLAUDE.md` racine).
+ *
+ * @typedef {'fr' | 'en' | 'origin'} Language
+ */
+
+/**
+ * Les locales réellement présentes dans `messages` — `'origin'` n'en est pas
+ * une, les pages retombent sur `fr`. Dérivée de l'objet, jamais recopiée.
+ *
+ * @typedef {keyof typeof import('../messages.js').messages} MessagesLocale
+ */
+
+/**
+ * Les chaînes d'interface d'une locale — le `t` passé en prop aux composants.
+ * Dérivé de l'objet réel (`messages.fr`) et non écrit à la main : la clé
+ * ajoutée dans `messages.js` est typée sans rien toucher ici.
+ *
+ * @typedef {typeof import('../messages.js').messages.fr} Messages
+ */
+
+/**
  * @typedef {Object} Exchange
  * @property {string} id
  * @property {string} question

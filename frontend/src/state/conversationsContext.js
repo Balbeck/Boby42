@@ -11,8 +11,17 @@ import { createContext, useContext } from 'react'
  * `react-refresh/only-export-components` : le composant provider vit à part.
  */
 
-export const ChatContext = createContext(null)
-export const ArchivisteContext = createContext(null)
+/**
+ * La valeur portée par chaque contexte : exactement ce que le hook d'état de la
+ * page renvoie. Dérivée du hook (`ReturnType`) et non recopiée à la main, pour
+ * qu'elle suive toute évolution de `useChat` / `useArchiviste`.
+ *
+ * @typedef {ReturnType<typeof import('../hooks/useChat').useChat>} ChatState
+ * @typedef {ReturnType<typeof import('../hooks/useArchiviste').useArchiviste>} ArchivisteState
+ */
+
+export const ChatContext = createContext(/** @type {ChatState | null} */ (null))
+export const ArchivisteContext = createContext(/** @type {ArchivisteState | null} */ (null))
 
 /** État du chat, partagé entre les pages. */
 export function useChat() {

@@ -13,6 +13,7 @@ import { ChatContext, ArchivisteContext } from './conversationsContext'
  * Deux contextes distincts (un par page) plutôt qu'une valeur combinée : une
  * mise à jour du chat ne re-rend pas le consommateur archiviste.
  */
+/** @param {{ children: import('react').ReactNode }} props */
 function ConversationsProvider({ children }) {
   const chat = useChatState()
   const archiviste = useArchivisteState()

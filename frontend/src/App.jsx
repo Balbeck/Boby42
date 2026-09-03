@@ -26,11 +26,11 @@ function App() {
   } = useChat()
   const { containerRef, bottomRef } = useAutoScroll()
   const language = useLanguage()
-  const t = messages[language] ?? messages.fr
+  const t = messages[/** @type {import('./types/types.js').MessagesLocale} */ (language)] ?? messages.fr
   const hasStarted = exchanges.length > 0
   const [showWip, setShowWip] = useState(false)
   const dismissWip = () => setShowWip(false)
-  const handleSend = (question) => {
+  const handleSend = (/** @type {string} */ question) => {
     if (!wipSeen) {
       wipSeen = true
       setShowWip(true)

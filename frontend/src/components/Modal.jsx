@@ -13,11 +13,12 @@ import { useEffect, useRef } from 'react'
  * }} props
  */
 export default function Modal({ onClose, children, label, closeLabel }) {
-  const closeRef = useRef(null)
+  const closeRef = useRef(/** @type {HTMLButtonElement | null} */ (null))
 
   useEffect(() => {
     closeRef.current?.focus()
 
+    /** @param {KeyboardEvent} event */
     function onKeyDown(event) {
       if (event.key === 'Escape') onClose()
     }

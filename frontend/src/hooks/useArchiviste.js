@@ -3,7 +3,7 @@ import { search, fetchDocument } from '../services/archivisteApi'
 import { sendFeedback } from '../services/feedbackApi'
 import { getConversation } from '../services/historyApi'
 
-/** @import { ArchivisteExchange, ArchivisteDocument, ConversationDetail } from '../types/types.js' */
+/** @import { ArchivisteExchange, ArchivisteDocument, ConversationDetail, Language } from '../types/types.js' */
 
 /**
  * Une conversation lue en base → les échanges de cette page. Même appariement
@@ -16,6 +16,7 @@ import { getConversation } from '../services/historyApi'
  * @returns {ArchivisteExchange[]}
  */
 function toExchanges(conversation) {
+  /** @type {ArchivisteExchange[]} */
   const exchanges = []
 
   conversation.messages.forEach((message, index) => {
@@ -29,7 +30,10 @@ function toExchanges(conversation) {
       documents: (assistant?.documents ?? []).map((doc) => ({
         name: doc.name,
         type: doc.type ?? 'md',
-        url: doc.url,
+        // La colonne est nullable, mais une ligne journalisée porte toujours
+        // l'url construite par le backend — assertion de type, aucun garde-fou
+        // ajouté à l'exécution.
+        url: /** @type {string} */ (doc.url),
         score: doc.score ?? 0,
         loading: false,
         loaded: false,
@@ -63,8 +67,7 @@ function patchDocument(exchanges, exchangeId, docName, patch) {
 }
 
 export function useArchiviste() {
-  /** @type {[ArchivisteExchange[], Function]} */
-  const [exchanges, setExchanges] = useState([])
+  const [exchanges, setExchanges] = useState(/** @type {ArchivisteExchange[]} */ ([]))
   const [isSending, setIsSending] = useState(false)
   // Unsent input for this page — lifted out of `ChatInput` so a page switch
   // doesn't drop a half-typed search (same as useChat).
@@ -72,10 +75,10 @@ export function useArchiviste() {
   // The conversation this page's searches belong to (T4). `null` until the
   // first response carries one; kept in a ref too so `sendQuestion` stays
   // referentially stable.
-  const [conversationId, setConversationId] = useState(null)
-  const conversationIdRef = useRef(null)
-  const abortControllerRef = useRef(null)
-  const pendingIdRef = useRef(null)
+  const [conversationId, setConversationId] = useState(/** @type {string | null} */ (null))
+  const conversationIdRef = useRef(/** @type {string | null} */ (null))
+  const abortControllerRef = useRef(/** @type {AbortController | null} */ (null))
+  const pendingIdRef = useRef(/** @type {string | null} */ (null))
   // Mirror of `exchanges` so `submitFeedback` can read the current messageId /
   // rating without a stale closure and without depending on `exchanges`.
   const exchangesRef = useRef(exchanges)
@@ -83,7 +86,12 @@ export function useArchiviste() {
     exchangesRef.current = exchanges
   }, [exchanges])
 
-  const sendQuestion = useCallback(async (question, language) => {
+  /**
+   * @param {string} question
+   * @param {Language} language
+   */
+  const sendQuestion = useCallback(
+    async (/** @type {string} */ question, /** @type {Language} */ language) => {
     const trimmed = question.trim()
     if (!trimmed) return
 
@@ -126,10 +134,12 @@ export function useArchiviste() {
         ),
       )
     } catch (err) {
-      if (err.name === 'AbortError') return
+      if (/** @type {Error} */ (err).name === 'AbortError') return
       setExchanges((prev) =>
         prev.map((exchange) =>
-          exchange.id === id ? { ...exchange, loading: false, error: err.message } : exchange,
+          exchange.id === id
+            ? { ...exchange, loading: false, error: /** @type {Error} */ (err).message }
+            : exchange,
         ),
       )
     } finally {
@@ -154,7 +164,8 @@ export function useArchiviste() {
    * @param {string} exchangeId
    * @param {ArchivisteDocument} doc
    */
-  const loadDocument = useCallback(async (exchangeId, doc) => {
+  const loadDocument = useCallback(
+    async (/** @type {string} */ exchangeId, /** @type {ArchivisteDocument} */ doc) => {
     if (doc.loaded || doc.loading) return
 
     // PDFs aren't fetched as JSON — the <iframe> loads doc.url itself. Just mark
@@ -175,7 +186,7 @@ export function useArchiviste() {
       setExchanges((prev) =>
         patchDocument(prev, exchangeId, doc.name, {
           loading: false,
-          error: err.message,
+          error: /** @type {Error} */ (err).message,
         }),
       )
     }
@@ -190,7 +201,7 @@ export function useArchiviste() {
    * @param {ArchivisteDocument} doc
    */
   const toggleDocument = useCallback(
-    (exchangeId, doc) => {
+    (/** @type {string} */ exchangeId, /** @type {ArchivisteDocument} */ doc) => {
       const next = !doc.expanded
       setExchanges((prev) => patchDocument(prev, exchangeId, doc.name, { expanded: next }))
       if (next) loadDocument(exchangeId, doc)
@@ -205,7 +216,7 @@ export function useArchiviste() {
    *
    * @param {string} id
    */
-  const loadConversation = useCallback(async (id) => {
+  const loadConversation = useCallback(async (/** @type {string} */ id) => {
     const conversation = await getConversation(id)
     setExchanges(toExchanges(conversation))
     conversationIdRef.current = conversation.id
@@ -232,7 +243,12 @@ export function useArchiviste() {
    * @param {-1 | 0 | 1} rating
    * @param {string} [comment] - only sent with a -1
    */
-  const submitFeedback = useCallback(async (exchangeId, rating, comment) => {
+  const submitFeedback = useCallback(
+    async (
+      /** @type {string} */ exchangeId,
+      /** @type {-1 | 0 | 1} */ rating,
+      /** @type {string | undefined} */ comment,
+    ) => {
     const exchange = exchangesRef.current.find((e) => e.id === exchangeId)
     if (!exchange || !exchange.messageId) return
 

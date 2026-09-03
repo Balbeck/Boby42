@@ -5,8 +5,19 @@
     "target": "esnext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
-    "noEmit": true
+    "noEmit": true,
+    "types": [
+      "node",
+      "vite/client"
+    ],
+    "maxNodeModuleJsDepth": 0
   },
-  "include": ["**/*.js", "**/*.jsx"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "**/*.js",
+    "**/*.jsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

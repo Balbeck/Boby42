@@ -19,7 +19,7 @@ function ArchivisteApp() {
   } = useArchiviste()
   const { containerRef, bottomRef } = useAutoScroll()
   const language = useLanguage()
-  const t = messages[language] ?? messages.fr
+  const t = messages[/** @type {import('./types/types.js').MessagesLocale} */ (language)] ?? messages.fr
   const hasStarted = exchanges.length > 0
 
   return (

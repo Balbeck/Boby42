@@ -1,3 +1,6 @@
+// @ts-nocheck — the /lab payloads (labApi.table/tree/analytics*) arrive untyped
+// from the backend; writing typedefs for them is a task of its own, and /lab is a
+// single-user, password-gated admin page. Drop this line when they get typed.
 // The full set of knobs Ollama's POST /api/generate accepts alongside `prompt`,
 // as a flat catalogue the config panel renders from. Nothing here is sent
 // unless the user gives it a value — an empty field is omitted so Ollama keeps

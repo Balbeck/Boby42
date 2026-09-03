@@ -47,9 +47,15 @@ const DOT_INTERVAL = 500
 // it a fast answer makes the documents and the answer land together and the
 // "reading" step is never seen.
 const STEP_DURATIONS = { intro: 3000, searching: 1000, reading: 3000 }
+
+/** @typedef {'intro' | 'searching' | 'reading' | 'done' | 'error'} GuidedStep */
+
+/** @type {GuidedStep[]} */
 const FULL_ORDER = ['intro', 'searching', 'reading', 'done']
+/** @type {GuidedStep[]} */
 const NO_DOCUMENTS_ORDER = ['intro', 'searching', 'done']
 
+/** @param {{ text: string }} props */
 function AnimatedText({ text }) {
   const [dotIndex, setDotIndex] = useState(0)
 
@@ -73,7 +79,7 @@ function AnimatedText({ text }) {
  * @param {{
  *   documents: import('../types/types.js').ArchivisteDocument[],
  *   onToggleDocument: (doc: import('../types/types.js').ArchivisteDocument) => void,
- *   t: object,
+ *   t: import('../types/types.js').Messages,
  * }} props
  */
 function DocumentsBlock({ documents, onToggleDocument, t }) {
@@ -115,7 +121,7 @@ function DocumentsBlock({ documents, onToggleDocument, t }) {
  *
  * @param {'retrieving' | 'reading' | 'done' | 'error'} phase
  * @param {boolean} hasDocuments
- * @returns {'intro' | 'searching' | 'reading' | 'done' | 'error'}
+ * @returns {GuidedStep}
  */
 function useGuidedStep(phase, hasDocuments) {
   const order = hasDocuments ? FULL_ORDER : NO_DOCUMENTS_ORDER
@@ -130,11 +136,13 @@ function useGuidedStep(phase, hasDocuments) {
   // after a tab switch (already 'done' / 'error', or mid-generation 'reading')
   // shows its state at once instead of replaying intro → searching → reading.
   // Only a fresh 'retrieving' exchange starts the animated sequence.
-  const [step, setStep] = useState(() =>
-    phase === 'done' ? 'done'
-      : phase === 'error' ? 'error'
-        : phase === 'reading' && hasDocuments ? 'reading'
-          : 'intro',
+  const [step, setStep] = useState(
+    /** @returns {GuidedStep} */
+    () =>
+      phase === 'done' ? 'done'
+        : phase === 'error' ? 'error'
+          : phase === 'reading' && hasDocuments ? 'reading'
+            : 'intro',
   )
   // Wall-clock time the current step was entered. Set from an effect (never
   // during render) so the minimum-duration maths below is measured from entry.
@@ -167,7 +175,10 @@ function useGuidedStep(phase, hasDocuments) {
     const toIdx = order.indexOf(target)
     if (toIdx <= fromIdx) return
 
-    const wait = Math.max(0, STEP_DURATIONS[step] - (Date.now() - enteredAt.current))
+    // `step` is neither 'done' nor 'error' here (both return above), so it is
+    // always one of STEP_DURATIONS' keys — asserted, no runtime branch added.
+    const minimum = STEP_DURATIONS[/** @type {keyof typeof STEP_DURATIONS} */ (step)]
+    const wait = Math.max(0, minimum - (Date.now() - enteredAt.current))
     const timer = setTimeout(() => setStep(order[fromIdx + 1]), wait)
     return () => clearTimeout(timer)
   }, [step, target, order])
@@ -185,8 +196,8 @@ function useGuidedStep(phase, hasDocuments) {
  *   messageId?: string | null,
  *   rating?: -1 | 0 | 1,
  *   onRate?: (rating: -1 | 0 | 1, comment?: string) => void,
- *   onToggleDocument?: (doc: import('../types/types.js').ArchivisteDocument) => void,
- *   t: object,
+ *   onToggleDocument: (doc: import('../types/types.js').ArchivisteDocument) => void,
+ *   t: import('../types/types.js').Messages,
  * }} props
  */
 export default function Message({
