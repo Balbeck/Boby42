@@ -6,6 +6,7 @@ import HamburgerButton from '../components/HamburgerButton'
 import Drawer from '../components/Drawer'
 import { useChat, useArchiviste } from '../state/conversationsContext'
 import { messages, useLanguage, setLanguage } from '../i18n'
+import { AUTH } from '../auth'
 
 /**
  * La navigation qui ne se démonte jamais : rendue **une seule fois** par la
@@ -16,6 +17,11 @@ import { messages, useLanguage, setLanguage } from '../i18n'
  *   coin haut-gauche est au hamburger), rendue ici et nulle part ailleurs ;
  * - le tiroir d'historique et son état d'ouverture ;
  * - la position de scroll de chaque page.
+ *
+ * Tant que `AUTH` (`../auth`) est `false` — pas encore de vraie auth 42 —, le
+ * hamburger et le tiroir sont masqués et l'on revient au layout précédent : le
+ * PageSwitcher en haut à **gauche**, le LanguageSwitcher seul en haut à droite.
+ * L'état du tiroir reste en place, dormant, pour un simple retour à `true`.
  *
  * Elle est **à l'intérieur** de `ConversationsProvider` : c'est ce qui lui
  * permet de lire `useChat()` / `useArchiviste()` — un composant ne peut pas
@@ -72,23 +78,36 @@ export default function PersistentNav() {
 
   return (
     <>
-      <div className="fixed top-4 left-4 z-30">
-        <HamburgerButton open={drawerOpen} onClick={() => setDrawerOpen((prev) => !prev)} t={t} />
-      </div>
-      <div className="fixed top-4 right-4 z-20 flex items-center gap-2">
-        <PageSwitcher t={t} />
-        <LanguageSwitcher language={language} onChange={setLanguage} />
-      </div>
+      {AUTH ? (
+        <>
+          <div className="fixed top-4 left-4 z-30">
+            <HamburgerButton open={drawerOpen} onClick={() => setDrawerOpen((prev) => !prev)} t={t} />
+          </div>
+          <div className="fixed top-4 right-4 z-20 flex items-center gap-2">
+            <PageSwitcher t={t} />
+            <LanguageSwitcher language={language} onChange={setLanguage} />
+          </div>
 
-      <Drawer
-        open={drawerOpen}
-        onClose={closeDrawer}
-        onSelect={openConversation}
-        onNew={startNew}
-        activeIds={{ chat: chat.conversationId, archiviste: archiviste.conversationId }}
-        language={language}
-        t={t}
-      />
+          <Drawer
+            open={drawerOpen}
+            onClose={closeDrawer}
+            onSelect={openConversation}
+            onNew={startNew}
+            activeIds={{ chat: chat.conversationId, archiviste: archiviste.conversationId }}
+            language={language}
+            t={t}
+          />
+        </>
+      ) : (
+        <>
+          <div className="fixed top-4 left-4 z-20">
+            <PageSwitcher t={t} />
+          </div>
+          <div className="fixed top-4 right-4 z-20">
+            <LanguageSwitcher language={language} onChange={setLanguage} />
+          </div>
+        </>
+      )}
 
       <Outlet />
     </>

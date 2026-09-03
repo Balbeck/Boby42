@@ -18,4 +18,10 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    // Config files run in Node at build/dev time, not in the browser — `process`
+    // is a legit global there.
+    files: ['*.config.{js,mjs}'],
+    languageOptions: { globals: globals.node },
+  },
 ])
