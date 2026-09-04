@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -27,6 +28,14 @@ const backendTarget = `http://${backendHost}:${backendPort}`
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // Vitest (F10). Lives here rather than in a vitest.config.js so the tests run
+  // through this same config — a separate file would silently shadow it.
+  // `jsdom` because two of the three suites render React hooks; `globals` stays
+  // off so every test file imports what it uses (ESLint sees no unknown global).
+  test: {
+    environment: 'jsdom',
+    include: ['src/**/*.test.{js,jsx}'],
+  },
   server: {
     port: Number(process.env.FRONTEND_PORT),
     allowedHosts: (process.env.VITE_ALLOWED_HOSTS || '').split(',').filter(Boolean),
