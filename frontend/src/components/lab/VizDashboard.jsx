@@ -1,8 +1,9 @@
 // @ts-nocheck — the /lab payloads (labApi.table/tree/analytics*) arrive untyped
 // from the backend; writing typedefs for them is a task of its own, and /lab is a
 // single-user, password-gated admin page. Drop this line when they get typed.
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import * as labApi from '../../services/labApi'
+import { useKeyedResource } from '../../hooks/useKeyedResource'
 import { C, windowFor } from './vizKit'
 import { SectionLabel } from './VizChrome'
 import PeriodSelect from './PeriodSelect'
@@ -28,22 +29,14 @@ import VisitorExplorer from './VisitorExplorer'
  */
 export default function VizDashboard() {
   const [range, setRange] = useState(() => windowFor('7'))
-  // { key, value } — value is 'error' or the payload; a key mismatch = loading.
-  const [res, setRes] = useState(null)
 
   const key = `${range.from}|${range.to}`
 
-  useEffect(() => {
-    let cancelled = false
-    labApi
-      .analyticsOverview({ from: range.from, to: range.to })
-      .then((v) => !cancelled && setRes({ key: `${range.from}|${range.to}`, value: v ?? 'error' }))
-    return () => {
-      cancelled = true
-    }
-  }, [range.from, range.to])
-
-  const overview = res && res.key === key ? res.value : null
+  // null = loading, 'error' = failed, else the overview payload for this window.
+  const overview = useKeyedResource(
+    () => labApi.analyticsOverview({ from: range.from, to: range.to }).then((v) => v ?? 'error'),
+    key,
+  )
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">

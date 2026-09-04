@@ -1,8 +1,9 @@
 // @ts-nocheck — the /lab payloads (labApi.table/tree/analytics*) arrive untyped
 // from the backend; writing typedefs for them is a task of its own, and /lab is a
 // single-user, password-gated admin page. Drop this line when they get typed.
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import * as labApi from '../../services/labApi'
+import { useKeyedResource } from '../../hooks/useKeyedResource'
 import { Card, PageBadge, Pager } from './VizChrome'
 import { fmtAgo, fmtInt } from './vizKit'
 import { Tree } from './RelationsExplorer'
@@ -22,45 +23,32 @@ export default function ConversationBrowser() {
   const [fromDay, setFromDay] = useState('')
   const [toDay, setToDay] = useState('')
   const [offset, setOffset] = useState(0)
-  const [listRes, setListRes] = useState(null) // { key, value } — value 'error' | { items, total }
   const [selected, setSelected] = useState(null) // conversation id
-  const [detailRes, setDetailRes] = useState(null) // { id, tree }
 
   const listKey = `${pageFilter}|${fromDay}|${toDay}|${offset}`
 
-  useEffect(() => {
-    let cancelled = false
-    labApi
-      .analyticsConversations({
-        from: fromDay ? `${fromDay}T00:00:00Z` : undefined,
-        to: toDay ? `${toDay}T23:59:59Z` : undefined,
-        limit: PAGE_SIZE,
-        offset,
-        page: pageFilter || undefined,
-      })
-      .then((v) => {
-        if (!cancelled) {
-          setListRes({ key: `${pageFilter}|${fromDay}|${toDay}|${offset}`, value: v ?? 'error' })
-        }
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [pageFilter, fromDay, toDay, offset])
+  // null = loading, 'error' = failed, else { items, total } for this page.
+  const list = useKeyedResource(
+    () =>
+      labApi
+        .analyticsConversations({
+          from: fromDay ? `${fromDay}T00:00:00Z` : undefined,
+          to: toDay ? `${toDay}T23:59:59Z` : undefined,
+          limit: PAGE_SIZE,
+          offset,
+          page: pageFilter || undefined,
+        })
+        .then((v) => v ?? 'error'),
+    listKey,
+  )
 
-  useEffect(() => {
-    if (!selected) return
-    let cancelled = false
-    labApi.analyticsConversation(selected).then((tree) => {
-      if (!cancelled) setDetailRes({ id: selected, tree: tree ?? null })
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [selected])
+  // null = loading, 'error' = failed, else the selected conversation's subtree.
+  const detail = useKeyedResource(
+    () => labApi.analyticsConversation(selected).then((t) => t ?? 'error'),
+    selected || '',
+  )
 
-  const listLoading = !listRes || listRes.key !== listKey
-  const list = listLoading ? null : listRes.value
+  const listLoading = list === null
   const items = list && list !== 'error' ? list.items : []
   const total = list && list !== 'error' ? list.total : 0
 
@@ -72,26 +60,22 @@ export default function ConversationBrowser() {
   }
 
   if (selected) {
-    const ready = detailRes && detailRes.id === selected
     return (
       <Card className="flex flex-col gap-3">
         <button
           type="button"
-          onClick={() => {
-            setSelected(null)
-            setDetailRes(null)
-          }}
+          onClick={() => setSelected(null)}
           className="self-start rounded-md border border-chat-border px-2.5 py-1 text-xs text-chat-text-muted hover:bg-chat-surface-2 hover:text-chat-text"
         >
           ← Back to list
         </button>
-        {!ready && <p className="text-sm text-chat-text-muted">Loading transcript…</p>}
-        {ready && !detailRes.tree && (
+        {detail === null && <p className="text-sm text-chat-text-muted">Loading transcript…</p>}
+        {detail === 'error' && (
           <p className="text-sm text-chat-error">Couldn’t load that conversation.</p>
         )}
-        {ready && detailRes.tree && (
+        {detail && detail !== 'error' && (
           <div className="max-w-full overflow-x-auto">
-            <Tree tree={detailRes.tree} />
+            <Tree tree={detail} />
           </div>
         )}
       </Card>

@@ -1,8 +1,9 @@
 // @ts-nocheck — the /lab payloads (labApi.table/tree/analytics*) arrive untyped
 // from the backend; writing typedefs for them is a task of its own, and /lab is a
 // single-user, password-gated admin page. Drop this line when they get typed.
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import * as labApi from '../../services/labApi'
+import { useKeyedResource } from '../../hooks/useKeyedResource'
 import { chipColor, fmtTimestamp } from './format'
 
 /**
@@ -17,36 +18,22 @@ import { chipColor, fmtTimestamp } from './format'
 
 
 export default function RelationsExplorer() {
-  const [convos, setConvos] = useState(null) // null loading | 'error' | rows[]
   const [draft, setDraft] = useState('')
   const [choice, setChoice] = useState('') // the id currently being explored
-  const [result, setResult] = useState(null) // { id, tree } ; mismatch with choice = loading
 
-  useEffect(() => {
-    let cancelled = false
-    labApi.table('conversations').then((res) => {
-      if (!cancelled) setConvos(res ? res.rows : 'error')
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  // null = loading, 'error' = failed, else the conversation rows.
+  const convos = useKeyedResource(
+    () => labApi.table('conversations').then((res) => (res ? res.rows : 'error')),
+    'conversations',
+  )
 
-  useEffect(() => {
-    const id = choice.trim()
-    if (!id) return
-    let cancelled = false
-    labApi.tree(id).then((tree) => {
-      if (!cancelled) setResult({ id, tree: tree ?? null })
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [choice])
+  // null = loading, 'error' = failed, else the picked/pasted conversation subtree.
+  const tree = useKeyedResource(
+    () => labApi.tree(choice.trim()).then((t) => t ?? 'error'),
+    choice.trim(),
+  )
 
   const list = Array.isArray(convos) ? convos : []
-  const loaded = result && result.id === choice.trim()
-  const tree = loaded ? result.tree : null
 
   return (
     <div className="flex w-full max-w-full flex-col gap-3">
@@ -100,15 +87,15 @@ export default function RelationsExplorer() {
         <p className="text-sm text-chat-text-muted">Pick or paste a conversation to expand it.</p>
       )}
 
-      {choice.trim() && !loaded && (
+      {choice.trim() && tree === null && (
         <p className="text-sm text-chat-text-muted">Loading tree…</p>
       )}
 
-      {loaded && !tree && (
+      {tree === 'error' && (
         <p className="text-sm text-chat-error">No conversation with that id.</p>
       )}
 
-      {tree && <Tree tree={tree} />}
+      {tree && tree !== 'error' && <Tree tree={tree} />}
     </div>
   )
 }

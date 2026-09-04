@@ -3,6 +3,7 @@
 // single-user, password-gated admin page. Drop this line when they get typed.
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import * as labApi from '../../services/labApi'
+import { useKeyedResource } from '../../hooks/useKeyedResource'
 import { Card, PageBadge } from './VizChrome'
 import { fmtAgo, fmtInt, fmtMs } from './vizKit'
 import { chipColor, fmtTimestamp } from './format'
@@ -29,7 +30,6 @@ export default function VisitorExplorer() {
   // { key, value } — value 'notfound' | 'listerror' | 'error' | { visitor, rows, truncated }
   const [convosRes, setConvosRes] = useState(null)
   const [openConvo, setOpenConvo] = useState(null) // conversation id at level 2
-  const [treeRes, setTreeRes] = useState(null) // { id, tree: object | null }
 
   // The visitor list for the dropdown, newest activity first.
   useEffect(() => {
@@ -76,25 +76,19 @@ export default function VisitorExplorer() {
       if (cancelled) return
       setConvosRes({ key: id, value })
       setOpenConvo(null)
-      setTreeRes(null)
     })
     return () => {
       cancelled = true
     }
   }, [selected, visitors])
 
-  // One conversation's subtree, when a row is opened. A stale `treeRes` from the
-  // previous conversation is masked by the `treeRes.id === openConvo` guard.
-  useEffect(() => {
-    if (!openConvo) return
-    let cancelled = false
-    labApi.tree(openConvo).then((tree) => {
-      if (!cancelled) setTreeRes({ id: openConvo, tree: tree ?? null })
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [openConvo])
+  // One conversation's subtree, when a row is opened: null = loading, 'error' =
+  // failed, else the tree. Keyed on `openConvo`, so a stale previous-conversation
+  // result is never shown and clearing `openConvo` yields null.
+  const treeRes = useKeyedResource(
+    () => labApi.tree(openConvo).then((t) => t ?? 'error'),
+    openConvo || '',
+  )
 
   const options = Array.isArray(visitors) ? visitors : []
   const selectValue = options.some((v) => (v.anon_id || String(v.id)) === selected)
@@ -102,7 +96,6 @@ export default function VisitorExplorer() {
     : ''
   const convosReady = convosRes && convosRes.key === selected.trim()
   const cv = convosReady ? convosRes.value : null
-  const treeReady = treeRes && treeRes.id === openConvo
 
   return (
     <Card className="flex flex-col gap-3">
@@ -207,20 +200,20 @@ export default function VisitorExplorer() {
 
       {cv && typeof cv === 'object' && openConvo && (
         <>
-          {!treeReady && (
+          {treeRes === null && (
             <>
               <BackBtn onBack={() => setOpenConvo(null)} />
               <p className="text-sm text-chat-text-muted">Loading transcript…</p>
             </>
           )}
-          {treeReady && !treeRes.tree && (
+          {treeRes === 'error' && (
             <>
               <BackBtn onBack={() => setOpenConvo(null)} />
               <p className="text-sm text-chat-error">Couldn&rsquo;t load that conversation.</p>
             </>
           )}
-          {treeReady && treeRes.tree && (
-            <ExchangesView tree={treeRes.tree} onBack={() => setOpenConvo(null)} />
+          {treeRes && treeRes !== 'error' && (
+            <ExchangesView tree={treeRes} onBack={() => setOpenConvo(null)} />
           )}
         </>
       )}

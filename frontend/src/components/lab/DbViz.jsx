@@ -1,8 +1,9 @@
 // @ts-nocheck — the /lab payloads (labApi.table/tree/analytics*) arrive untyped
 // from the backend; writing typedefs for them is a task of its own, and /lab is a
 // single-user, password-gated admin page. Drop this line when they get typed.
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import * as labApi from '../../services/labApi'
+import { useKeyedResource } from '../../hooks/useKeyedResource'
 import DataGrid, { ChevronSelect } from './DataGrid'
 import RelationsExplorer from './RelationsExplorer'
 
@@ -49,32 +50,16 @@ function renderHint(text) {
 }
 
 export default function DbViz() {
-  const [tables, setTables] = useState(null) // null = loading | 'error' | LabTableInfo[]
   const [selected, setSelected] = useState(null)
-  // { name, payload } — payload is LabTableData, or null when the fetch failed.
-  // A mismatch with `selected` (or absence) means "still loading".
-  const [result, setResult] = useState(null)
 
-  useEffect(() => {
-    let cancelled = false
-    labApi.tables().then((data) => {
-      if (!cancelled) setTables(data ?? 'error')
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  // null = loading, 'error' = failed, else LabTableInfo[].
+  const tables = useKeyedResource(() => labApi.tables().then((d) => d ?? 'error'), 'tables')
 
-  useEffect(() => {
-    if (!selected) return
-    let cancelled = false
-    labApi.table(selected).then((payload) => {
-      if (!cancelled) setResult({ name: selected, payload: payload ?? null })
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [selected])
+  // null = loading, 'error' = failed, else the selected table's LabTableData.
+  const data = useKeyedResource(
+    () => labApi.table(selected).then((p) => p ?? 'error'),
+    selected || '',
+  )
 
   if (tables === null) {
     return <p className="text-sm text-chat-text-muted">Loading tables…</p>
@@ -84,9 +69,6 @@ export default function DbViz() {
       <p className="text-sm text-chat-error">Couldn&rsquo;t load the table list. Check the backend is up.</p>
     )
   }
-
-  const loaded = result && result.name === selected
-  const data = loaded ? result.payload : null
 
   return (
     <div className="flex w-full max-w-full flex-col gap-5">
@@ -117,15 +99,15 @@ export default function DbViz() {
         <p className="text-sm text-chat-text-muted">Pick a table to inspect its rows.</p>
       )}
 
-      {selected && !loaded && (
+      {selected && data === null && (
         <p className="text-sm text-chat-text-muted">Loading {selected}…</p>
       )}
 
-      {loaded && !data && (
+      {selected && data === 'error' && (
         <p className="text-sm text-chat-error">Couldn&rsquo;t load &ldquo;{selected}&rdquo;.</p>
       )}
 
-      {data && (
+      {data && data !== 'error' && (
         <div className="flex w-full max-w-full flex-col gap-2">
           <p className="text-xs text-chat-text-muted tabular-nums">
             {data.columns.length} columns · {data.rowCount} rows

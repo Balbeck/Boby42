@@ -1,8 +1,9 @@
 // @ts-nocheck — the /lab payloads (labApi.table/tree/analytics*) arrive untyped
 // from the backend; writing typedefs for them is a task of its own, and /lab is a
 // single-user, password-gated admin page. Drop this line when they get typed.
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import * as labApi from '../../services/labApi'
+import { useKeyedResource } from '../../hooks/useKeyedResource'
 import { Card, PageBadge, Pager } from './VizChrome'
 import { fmtAgo, fmtInt } from './vizKit'
 
@@ -21,36 +22,26 @@ const PAGE_SIZE = 25
 export default function UnmatchedQuestions({ range }) {
   const [pageFilter, setPageFilter] = useState('') // '' | 'chat' | 'archiviste'
   const [offset, setOffset] = useState(0)
-  const [res, setRes] = useState(null) // { key, value } — value 'error' | { items, total }
   const [copied, setCopied] = useState('') // id of the just-copied row, or 'ALL'
 
   const key = `${range.from}|${range.to}|${pageFilter}|${offset}`
 
-  useEffect(() => {
-    let cancelled = false
-    labApi
-      .analyticsUnmatched({
-        from: range.from,
-        to: range.to,
-        limit: PAGE_SIZE,
-        offset,
-        page: pageFilter || undefined,
-      })
-      .then((v) => {
-        if (!cancelled) {
-          setRes({
-            key: `${range.from}|${range.to}|${pageFilter}|${offset}`,
-            value: v ?? 'error',
-          })
-        }
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [range.from, range.to, pageFilter, offset])
+  // null = loading, 'error' = failed, else { items, total } for this page.
+  const data = useKeyedResource(
+    () =>
+      labApi
+        .analyticsUnmatched({
+          from: range.from,
+          to: range.to,
+          limit: PAGE_SIZE,
+          offset,
+          page: pageFilter || undefined,
+        })
+        .then((v) => v ?? 'error'),
+    key,
+  )
 
-  const loading = !res || res.key !== key
-  const data = loading ? null : res.value
+  const loading = data === null
   const items = data && data !== 'error' ? data.items : []
   const total = data && data !== 'error' ? data.total : 0
 
