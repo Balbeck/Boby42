@@ -7,9 +7,10 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node --test test/**/*.test.js",
+    "test": "node --test --require ./test/env.js --test-concurrency=1 \"test/**/*.test.js\"",
     "start": "fastify start -l info app.js",
-    "dev": "fastify start -w -l info -P app.js"
+    "dev": "fastify start -w -l info -P app.js",
+    "test:coverage": "node --test --require ./test/env.js --test-concurrency=1 --experimental-test-coverage --test-coverage-exclude=\"test/**\" --test-coverage-lines=80 \"test/**/*.test.js\""
   },
   "keywords": [],
   "author": "",

@@ -238,7 +238,9 @@ async function dailyFeedback ({ from, to }) {
 
 // Retrieval-score histogram: 15 fixed 0.01-wide buckets over [0.85, 1.00].
 // `MIN_SCORE` on both pages is 0.89, so real data lives in the top ~11 buckets;
-// the wider floor catches any pre-tuning row without an "other" bin.
+// the wider floor catches any pre-tuning row without an "other" bin. Bins are
+// half-open, [lo, hi), except the last one which includes 1.00 — see the
+// bucket expression in scoreHistogram().
 const HIST_LO = 0.85
 const HIST_HI = 1.0
 const HIST_BUCKETS = 15
@@ -254,7 +256,23 @@ async function scoreHistogram ({ from, to }) {
   return sequelize.query(
     `
     WITH s AS (
-      SELECT width_bucket(md.score, :lo, :hi, :n) AS bucket
+      -- Two deliberate corrections to a plain width_bucket(md.score, :lo, :hi, :n):
+      --
+      -- 1. a numeric cast, not the float8 the column stores. In double precision
+      --    (0.95 - 0.85) / 0.01 evaluates to 9.999999999999998, so a score
+      --    sitting exactly on a bin edge fell one bin low — 0.95 was counted in
+      --    [0.94, 0.95) and 0.99 in [0.98, 0.99). Exact decimal arithmetic puts
+      --    each score in the bin the chart's own label claims.
+      -- 2. least(..., :n) folds the upper bound into the last bin. width_bucket
+      --    puts x >= hi in bucket n+1, and the LEFT JOIN on
+      --    generate_series(1, :n) below then DROPPED those rows entirely — while
+      --    1.000 is a common real score here (a subject PDF matches its own name
+      --    at exactly 1.000 -- see "Services & RAG storage"). The histogram was
+      --    silently under-counting its best bin.
+      SELECT least(
+               width_bucket(md.score::numeric, (:lo)::numeric, (:hi)::numeric, :n),
+               :n
+             ) AS bucket
       FROM message_documents md
       JOIN messages m ON m.id = md.message_id
       WHERE md.score IS NOT NULL AND m.created_at BETWEEN :from AND :to

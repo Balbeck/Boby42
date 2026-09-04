@@ -1,4 +1,4 @@
-.PHONY: localMac prod down logs help vectorStore subjectsPdfVectorStore db-migrate db-seed psql check-env-lab test testsFront testsBack
+.PHONY: localMac prod down logs help vectorStore subjectsPdfVectorStore db-migrate db-seed psql check-env-lab test testsFront testsBack coverage
 
 help:
 	@echo "make localMac    - build and run on Docker Desktop (Mac), published ports, .env.localMac + .env.lab"
@@ -12,7 +12,8 @@ help:
 	@echo "make subjectsPdfVectorStore - regenerate backend/data/subjectsPdf_vector_store.json from subjectsPdfQuestions.json (requires backend container running)"
 	@echo "make test        - run testsFront and testsBack"
 	@echo "make testsFront  - run the frontend test suite (npm run test in frontend/)"
-	@echo "make testsBack   - backend tests (not implemented yet)"
+	@echo "make testsBack   - run the backend test suite (node --test in backend/)"
+	@echo "make coverage    - backend tests + coverage report, fails under 80% lines"
 
 check-env-lab:
 	@test -f .env.lab || { \
@@ -56,5 +57,12 @@ test: testsFront testsBack
 testsFront:
 	cd frontend && npm run test
 
+# Runs on the HOST, like testsFront. The DB-backed suites need the postgres
+# container up (they use the loopback-published port and create their own
+# `boby42_test` database inside it); with it down they SKIP rather than fail,
+# so this target stays green either way. See backend/CLAUDE.md → Tests.
 testsBack:
-	@echo "🚧 Test Backend to implement !"
+	cd backend && npm run test
+
+coverage:
+	cd backend && npm run test:coverage
