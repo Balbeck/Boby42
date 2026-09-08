@@ -10,7 +10,9 @@
     "test": "node --test --require ./test/env.js --test-concurrency=1 \"test/**/*.test.js\"",
     "start": "fastify start -l info app.js",
     "dev": "fastify start -w -l info -P app.js",
-    "test:coverage": "node --test --require ./test/env.js --test-concurrency=1 --experimental-test-coverage --test-coverage-exclude=\"test/**\" --test-coverage-lines=80 \"test/**/*.test.js\""
+    "test:coverage": "node --test --require ./test/env.js --test-concurrency=1 --experimental-test-coverage --test-coverage-exclude=\"test/**\" --test-coverage-exclude=\"db/migrations/**\" --test-coverage-exclude=\"db/migrate.js\" --test-coverage-exclude=\"db/seed.js\" --test-coverage-exclude=\"db/umzug.js\" --test-coverage-exclude=\"scripts/**\" --test-coverage-exclude=\"app.js\" --test-coverage-exclude=\"types/types.js\" --test-coverage-lines=100 \"test/**/*.test.js\"",
+    "test:unit": "node --test --require ./test/env.js --test-concurrency=1 \"test/unit/**/*.test.js\"",
+    "test:coverage:unit": "node --test --require ./test/env.js --test-concurrency=1 --experimental-test-coverage --test-coverage-exclude=\"test/**\" --test-coverage-exclude=\"db/migrations/**\" --test-coverage-exclude=\"db/migrate.js\" --test-coverage-exclude=\"db/seed.js\" --test-coverage-exclude=\"db/umzug.js\" --test-coverage-exclude=\"scripts/**\" --test-coverage-exclude=\"app.js\" --test-coverage-exclude=\"types/types.js\" --test-coverage-lines=100 \"test/unit/**/*.test.js\""
   },
   "keywords": [],
   "author": "",

@@ -1,4 +1,4 @@
-.PHONY: localMac prod down logs help vectorStore subjectsPdfVectorStore db-migrate db-seed psql check-env-lab test testsFront testsBack coverage
+.PHONY: localMac prod down logs help vectorStore subjectsPdfVectorStore db-migrate db-seed psql check-env-lab test testsFront testsBack testsUnit coverage coverageBack coverageFront
 
 help:
 	@echo "make localMac    - build and run on Docker Desktop (Mac), published ports, .env.localMac + .env.lab"
@@ -13,7 +13,10 @@ help:
 	@echo "make test        - run testsFront and testsBack"
 	@echo "make testsFront  - run the frontend test suite (npm run test in frontend/)"
 	@echo "make testsBack   - run the backend test suite (node --test in backend/)"
-	@echo "make coverage    - backend tests + coverage report, fails under 80% lines"
+	@echo "make coverage    - coverage for BOTH apps (backend 100% floor, frontend ratchet)"
+	@echo "make coverageBack  - backend coverage only, fails under 100% lines"
+	@echo "make coverageFront - frontend coverage only, fails under the ratchet in vite.config.js"
+	@echo "make testsUnit   - backend UNIT tests only (no DB, no Ollama, no containers)"
 
 check-env-lab:
 	@test -f .env.lab || { \
@@ -64,5 +67,21 @@ testsFront:
 testsBack:
 	cd backend && npm run test
 
-coverage:
+# The test/unit/** suites alone — every external boundary stubbed (no Postgres,
+# no Ollama, no containers), ~1 s. The fast inner loop while writing code.
+# It is NOT the whole unit set: test/lib/ and five of test/services/ are pure
+# too. The 100% line figure is `make coverage`, not this. See backend/CLAUDE.md.
+testsUnit:
+	cd backend && npm run test:unit
+
+# Both apps. The frontend number was invisible from the repo root before, which
+# is how a 66% could sit next to a 100% without anyone seeing the gap — the two
+# floors are deliberately different (see each app's CLAUDE.md → Tests) but both
+# have to be checked by the same command.
+coverage: coverageBack coverageFront
+
+coverageBack:
 	cd backend && npm run test:coverage
+
+coverageFront:
+	cd frontend && npm run test:coverage

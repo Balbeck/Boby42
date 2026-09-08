@@ -143,3 +143,64 @@ describe('useGuidedStep', () => {
     expect(result.current).toBe('intro')
   })
 })
+
+// ── The error path (F11) ────────────────────────────────────────────────────
+// Not covered before, and it is the one branch with a deliberate *delay* rather
+// than a jump: a failure during the intro still lets the intro finish its beat,
+// so a 502 that comes back in 200 ms doesn't flash the animation and blow it
+// away in the same frame. Every other transition into `error` is immediate.
+describe('reaching the error step', () => {
+  it('lets the intro finish its beat before showing the error', () => {
+    const { result, rerender } = render('retrieving', true)
+    expect(result.current).toBe('intro')
+
+    // The failure arrives 500 ms in — the intro keeps the remaining 2.5 s.
+    tick(500)
+    rerender({ phase: 'error', hasDocuments: true })
+
+    tick(STEP_DURATIONS.intro - 500 - 1)
+    expect(result.current).toBe('intro')
+
+    tick(1)
+    expect(result.current).toBe('error')
+  })
+
+  it('does not add any wait when the intro is already over', () => {
+    const { result, rerender } = render('retrieving', true)
+    tick(STEP_DURATIONS.intro)
+    expect(result.current).toBe('searching')
+
+    rerender({ phase: 'error', hasDocuments: true })
+    tick()
+    expect(result.current).toBe('error')
+  })
+
+  it('mounts straight at error for an exchange revisited after a failure', () => {
+    // A page switch and back must not replay the animation over a dead
+    // exchange.
+    const { result } = render('error', true)
+    expect(result.current).toBe('error')
+  })
+
+  it('never leaves error, even if a later phase says otherwise', () => {
+    // The machine is forward-only and `error` is terminal — a stale phase
+    // update must not resurrect the beats under an error message.
+    const { result, rerender } = render('error', true)
+
+    rerender({ phase: 'done', hasDocuments: true })
+    tick(STEP_DURATIONS.intro * 2)
+    expect(result.current).toBe('error')
+  })
+
+  it('goes to error from reading with no extra delay', () => {
+    const { result, rerender } = render('retrieving', true)
+    tick(STEP_DURATIONS.intro)
+    rerender({ phase: 'reading', hasDocuments: true })
+    tick(STEP_DURATIONS.searching)
+    expect(result.current).toBe('reading')
+
+    rerender({ phase: 'error', hasDocuments: true })
+    tick()
+    expect(result.current).toBe('error')
+  })
+})

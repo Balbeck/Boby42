@@ -30,11 +30,45 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   // Vitest (F10). Lives here rather than in a vitest.config.js so the tests run
   // through this same config — a separate file would silently shadow it.
-  // `jsdom` because two of the three suites render React hooks; `globals` stays
-  // off so every test file imports what it uses (ESLint sees no unknown global).
+  // `jsdom` because most suites render components or hooks; `globals` stays off
+  // so every test file imports what it uses (ESLint sees no unknown global).
+  // `setupFiles` carries the cleanup hook plus the jsdom gaps the components
+  // trip over (matchMedia, ResizeObserver, scrollIntoView, recharts' sizing).
   test: {
     environment: 'jsdom',
     include: ['src/**/*.test.{js,jsx}'],
+    setupFiles: ['./src/test/setup.js'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'text-summary'],
+      // `include` is the load-bearing part: it puts every source file in the
+      // denominator, so an untested module reports 0 % instead of being absent
+      // from the report entirely. Same trap as node's
+      // --experimental-test-coverage on the backend, where a route nobody
+      // loaded simply did not appear and the percentage described a subset.
+      include: ['src/**/*.{js,jsx}'],
+      exclude: [
+        'src/**/*.test.{js,jsx}',
+        'src/test/**',
+        // JSDoc typedefs — no runtime code at all.
+        'src/types/types.js',
+        // The composition root: createRoot().render() with the router tree.
+        // Mounting it is an integration test by definition (it renders the whole
+        // app), and integration is deliberately deferred — see "Tests" in
+        // CLAUDE.md. Mirrors the backend excluding app.js.
+        'src/main.jsx',
+      ],
+      // Lines only, like the backend. Branches and functions are reported but
+      // not enforced — raising those is a separate, much more expensive call.
+      //
+      // ⚠️ The TARGET is 100, the floor below is where the work actually got to
+      // (2026-09-08). It is a RATCHET, not the goal: raise it as the five
+      // remaining files land, never lower it. Still uncovered — LabApp.jsx,
+      // DataGrid.jsx, DbViz.jsx, OllamaPanel.jsx, RelationsExplorer.jsx, plus
+      // the untested half of ConversationBrowser.jsx / VisitorExplorer.jsx.
+      // See frontend/CLAUDE.md → "Tests".
+      thresholds: { lines: 66 },
+    },
   },
   server: {
     port: Number(process.env.FRONTEND_PORT),
