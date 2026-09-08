@@ -403,6 +403,20 @@ describe('ArchivisteApp — the landing page', () => {
     expect(screen.getByText(/Erreur\s*:\s*boom/)).toBeDefined()
   })
 
+  it('sends from the composer of the started page too', async () => {
+    // Both branches render their own <Composer> with the same props; only the
+    // empty-page one was exercised, so the started-page handler was never run.
+    const { archiviste } = renderPage(ArchivisteApp, {
+      archiviste: fakeState({
+        draft: 'une deuxième recherche',
+        exchanges: [{ id: 'ex-1', question: 'la première', documents: [], loading: false, rating: 0 }],
+      }),
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: t.sendAria }))
+    expect(archiviste.sendQuestion).toHaveBeenCalledWith('une deuxième recherche', 'fr')
+  })
+
   it('routes a rating and a document toggle back with the exchange id', async () => {
     const documents = [{
       name: 'Wi-Fi', type: 'md', url: '/u/1', score: 0.94,

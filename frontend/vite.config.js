@@ -61,13 +61,11 @@ export default defineConfig({
       // Lines only, like the backend. Branches and functions are reported but
       // not enforced — raising those is a separate, much more expensive call.
       //
-      // ⚠️ The TARGET is 100, the floor below is where the work actually got to
-      // (2026-09-08). It is a RATCHET, not the goal: raise it as the five
-      // remaining files land, never lower it. Still uncovered — LabApp.jsx,
-      // DataGrid.jsx, DbViz.jsx, OllamaPanel.jsx, RelationsExplorer.jsx, plus
-      // the untested half of ConversationBrowser.jsx / VisitorExplorer.jsx.
-      // See frontend/CLAUDE.md → "Tests".
-      thresholds: { lines: 66 },
+      // 100, reached 2026-09-08. Never lower it to make a run pass: a file that
+      // cannot be covered is either dead code to delete or a design to change —
+      // `DataGrid`'s DEFAULT_KIND was the former and was folded into the search
+      // list rather than exempted.
+      thresholds: { lines: 100 },
     },
   },
   server: {

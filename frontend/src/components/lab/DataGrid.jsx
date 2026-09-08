@@ -484,7 +484,13 @@ const SORT_KINDS = [
   },
 ]
 
-/** @type {SortKind} */
+/**
+ * The catch-all, last in the search order below. It lives in the same list
+ * rather than behind a `??`: as a fallback its `match` could never run, which
+ * is a branch nothing can reach and nothing can test.
+ *
+ * @type {SortKind}
+ */
 const DEFAULT_KIND = { id: 'text', match: () => true, compare: byString, hint: 'A→Z' }
 
 /** One pass over the fetched rows: longest visible value + "any cell is an object". */
@@ -504,5 +510,6 @@ function scanColumn(column, rows) {
 /** @returns {SortKind} */
 function sortKindFor(column, rows) {
   const ctx = scanColumn(column, rows)
-  return SORT_KINDS.find((k) => k.match(column, ctx)) ?? DEFAULT_KIND
+  // DEFAULT_KIND matches everything, so `find` always returns something.
+  return /** @type {SortKind} */ ([...SORT_KINDS, DEFAULT_KIND].find((k) => k.match(column, ctx)))
 }
