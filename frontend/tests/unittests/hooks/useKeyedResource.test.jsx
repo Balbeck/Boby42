@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 
-import { useKeyedResource } from './useKeyedResource'
+import { useKeyedResource } from '../../../src/hooks/useKeyedResource'
 
 // The keyed-fetch primitive behind nine /lab call sites. Two properties carry
 // the whole thing and neither is visible from the code's shape:

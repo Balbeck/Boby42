@@ -16,7 +16,7 @@
 // Each builder returns a COMPLETE object, exactly as the backend sends it: the
 // tests that care about a missing field say so explicitly by overriding it.
 
-/** @import { ArchivisteDocument, ConversationSummary, ConversationMessage, ConversationDetail } from '../types/types.js' */
+/** @import { ArchivisteDocument, ConversationSummary, ConversationMessage, ConversationDetail } from '../src/types/types.js' */
 
 /**
  * One matched document as it sits in an exchange — unloaded and collapsed, the

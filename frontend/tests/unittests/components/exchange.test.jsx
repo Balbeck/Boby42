@@ -2,16 +2,16 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, within, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import ChatInput from './ChatInput'
-import Composer from './Composer'
-import DocumentsBlock from './DocumentsBlock'
-import ArchivisteDocument from './ArchivisteDocument'
-import ArchivisteMessage from './ArchivisteMessage'
-import FeedbackButtons from './FeedbackButtons'
-import Message from './Message'
-import { messages } from '../messages'
-import { STEP_DURATIONS } from '../hooks/useGuidedStep'
-import { archivisteDocument } from '../test/fixtures'
+import ChatInput from '../../../src/components/ChatInput'
+import Composer from '../../../src/components/Composer'
+import DocumentsBlock from '../../../src/components/DocumentsBlock'
+import ArchivisteDocument from '../../../src/components/ArchivisteDocument'
+import ArchivisteMessage from '../../../src/components/ArchivisteMessage'
+import FeedbackButtons from '../../../src/components/FeedbackButtons'
+import Message from '../../../src/components/Message'
+import { messages } from '../../../src/messages'
+import { STEP_DURATIONS } from '../../../src/hooks/useGuidedStep'
+import { archivisteDocument } from '../../fixtures'
 
 // The exchange surface: the composer, the document rows, the two message
 // components. The assertions that matter here are the conditional ones — which
@@ -26,8 +26,8 @@ afterEach(() => {
 })
 
 /**
- * @param {Partial<import('../types/types.js').ArchivisteDocument>} [overrides]
- * @returns {import('../types/types.js').ArchivisteDocument}
+ * @param {Partial<import('../../../src/types/types.js').ArchivisteDocument>} [overrides]
+ * @returns {import('../../../src/types/types.js').ArchivisteDocument}
  */
 const doc = (overrides = {}) => archivisteDocument(overrides)
 

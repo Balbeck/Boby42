@@ -12,7 +12,7 @@ const STORAGE_KEY = 'boby42.visitorId'
 /** Fresh module per test — the fallback id is cached in module scope. */
 async function loadIdentity() {
   vi.resetModules()
-  return import('./identity')
+  return import('../../../src/services/identity')
 }
 
 beforeEach(() => {

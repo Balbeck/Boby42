@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
-import { sendMessage, fetchChatDocuments, fetchDocumentContent } from './chatApi'
-import { stubFetch, jsonResponse, streamResponse, ndjsonResponse } from '../test/fetchStub'
+import { sendMessage, fetchChatDocuments, fetchDocumentContent } from '../../../src/services/chatApi'
+import { stubFetch, jsonResponse, streamResponse, ndjsonResponse } from '../../fetchStub'
 
 // chatApi is the only transport in the app that reads a streamed body, and the
 // stream is where the interesting failures live: a `done` frame that never

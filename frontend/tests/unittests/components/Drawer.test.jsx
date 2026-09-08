@@ -2,13 +2,13 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import Drawer from './Drawer'
-import LabLogin from './LabLogin'
-import * as historyApi from '../services/historyApi'
-import * as labApi from '../services/labApi'
-import { messages } from '../messages'
-import { AUTH } from '../auth'
-import { conversationSummary } from '../test/fixtures'
+import Drawer from '../../../src/components/Drawer'
+import LabLogin from '../../../src/components/LabLogin'
+import * as historyApi from '../../../src/services/historyApi'
+import * as labApi from '../../../src/services/labApi'
+import { messages } from '../../../src/messages'
+import { AUTH } from '../../../src/auth'
+import { conversationSummary } from '../../fixtures'
 
 // Two gated surfaces.
 //
@@ -31,8 +31,8 @@ afterEach(() => {
 })
 
 /**
- * @param {Partial<import('../types/types.js').ConversationSummary>} [overrides]
- * @returns {import('../types/types.js').ConversationSummary}
+ * @param {Partial<import('../../../src/types/types.js').ConversationSummary>} [overrides]
+ * @returns {import('../../../src/types/types.js').ConversationSummary}
  */
 const conversation = (overrides = {}) => conversationSummary(overrides)
 

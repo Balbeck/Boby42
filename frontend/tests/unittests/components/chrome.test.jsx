@@ -3,13 +3,13 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 
-import Disclaimer from './Disclaimer'
-import HamburgerButton from './HamburgerButton'
-import PageSwitcher from './PageSwitcher'
-import Modal from './Modal'
-import ConstructionNotice from './ConstructionNotice'
-import LanguageSwitcher from './LanguageSwitcher'
-import { messages } from '../messages'
+import Disclaimer from '../../../src/components/Disclaimer'
+import HamburgerButton from '../../../src/components/HamburgerButton'
+import PageSwitcher from '../../../src/components/PageSwitcher'
+import Modal from '../../../src/components/Modal'
+import ConstructionNotice from '../../../src/components/ConstructionNotice'
+import LanguageSwitcher from '../../../src/components/LanguageSwitcher'
+import { messages } from '../../../src/messages'
 
 // The page chrome. Mostly presentational, so the assertions stay on behaviour a
 // user can perform — a click, a key, focus — rather than on class names, which

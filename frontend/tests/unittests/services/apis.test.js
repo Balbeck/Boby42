@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
-import { search, fetchDocument } from './archivisteApi'
-import { sendFeedback } from './feedbackApi'
-import { listConversations, getConversation } from './historyApi'
-import * as labApi from './labApi'
-import { listModels, generate } from './ollamaApi'
-import { stubFetch, jsonResponse, ndjsonResponse } from '../test/fetchStub'
+import { search, fetchDocument } from '../../../src/services/archivisteApi'
+import { sendFeedback } from '../../../src/services/feedbackApi'
+import { listConversations, getConversation } from '../../../src/services/historyApi'
+import * as labApi from '../../../src/services/labApi'
+import { listModels, generate } from '../../../src/services/ollamaApi'
+import { stubFetch, jsonResponse, ndjsonResponse } from '../../fetchStub'
 
 // The four remaining transports. They are thin by design — the value in testing
 // them is the small amount of URL and body ASSEMBLY each one does, because that

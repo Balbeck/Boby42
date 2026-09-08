@@ -3,8 +3,8 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 
-import LabApp from './LabApp'
-import * as labApi from './services/labApi'
+import LabApp from '../../src/LabApp'
+import * as labApi from '../../src/services/labApi'
 
 // The /lab shell. Three things carry it and none is visible from the markup:
 //

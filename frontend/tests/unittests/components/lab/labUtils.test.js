@@ -1,8 +1,8 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
 
-import { UUID_RE, chipColor, fmtTimestamp } from './format'
-import { fmtInt, fmtNum1, fmtPct, fmtMs, shortDay, fmtAgo, windowFor, PERIODS, C, SERIES, axisProps, GRID } from './vizKit'
-import { PARAM_GROUPS, buildRequestBody } from './ollamaParams'
+import { UUID_RE, chipColor, fmtTimestamp } from '../../../../src/components/lab/format'
+import { fmtInt, fmtNum1, fmtPct, fmtMs, shortDay, fmtAgo, windowFor, PERIODS, C, SERIES, axisProps, GRID } from '../../../../src/components/lab/vizKit'
+import { PARAM_GROUPS, buildRequestBody } from '../../../../src/components/lab/ollamaParams'
 
 // The three pure modules behind /lab. They are formatters and a catalogue, so
 // the tests are mostly about the edge inputs a live database actually produces:

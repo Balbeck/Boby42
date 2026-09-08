@@ -13,7 +13,7 @@ import { renderHook, act, render, screen } from '@testing-library/react'
 /** Fresh module, with whatever localStorage is currently set up. */
 async function loadI18n() {
   vi.resetModules()
-  return import('./i18n')
+  return import('../../src/i18n')
 }
 
 beforeEach(() => {

@@ -36,8 +36,12 @@ export default defineConfig({
   // trip over (matchMedia, ResizeObserver, scrollIntoView, recharts' sizing).
   test: {
     environment: 'jsdom',
-    include: ['src/**/*.test.{js,jsx}'],
-    setupFiles: ['./src/test/setup.js'],
+    // Only tests/unittests/** — integration and e2e get their own folders and
+    // their own scripts when they land, and must never be folded into the unit
+    // run (see "Tests" in CLAUDE.md). tests/{setup,fetchStub,fixtures}.js sit at
+    // the tests/ root: the harness is shared by all three levels, not unit-only.
+    include: ['tests/unittests/**/*.test.{js,jsx}'],
+    setupFiles: ['./tests/setup.js'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'text-summary'],
@@ -48,8 +52,6 @@ export default defineConfig({
       // loaded simply did not appear and the percentage described a subset.
       include: ['src/**/*.{js,jsx}'],
       exclude: [
-        'src/**/*.test.{js,jsx}',
-        'src/test/**',
         // JSDoc typedefs — no runtime code at all.
         'src/types/types.js',
         // The composition root: createRoot().render() with the router tree.

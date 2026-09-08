@@ -10,13 +10,13 @@ import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 // thread on the current one). That whole branch is dormant in production until
 // 42's OAuth2 lands, which is exactly why it needs a test — nobody will notice
 // it rotting.
-vi.mock('../auth', () => ({ AUTH: true }))
+vi.mock('../../../src/auth', () => ({ AUTH: true }))
 
-import PersistentNav from './PersistentNav'
-import { ChatContext, ArchivisteContext } from '../state/conversationsContext'
-import { setLanguage } from '../i18n'
-import * as historyApi from '../services/historyApi'
-import { messages } from '../messages'
+import PersistentNav from '../../../src/layout/PersistentNav'
+import { ChatContext, ArchivisteContext } from '../../../src/state/conversationsContext'
+import { setLanguage } from '../../../src/i18n'
+import * as historyApi from '../../../src/services/historyApi'
+import { messages } from '../../../src/messages'
 
 const t = messages.fr
 

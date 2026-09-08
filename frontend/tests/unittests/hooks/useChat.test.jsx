@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 
-import { useChat } from './useChat'
-import * as chatApi from '../services/chatApi'
-import * as historyApi from '../services/historyApi'
-import { conversationDetail, conversationMessage, loggedDocument } from '../test/fixtures'
+import { useChat } from '../../../src/hooks/useChat'
+import * as chatApi from '../../../src/services/chatApi'
+import * as historyApi from '../../../src/services/historyApi'
+import { conversationDetail, conversationMessage, loggedDocument } from '../../fixtures'
 
 // The /chat page state: the two-call flow, the streaming reconciliation, the
 // queue wiring and the stop button. The transport is stubbed — what is under
@@ -56,7 +56,7 @@ function deferred() {
 /**
  * @param {any} view - the renderHook result
  * @param {string} [question]
- * @param {import('../types/types.js').Language} [language]
+ * @param {import('../../../src/types/types.js').Language} [language]
  * @param {string} [notFound] - the localized "nothing found" text the page passes
  */
 async function ask(view, question = 'où est le wifi', language = 'fr', notFound = undefined) {

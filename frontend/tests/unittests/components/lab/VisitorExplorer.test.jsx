@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import VisitorExplorer from './VisitorExplorer'
-import * as labApi from '../../services/labApi'
+import VisitorExplorer from '../../../../src/components/lab/VisitorExplorer'
+import * as labApi from '../../../../src/services/labApi'
 
 // The "By visitor" panel. It is the one screen in /lab built on NO endpoint of
 // its own: there is no "conversations of one visitor" route, so it pulls the

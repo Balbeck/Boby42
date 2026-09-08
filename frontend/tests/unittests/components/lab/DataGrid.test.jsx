@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, within, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import DataGrid, { ChevronSelect } from './DataGrid'
+import DataGrid, { ChevronSelect } from '../../../../src/components/lab/DataGrid'
 
 // The 💾 grid. It is purely presentational — no fetch — but it carries more
 // logic than anything else in /lab: a per-column comparator chosen from the

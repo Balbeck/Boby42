@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import OllamaPanel from './OllamaPanel'
-import * as ollamaApi from '../../services/ollamaApi'
+import OllamaPanel from '../../../../src/components/lab/OllamaPanel'
+import * as ollamaApi from '../../../../src/services/ollamaApi'
 
 // The 💬 console. It talks straight to the backend's `/ollama/*` proxy — no RAG,
 // no logging — so what matters here is the REQUEST it assembles and the states

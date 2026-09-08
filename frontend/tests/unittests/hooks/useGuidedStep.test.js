@@ -1,7 +1,7 @@
 import { cleanup, renderHook } from '@testing-library/react'
 import { act } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { STEP_DURATIONS, useGuidedStep } from './useGuidedStep.js'
+import { STEP_DURATIONS, useGuidedStep } from '../../../src/hooks/useGuidedStep.js'
 
 // The machine measures each step's minimum on-screen time with `Date.now()` and
 // leaves it with a `setTimeout`. Faking timers alone would leave `Date.now()`

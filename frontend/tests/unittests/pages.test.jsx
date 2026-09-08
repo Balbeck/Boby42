@@ -3,16 +3,16 @@ import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
-import App from './App'
-import ArchivisteApp from './ArchivisteApp'
-import PersistentNav from './layout/PersistentNav'
-import { ConversationsLayout } from './state/ConversationsProvider'
-import { ChatContext, ArchivisteContext, useChat, useArchiviste } from './state/conversationsContext'
-import { withNotionLink } from './notionLink'
-import { NOTION_RTFM_URL, messages } from './messages'
-import { setLanguage } from './i18n'
-import * as chatApi from './services/chatApi'
-import * as archivisteApi from './services/archivisteApi'
+import App from '../../src/App'
+import ArchivisteApp from '../../src/ArchivisteApp'
+import PersistentNav from '../../src/layout/PersistentNav'
+import { ConversationsLayout } from '../../src/state/ConversationsProvider'
+import { ChatContext, ArchivisteContext, useChat, useArchiviste } from '../../src/state/conversationsContext'
+import { withNotionLink } from '../../src/notionLink'
+import { NOTION_RTFM_URL, messages } from '../../src/messages'
+import { setLanguage } from '../../src/i18n'
+import * as chatApi from '../../src/services/chatApi'
+import * as archivisteApi from '../../src/services/archivisteApi'
 
 // The two student pages plus the shell that holds them. The pages are wired to
 // a fake context rather than the real hooks: what is under test here is the
@@ -307,8 +307,8 @@ describe('App — the /chat page', () => {
     // would be a different object than the one the fresh App consumes.
     vi.resetModules()
     const [{ default: FreshApp }, freshContext] = await Promise.all([
-      import('./App'),
-      import('./state/conversationsContext'),
+      import('../../src/App'),
+      import('../../src/state/conversationsContext'),
     ])
 
     const chat = fakeState({ draft: 'q' })

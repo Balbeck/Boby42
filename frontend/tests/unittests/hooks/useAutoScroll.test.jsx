@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 
-import { useAutoScroll } from './useAutoScroll'
+import { useAutoScroll } from '../../../src/hooks/useAutoScroll'
 
 // The whole hook is one deliberate quirk: it IGNORES the first ResizeObserver
 // callback. That callback fires on `observe()` with nothing actually resized,

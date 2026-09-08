@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readNdjson } from './ndjson.js'
+import { readNdjson } from '../../../src/services/ndjson.js'
 
 // `readNdjson` only ever touches `response.body.getReader()`, so a plain object
 // carrying a `ReadableStream` is a faithful stand-in — and keeps the test from

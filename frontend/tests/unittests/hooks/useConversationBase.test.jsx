@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 
-import { useConversationBase } from './useConversationBase'
-import * as feedbackApi from '../services/feedbackApi'
-import * as historyApi from '../services/historyApi'
-import { archivisteDocument, conversationDetail, conversationMessage } from '../test/fixtures'
+import { useConversationBase } from '../../../src/hooks/useConversationBase'
+import * as feedbackApi from '../../../src/services/feedbackApi'
+import * as historyApi from '../../../src/services/historyApi'
+import { archivisteDocument, conversationDetail, conversationMessage } from '../../fixtures'
 
 // The seam shared by /chat and /archiviste. Three behaviours here are load-bearing
 // and none of them is visible on screen when it breaks:
@@ -25,8 +25,8 @@ afterEach(() => {
 })
 
 /**
- * @param {Partial<import('../types/types.js').ArchivisteDocument>} [overrides]
- * @returns {import('../types/types.js').ArchivisteDocument}
+ * @param {Partial<import('../../../src/types/types.js').ArchivisteDocument>} [overrides]
+ * @returns {import('../../../src/types/types.js').ArchivisteDocument}
  */
 const doc = (overrides = {}) => archivisteDocument({ score: 0.94, ...overrides })
 

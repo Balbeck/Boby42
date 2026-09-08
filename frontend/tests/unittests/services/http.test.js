@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
 
-import { apiUrl, throwIfNotOk, postJson, getJson, getJsonOrNull } from './http'
-import { stubFetch, jsonResponse, textResponse } from '../test/fetchStub'
+import { apiUrl, throwIfNotOk, postJson, getJson, getJsonOrNull } from '../../../src/services/http'
+import { stubFetch, jsonResponse, textResponse } from '../../fetchStub'
 
 // http.js holds TWO error contracts on purpose, and mixing them up is the kind
 // of bug that only shows in production: the student pages throw on a non-OK

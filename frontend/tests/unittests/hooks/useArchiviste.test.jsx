@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 
-import { useArchiviste } from './useArchiviste'
-import * as archivisteApi from '../services/archivisteApi'
-import * as historyApi from '../services/historyApi'
-import { conversationDetail, conversationMessage, documentRow, loggedDocument } from '../test/fixtures'
+import { useArchiviste } from '../../../src/hooks/useArchiviste'
+import * as archivisteApi from '../../../src/services/archivisteApi'
+import * as historyApi from '../../../src/services/historyApi'
+import { conversationDetail, conversationMessage, documentRow, loggedDocument } from '../../fixtures'
 
 // The /archiviste page state. It mirrors useChat's structure but on a SINGLE
 // call and with no `phase` — waiting is a plain `queued` boolean here. That

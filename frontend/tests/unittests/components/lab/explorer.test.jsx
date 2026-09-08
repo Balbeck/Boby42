@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import DbViz from './DbViz'
-import RelationsExplorer, { Tree } from './RelationsExplorer'
-import ConversationBrowser from './ConversationBrowser'
-import * as labApi from '../../services/labApi'
+import DbViz from '../../../../src/components/lab/DbViz'
+import RelationsExplorer, { Tree } from '../../../../src/components/lab/RelationsExplorer'
+import ConversationBrowser from '../../../../src/components/lab/ConversationBrowser'
+import * as labApi from '../../../../src/services/labApi'
 
 // The 💾 tab and the two conversation views.
 //
@@ -73,7 +73,12 @@ beforeEach(() => {
   writeText = vi.fn()
   Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
 })
-afterEach(() => vi.restoreAllMocks())
+// No `afterEach(() => vi.restoreAllMocks())` here, deliberately: a suite-level
+// afterEach runs BEFORE setup.js's (vitest stacks them, last registered first),
+// so restoring here un-stubs `labApi` while the components are still mounted —
+// and anything that settles or mounts in that window calls the REAL module and
+// escapes to the network guard, failing whichever test is current. setup.js
+// restores every spy itself, after its `cleanup()`, which is the right order.
 
 /** Every /lab read the panels under test can make, stubbed empty by default. */
 function stubLab(/** @type {{ tables?: any, table?: any, tree?: any, conversations?: any, conversation?: any }} */ {
@@ -361,6 +366,12 @@ describe('DbViz', () => {
     expect(screen.getByText('Loading tables…')).toBeDefined()
     expect(await screen.findByRole('option', { name: 'conversations — 12 rows' })).toBeDefined()
     expect(screen.getByRole('option', { name: 'messages — 40 rows' })).toBeDefined()
+
+    // The table list landing is also what mounts the RelationsExplorer under the
+    // grid, which immediately reads `conversations` for its own picker. Returning
+    // here would leave that read in flight — it then settles outside the test,
+    // where the spies are already gone. Wait for its picker to settle.
+    await screen.findByText('— pick a conversation (0) —')
   })
 
   it('says the list could not be loaded, and renders nothing else', async () => {
@@ -376,9 +387,14 @@ describe('DbViz', () => {
     render(<DbViz />)
 
     expect(await screen.findByText('Pick a table to inspect its rows.')).toBeDefined()
+    // Settling the explorer's own read before asserting: without it the loop
+    // below can run over an empty call list and pass vacuously.
+    await screen.findByText('— pick a conversation (0) —')
+
     // `table` IS called once — by the RelationsExplorer mounted underneath, for
     // its own conversation list. What must not happen is a read of a table the
     // operator never picked.
+    expect(vi.mocked(labApi.table).mock.calls).toHaveLength(1)
     for (const [name] of vi.mocked(labApi.table).mock.calls) {
       expect(name).toBe('conversations')
     }
@@ -483,6 +499,7 @@ describe('DbViz', () => {
 
     expect(await screen.findByText('Relations explorer')).toBeDefined()
     expect(screen.getByPlaceholderText(/paste a conversations.id/)).toBeDefined()
+    await screen.findByText('— pick a conversation (0) —')
   })
 })
 
