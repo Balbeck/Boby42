@@ -205,6 +205,41 @@ describe('getAnswer', () => {
     assert.deepStrictEqual(sources.map((doc) => doc.name), ['Alternance'])
   })
 
+  it('skips a row whose type is neither md nor pdf, rather than throwing on it', async () => {
+    // The /chat schema enumerates the two types, so this is defensive — but the
+    // sequential loader matched no branch for such a row and dropped it in
+    // silence, and the concurrent one has to keep doing exactly that.
+    stubOllama({ '/api/generate': () => jsonResponse({ response: 'ok' }) })
+
+    const { sources } = await getAnswer('q', [
+      { name: 'Alternance', type: 'md', score: 0.95 },
+      // @ts-expect-error - deliberately outside the union
+      { name: 'Alternance', type: 'html', score: 0.94 }
+    ], 'fr')
+
+    assert.deepStrictEqual(sources.map((doc) => doc.name), ['Alternance'])
+  })
+
+  it('returns the rows in INPUT order, not in the order the concurrent reads finish', async () => {
+    // loadDocuments() resolves its rows with Promise.all; getAnswer() builds
+    // `sources` straight from that array, and the frontend renders it in order.
+    // A loader that pushed on completion would reorder a slow md read behind a
+    // fast pdf one — hence map-then-filter rather than push.
+    stubOllama({ '/api/generate': () => jsonResponse({ response: 'ok' }) })
+
+    const { sources } = await getAnswer('q', [
+      { name: 'Libft.en.subject', type: 'pdf', score: 0.99 },
+      { name: 'No Such Document', type: 'md', score: 0.97 },
+      { name: 'Alternance', type: 'md', score: 0.95 },
+      { name: 'Badge perdu', type: 'md', score: 0.93 }
+    ], 'fr')
+
+    assert.deepStrictEqual(
+      sources.map((doc) => doc.name),
+      ['Libft.en.subject', 'Alternance', 'Badge perdu']
+    )
+  })
+
   it('returns the frozen fallback with NO Ollama call when nothing carries text', async () => {
     const calls = stubOllama({
       '/api/generate': () => assert.fail('generation must not run on an empty document set')

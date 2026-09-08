@@ -235,47 +235,60 @@ ANSWER:`
  * extraction leaves `content: null` — the row is still returned, shown and
  * previewable, just absent from the prompt.
  *
+ * Rows are resolved and read CONCURRENTLY — `Promise.all` over the input array,
+ * the same shape `routes/archiviste.js` already uses. INPUT ORDER IS PRESERVED:
+ * `getAnswer()` builds `sources` from this array, so a dropped row is mapped to
+ * `null` and filtered out at the end rather than pushed on completion. One
+ * accepted consequence: a rejection from `readBaseDocumentaireDocument` now
+ * fails the whole load instead of only the rows after it — the caller's
+ * try/catch turns either into the same response, and `readSubjectsPdfText()`
+ * never throws by contract, so a PDF cannot trigger it.
+ *
  * @param {import('../types/types').ChatDocument[]} documents
  * @param {'fr' | 'en' | 'origin'} language
  * @returns {Promise<{name: string, type: 'md' | 'pdf', url: string | undefined, path: string | null, score: number | undefined, content: string | null}[]>}
  */
 async function loadDocuments(documents, language) {
-  const loaded = []
-
-  for (const row of documents) {
+  const loaded = await Promise.all(documents.map(async (row) => {
     if (row.type === 'md') {
       const doc = await readBaseDocumentaireDocument(language, `${row.name}.md`)
       if (!doc) {
         console.warn(`[orchestrator] dropping unresolved md document: ${row.name}`)
-        continue
+        return null
       }
       const dir = resolveNotionDir(language)
-      loaded.push({
+      return {
         name: doc.name,
         type: 'md',
         url: row.url,
         path: dir ? path.join(dir, `${doc.name}.md`) : null,
         score: row.score,
         content: doc.content
-      })
-    } else if (row.type === 'pdf') {
+      }
+    }
+
+    if (row.type === 'pdf') {
       const pdfPath = await resolveSubjectsPdfFile(`${row.name}.pdf`)
       if (!pdfPath) {
         console.warn(`[orchestrator] dropping unresolved pdf document: ${row.name}`)
-        continue
+        return null
       }
-      loaded.push({
+      return {
         name: row.name,
         type: 'pdf',
         url: row.url,
         path: pdfPath,
         score: row.score,
         content: await readSubjectsPdfText(pdfPath)
-      })
+      }
     }
-  }
 
-  return loaded
+    // A row that is neither 'md' nor 'pdf' matched no branch in the sequential
+    // version and was silently skipped — keep exactly that.
+    return null
+  }))
+
+  return loaded.filter(Boolean)
 }
 
 /**

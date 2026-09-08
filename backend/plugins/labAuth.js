@@ -14,6 +14,14 @@ const labAuth = require('../services/labAuth.service')
  * exact string equal to User.session_token (stateful single session) — anything
  * else is 401.
  *
+ * `verifyLab` asks those questions in the cheapest order that keeps those
+ * semantics: configured check (no query) → session → seeded check ONLY when the
+ * session came back empty, to decide which rejection applies. So a valid session
+ * costs one query on the one-row `users` table instead of two. The seeded check
+ * is never cached, because a user row can appear (`make db-seed`) or disappear
+ * while the process is live and that has to be observable immediately —
+ * `test/routes/lab.test.js` asserts exactly that.
+ *
  * Not attached to any existing route — only routes/auth/lab/* opt in.
  */
 module.exports = fp(async function (fastify) {
@@ -29,12 +37,19 @@ module.exports = fp(async function (fastify) {
 
   fastify.decorate('verifyLab', async function verifyLab(request, reply) {
     if (!labAuth.isConfigured()) return reply.callNotFound()
-    if (!(await User.findOne({ attributes: ['id'] }))) return reply.callNotFound()
 
     const token = request.cookies?.lab_token
     const user = token ? await labAuth.getSession(token) : null
-    if (!user) throw fastify.httpErrors.unauthorized('Invalid session')
+    if (user) {
+      request.labUser = user
+      return
+    }
 
-    request.labUser = user
+    // No valid session. `getSession()` returning null does NOT tell us whether
+    // the deployment is unseeded (404) or the caller is simply unauthenticated
+    // (401) — that is the only thing this second query decides, and it is why it
+    // runs on the failure path alone.
+    if (!(await User.findOne({ attributes: ['id'] }))) return reply.callNotFound()
+    throw fastify.httpErrors.unauthorized('Invalid session')
   })
 })

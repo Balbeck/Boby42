@@ -27,15 +27,21 @@ const TOKEN = 'a-valid-looking-token'
 const isConfigured = serviceStub(labAuthService, 'isConfigured', () => Boolean(process.env.LAB_JWT_SECRET))
 const login = serviceStub(labAuthService, 'login', async () => ({ token: TOKEN, login: LAB_USER.login }))
 const logout = serviceStub(labAuthService, 'logout', async () => undefined)
-const getSession = serviceStub(labAuthService, 'getSession', async () => LAB_USER)
+// Mirrors the REAL getSession(), which resolves the token's `sub` through
+// User.findByPk: with no user row there is no session either, whatever the
+// cookie says. The gate asks this question before the seeded check, so a stub
+// that ignored `seeded` would hand it a session no deployment can produce.
+const getSession = serviceStub(labAuthService, 'getSession', async () => (seeded ? LAB_USER : null))
 
 const labAuthPlugin = require('../../../plugins/labAuth')
 const authLabRoute = require('../../../routes/auth/lab/index')
 
-// Whether a /lab user row exists. A flag rather than a re-stub per test: the
-// gate calls User.findOne on every request, so flipping this between injects is
-// enough — and re-stubbing would leave the last stub installed for the rest of
-// the file (which it did, silently 404ing every later test).
+// Whether a /lab user row exists. Read by both stubs above at call time, so
+// flipping it between injects is enough — a flag rather than a re-stub per test,
+// because re-stubbing would leave the last stub installed for the rest of the
+// file (which it did, silently 404ing every later test). The gate only runs
+// User.findOne when there is no valid session, which is exactly the case these
+// fail-closed tests exercise.
 let seeded = true
 
 /** Builds the plugin + routes pair. */
