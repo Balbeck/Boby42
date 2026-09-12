@@ -6,6 +6,15 @@ const path = require('node:path')
 const DOCUMENTS_ROOT = path.join(__dirname, '../data/documents')
 const BASE_DOCUMENTAIRE_ROOT = path.join(__dirname, '../data/BaseDocumentaire')
 
+// Hector adds/renames documents by hand under BaseDocumentaire/ while the
+// stack is running, so the readdir below is cached per resolved directory and
+// invalidated by that directory's mtime rather than rebuilt on every read —
+// the stat is what makes a hand-added document visible without a restart.
+// Keyed on the resolved directory path (not the language string) so 'origin'
+// and a future alias that resolves to the same folder can't desynchronise.
+/** @type {Map<string, { mtimeMs: number, promise: Promise<string[]> }>} */
+const dirCache = new Map()
+
 // Maps the lowercase language code used in the API (front-end, URLs) to the
 // actual on-disk folder name under data/BaseDocumentaire/.
 const LANGUAGE_FOLDERS = { fr: 'Fr', en: 'En' }
@@ -66,8 +75,25 @@ async function listBaseDocumentaireNames(language) {
     return []
   }
 
-  const entries = await fs.readdir(notionDir, { withFileTypes: true })
-  return entries.filter((entry) => entry.isFile() && entry.name.endsWith('.md')).map((entry) => entry.name)
+  const stat = await fs.stat(notionDir)
+  const cached = dirCache.get(notionDir)
+  if (cached && cached.mtimeMs === stat.mtimeMs) {
+    return cached.promise
+  }
+
+  const promise = (async () => {
+    const entries = await fs.readdir(notionDir, { withFileTypes: true })
+    return entries.filter((entry) => entry.isFile() && entry.name.endsWith('.md')).map((entry) => entry.name)
+  })()
+
+  dirCache.set(notionDir, { mtimeMs: stat.mtimeMs, promise })
+
+  try {
+    return await promise
+  } catch (err) {
+    dirCache.delete(notionDir)
+    throw err
+  }
 }
 
 /**

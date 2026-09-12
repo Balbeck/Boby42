@@ -110,27 +110,51 @@ describe('columnsOf (through listTables / readTable)', () => {
 })
 
 describe('listTables', () => {
-  it('returns every allowed table, sorted, with its schema and true row count', async () => {
-    const query = stubQuery(byShape({ columns: COLUMN_ROWS, count: 7 }))
+  const TABLES = ['conversations', 'events', 'message_documents', 'message_feedback', 'messages', 'visitors']
+
+  /** @param {string[]} tables @returns {Object[]} */
+  function columnRowsFor (tables) {
+    return tables.flatMap((table) => COLUMN_ROWS.map((row) => ({ ...row, table_name: table })))
+  }
+
+  it('returns every allowed table, sorted, with its schema and true row count, in two queries', async () => {
+    const query = stubQuery([
+      columnRowsFor(TABLES),
+      TABLES.map((name) => ({ name, count: 7 }))
+    ])
     const tables = await labData.listTables()
 
-    assert.deepStrictEqual(tables.map((t) => t.name), [
-      'conversations', 'events', 'message_documents', 'message_feedback', 'messages', 'visitors'
-    ])
+    assert.deepStrictEqual(tables.map((t) => t.name), TABLES)
     assert.ok(tables.every((table) => table.rowCount === 7 && table.columns.length === 4))
-    // 2 queries per table — the schema and the count. The count is separate so
-    // the header shows real columns even when the table is empty.
-    assert.strictEqual(query.calls.length, 12)
+    // One set-based query for every table's columns, one UNION ALL for the
+    // counts — not 2 × tables sequential round trips.
+    assert.strictEqual(query.calls.length, 2)
   })
 
-  it('never queries `users`, in any of its queries', async () => {
-    const query = stubQuery(byShape({ columns: COLUMN_ROWS }))
+  it('never queries `users`, in either of its queries', async () => {
+    const query = stubQuery([
+      columnRowsFor(TABLES),
+      TABLES.map((name) => ({ name, count: 0 }))
+    ])
     await labData.listTables()
 
     for (const call of query.calls) {
       assert.ok(!/"users"/.test(call.sql), `users reached the database: ${call.sql}`)
-      assert.notStrictEqual(call.replacements.name, 'users')
     }
+    assert.deepStrictEqual(query.calls[0].replacements.names, TABLES)
+  })
+
+  it('reports an empty table with its real schema, not a missing entry', async () => {
+    const query = stubQuery([
+      columnRowsFor(TABLES),
+      TABLES.filter((name) => name !== 'events').map((name) => ({ name, count: 3 }))
+    ])
+    const tables = await labData.listTables()
+
+    const events = tables.find((table) => table.name === 'events')
+    assert.strictEqual(events.rowCount, 0)
+    assert.strictEqual(events.columns.length, 4)
+    void query
   })
 })
 

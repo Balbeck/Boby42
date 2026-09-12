@@ -235,18 +235,34 @@ describe('the breakdowns', () => {
 })
 
 describe('unmatchedQuestions', () => {
-  it('returns the items plus the untruncated total, from two queries', async () => {
-    const items = [{ id: '1', question: 'où est le wifi', language: 'fr', page: 'chat', createdAt: WINDOW.to }]
-    const query = stubQuery([items, [{ total: 42 }]])
+  it('returns the items plus the untruncated total, from a single query on the common path', async () => {
+    const items = [{
+      id: '1', question: 'où est le wifi', language: 'fr', page: 'chat', createdAt: WINDOW.to, _total: 42
+    }]
+    const query = stubQuery([items])
 
-    assert.deepStrictEqual(await analytics.unmatchedQuestions(WINDOW), { items, total: 42 })
-    // The total must NOT be items.length — it is what drives the pager.
+    assert.deepStrictEqual(await analytics.unmatchedQuestions(WINDOW), {
+      items: [{ id: '1', question: 'où est le wifi', language: 'fr', page: 'chat', createdAt: WINDOW.to }],
+      total: 42
+    })
+    // The total comes from the window function on the page query — no second
+    // round trip when the page has at least one row.
+    assert.strictEqual(query.calls.length, 1)
+    assert.match(query.calls[0].sql, /count\(\*\) OVER \(\)::int\s+AS "_total"/)
+  })
+
+  it('falls back to a count query when the page is empty — an offset past the end must not report total: 0', async () => {
+    const query = stubQuery([[], [{ total: 42 }]])
+
+    assert.deepStrictEqual(await analytics.unmatchedQuestions({ ...WINDOW, offset: 100000 }), {
+      items: [], total: 42
+    })
     assert.strictEqual(query.calls.length, 2)
     assert.match(query.calls[1].sql, /count\(\*\)::int AS total/)
   })
 
   it('defaults to limit 100 / offset 0 / no page filter', async () => {
-    const query = stubQuery([[], [{ total: 0 }]])
+    const query = stubQuery([[]])
     await analytics.unmatchedQuestions(WINDOW)
 
     assert.deepStrictEqual(query.calls[0].replacements, {
@@ -257,14 +273,14 @@ describe('unmatchedQuestions', () => {
   })
 
   it('caps the limit at 500 and floors a negative offset at 0', async () => {
-    const query = stubQuery([[], [{ total: 0 }]])
+    const query = stubQuery([[]])
     await analytics.unmatchedQuestions({ ...WINDOW, limit: 100000, offset: -5 })
 
     assert.strictEqual(query.calls[0].replacements.limit, 500)
     assert.strictEqual(query.calls[0].replacements.offset, 0)
   })
 
-  it('passes a page filter through to both the page query and the count', async () => {
+  it('passes the same page filter to the fallback count as the page query', async () => {
     const query = stubQuery([[], [{ total: 3 }]])
     await analytics.unmatchedQuestions({ ...WINDOW, page: 'archiviste' })
 
@@ -275,7 +291,7 @@ describe('unmatchedQuestions', () => {
   })
 
   it('selects only no_match events and reads the question out of the payload', async () => {
-    const query = stubQuery([[], [{ total: 0 }]])
+    const query = stubQuery([[]])
     await analytics.unmatchedQuestions(WINDOW)
 
     assert.match(query.calls[0].sql, /e\.type = 'no_match'/)
@@ -286,27 +302,40 @@ describe('unmatchedQuestions', () => {
 })
 
 describe('conversationList', () => {
-  it('returns the items plus the untruncated total', async () => {
-    const items = [{ id: 'c1', page: 'chat', messageCount: 4, hasNegativeFeedback: false }]
-    const query = stubQuery([items, [{ total: 9 }]])
+  it('returns the items plus the untruncated total, from a single query on the common path', async () => {
+    const items = [{ id: 'c1', page: 'chat', messageCount: 4, hasNegativeFeedback: false, _total: 9 }]
+    const query = stubQuery([items])
 
-    assert.deepStrictEqual(await analytics.conversationList(WINDOW), { items, total: 9 })
+    assert.deepStrictEqual(await analytics.conversationList(WINDOW), {
+      items: [{ id: 'c1', page: 'chat', messageCount: 4, hasNegativeFeedback: false }],
+      total: 9
+    })
+    assert.strictEqual(query.calls.length, 1)
+    assert.match(query.calls[0].sql, /count\(\*\) OVER \(\)::int\s+AS "_total"/)
+  })
+
+  it('falls back to a count query when the page is empty — an offset past the end must not report total: 0', async () => {
+    const query = stubQuery([[], [{ total: 9 }]])
+
+    assert.deepStrictEqual(await analytics.conversationList({ ...WINDOW, offset: 100000 }), {
+      items: [], total: 9
+    })
     assert.strictEqual(query.calls.length, 2)
   })
 
   it('defaults to limit 25 and caps it at 200', async () => {
-    const first = stubQuery([[], [{ total: 0 }]])
+    const first = stubQuery([[]])
     await analytics.conversationList(WINDOW)
     assert.strictEqual(first.calls[0].replacements.limit, 25)
     first.restore()
 
-    const second = stubQuery([[], [{ total: 0 }]])
+    const second = stubQuery([[]])
     await analytics.conversationList({ ...WINDOW, limit: 5000 })
     assert.strictEqual(second.calls[0].replacements.limit, 200)
   })
 
   it('filters on created_at but orders on updated_at — newest activity first', async () => {
-    const query = stubQuery([[], [{ total: 0 }]])
+    const query = stubQuery([[]])
     await analytics.conversationList(WINDOW)
 
     assert.match(query.calls[0].sql, /WHERE c\.created_at BETWEEN :from AND :to/)
@@ -314,7 +343,7 @@ describe('conversationList', () => {
   })
 
   it('flags a thread containing a thumbs-down on an assistant message', async () => {
-    const query = stubQuery([[], [{ total: 0 }]])
+    const query = stubQuery([[]])
     await analytics.conversationList(WINDOW)
 
     assert.match(query.calls[0].sql, /EXISTS \(/)

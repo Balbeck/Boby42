@@ -26,6 +26,7 @@ const { embeddingFor } = require('../fixtures/embeddings')
 
 const retriever = require('../../services/retriever.service')
 const subjectsPdfLibrary = require('../../services/subjectsPdfLibrary.service')
+const documentReader = require('../../services/documentReader.service')
 
 afterEach(() => {
   restoreAll()
@@ -146,8 +147,19 @@ describe('buildSubjectsPdfIndex — two categories sharing a basename', () => {
     isFile: () => !directory
   })
 
+  // The index is now cached and invalidated by directory mtime (see the
+  // service header comment). These tests patch `readdir` to a different fake
+  // tree per test, but the real on-disk directories they name never change
+  // mtime — so without also patching `stat` to a fresh value each call, the
+  // cache would keep serving an earlier test's fake tree instead of rebuilding.
+  let fakeMtime = 0
+  function stubFreshMtimes () {
+    patch(fsPromises, 'stat', async () => ({ mtimeMs: ++fakeMtime }))
+  }
+
   /** A fake two-category tree, driven by the directory being read. */
   function stubTree () {
+    stubFreshMtimes()
     patch(fsPromises, 'readdir', async (dir) => {
       const name = String(dir)
       if (name.endsWith('SubjectsPdf')) {
@@ -190,10 +202,133 @@ describe('buildSubjectsPdfIndex — two categories sharing a basename', () => {
   })
 
   it('matches the .pdf extension case-insensitively', async () => {
+    stubFreshMtimes()
     patch(fsPromises, 'readdir', async (dir) =>
       String(dir).endsWith('SubjectsPdf') ? [dirent('Upper.PDF'), dirent('notes.txt')] : []
     )
 
     assert.deepStrictEqual(await subjectsPdfLibrary.listSubjectsPdfFiles(), ['Upper.PDF'])
+  })
+})
+
+describe('subjectsPdfLibrary index cache — invalidation and concurrency', () => {
+  const dirent = (name, directory = false) => ({
+    name,
+    isDirectory: () => directory,
+    isFile: () => !directory
+  })
+
+  let mtimeCounter = 0
+  const nextMtime = () => ++mtimeCounter
+
+  /** Fails the next build so the module cache is guaranteed empty afterwards. */
+  async function resetCache () {
+    patch(fsPromises, 'readdir', async () => { throw fsError('EACCES', 'reset') })
+    await assert.rejects(() => subjectsPdfLibrary.listSubjectsPdfFiles(), /reset/)
+  }
+
+  it('reuses the cached index across calls when nothing on disk changed', async () => {
+    await resetCache()
+
+    let readdirCalls = 0
+    patch(fsPromises, 'stat', async () => ({ mtimeMs: 42 }))
+    patch(fsPromises, 'readdir', async (dir) => {
+      if (String(dir).endsWith('SubjectsPdf')) {
+        readdirCalls++
+        return [dirent('Stable.pdf')]
+      }
+      return []
+    })
+
+    const first = await subjectsPdfLibrary.listSubjectsPdfFiles()
+    const second = await subjectsPdfLibrary.listSubjectsPdfFiles()
+
+    assert.deepStrictEqual(first, ['Stable.pdf'])
+    assert.deepStrictEqual(second, ['Stable.pdf'])
+    assert.strictEqual(readdirCalls, 1, 'an unchanged mtime must not trigger a second walk')
+  })
+
+  it('rebuilds when a covered directory disappears between calls', async () => {
+    await resetCache()
+
+    let statShouldFail = false
+    let readdirCalls = 0
+    patch(fsPromises, 'stat', async () => {
+      if (statShouldFail) throw fsError('ENOENT')
+      return { mtimeMs: nextMtime() }
+    })
+    patch(fsPromises, 'readdir', async (dir) => {
+      if (String(dir).endsWith('SubjectsPdf')) {
+        readdirCalls++
+        return [dirent('Present.pdf')]
+      }
+      return []
+    })
+
+    await subjectsPdfLibrary.listSubjectsPdfFiles()
+    statShouldFail = true
+    const after = await subjectsPdfLibrary.listSubjectsPdfFiles()
+
+    assert.deepStrictEqual(after, ['Present.pdf'])
+    assert.strictEqual(readdirCalls, 2, 'a vanished directory must force a rebuild, not a stale hit')
+  })
+
+  it('shares one in-flight build between concurrent first callers', async () => {
+    await resetCache()
+
+    let readdirCalls = 0
+    patch(fsPromises, 'stat', async () => ({ mtimeMs: nextMtime() }))
+    patch(fsPromises, 'readdir', async (dir) => {
+      if (String(dir).endsWith('SubjectsPdf')) {
+        readdirCalls++
+        await new Promise((resolve) => setImmediate(resolve))
+        return [dirent('Concurrent.pdf')]
+      }
+      return []
+    })
+
+    const [a, b] = await Promise.all([
+      subjectsPdfLibrary.listSubjectsPdfFiles(),
+      subjectsPdfLibrary.listSubjectsPdfFiles()
+    ])
+
+    assert.deepStrictEqual(a, ['Concurrent.pdf'])
+    assert.deepStrictEqual(b, ['Concurrent.pdf'])
+    assert.strictEqual(readdirCalls, 1, 'two concurrent first calls must share one walk, not race')
+  })
+
+  it('drops a directory that vanishes between readdir and stat, instead of failing the build', async () => {
+    await resetCache()
+
+    patch(fsPromises, 'readdir', async (dir) =>
+      String(dir).endsWith('SubjectsPdf') ? [dirent('Racy.pdf')] : []
+    )
+    patch(fsPromises, 'stat', async () => { throw fsError('ENOENT') })
+
+    const files = await subjectsPdfLibrary.listSubjectsPdfFiles()
+    assert.deepStrictEqual(files, ['Racy.pdf'])
+  })
+})
+
+describe('documentReader index cache — a rebuild that fails must not poison the cache', () => {
+  it('propagates a readdir failure and lets the next call try again', async () => {
+    // stat succeeds (the real Fr/Notion directory exists) but readdir is made
+    // to fail once, simulating a transient error mid-rebuild. If the failed
+    // entry stayed cached, every later call would reject forever even once
+    // the transient condition is gone.
+    const realReaddir = fsPromises.readdir
+    let failNext = true
+    patch(fsPromises, 'readdir', async (dir, ...rest) => {
+      if (failNext && String(dir).includes(`${require('node:path').sep}Fr${require('node:path').sep}Notion`)) {
+        failNext = false
+        throw fsError('EACCES', 'permission denied')
+      }
+      return realReaddir(dir, ...rest)
+    })
+
+    await assert.rejects(() => documentReader.listBaseDocumentaireNames('fr'), /permission denied/)
+
+    const names = await documentReader.listBaseDocumentaireNames('fr')
+    assert.ok(names.includes('Alternance.md'))
   })
 })

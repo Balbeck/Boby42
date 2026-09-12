@@ -44,6 +44,21 @@ const MAX_LIMIT = 10000
 const NUMERIC_TYPE_RE = /int|numeric|real|double|decimal|float|serial|money/i
 
 /**
+ * @param {{ column_name: string, data_type: string, udt_name: string, is_nullable: string }} row
+ * @returns {import('../types/types').LabColumn}
+ */
+function mapColumn (row) {
+  return {
+    name: row.column_name,
+    // USER-DEFINED covers the pg enums (conversations.page, messages.role) —
+    // the udt_name (e.g. enum_conversations_page) is more honest than the label.
+    type: row.data_type === 'USER-DEFINED' ? row.udt_name : row.data_type,
+    nullable: row.is_nullable === 'YES',
+    numeric: NUMERIC_TYPE_RE.test(row.data_type)
+  }
+}
+
+/**
  * The public-schema columns of one table, in declaration order.
  *
  * @param {string} name - a table name already checked against ALLOWED
@@ -57,14 +72,7 @@ async function columnsOf (name) {
       ORDER BY ordinal_position`,
     { type: QueryTypes.SELECT, replacements: { name } }
   )
-  return rows.map((row) => ({
-    name: row.column_name,
-    // USER-DEFINED covers the pg enums (conversations.page, messages.role) —
-    // the udt_name (e.g. enum_conversations_page) is more honest than the label.
-    type: row.data_type === 'USER-DEFINED' ? row.udt_name : row.data_type,
-    nullable: row.is_nullable === 'YES',
-    numeric: NUMERIC_TYPE_RE.test(row.data_type)
-  }))
+  return rows.map(mapColumn)
 }
 
 /**
@@ -107,15 +115,34 @@ function recencyKey (name, columns) {
  */
 async function listTables () {
   const names = [...ALLOWED].sort()
-  const out = []
-  for (const name of names) {
-    out.push({
-      name,
-      columns: await columnsOf(name),
-      rowCount: await countOf(name)
-    })
+  if (names.length === 0) return []
+
+  const columnRows = await sequelize.query(
+    `SELECT table_name, column_name, data_type, udt_name, is_nullable
+       FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name IN (:names)
+      ORDER BY table_name, ordinal_position`,
+    { type: QueryTypes.SELECT, replacements: { names } }
+  )
+  const columnsByTable = new Map()
+  for (const row of columnRows) {
+    if (!columnsByTable.has(row.table_name)) columnsByTable.set(row.table_name, [])
+    columnsByTable.get(row.table_name).push(mapColumn(row))
   }
-  return out
+
+  // `name` values come only from ALLOWED (model-derived, never request input);
+  // each arm is double-quoted like every other identifier interpolation here.
+  const countsSql = names
+    .map((name) => `SELECT '${name}'::text AS name, count(*)::int AS count FROM "${name}"`)
+    .join('\n    UNION ALL\n    ')
+  const countRows = await sequelize.query(countsSql, { type: QueryTypes.SELECT })
+  const countByTable = new Map(countRows.map((row) => [row.name, row.count]))
+
+  return names.map((name) => ({
+    name,
+    columns: columnsByTable.get(name) || [],
+    rowCount: countByTable.get(name) || 0
+  }))
 }
 
 /**

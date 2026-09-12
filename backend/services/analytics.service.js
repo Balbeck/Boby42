@@ -365,13 +365,14 @@ async function errorBreakdown ({ from, to }) {
 async function unmatchedQuestions ({ from, to, limit = 100, offset = 0, page = null }) {
   const replacements = { from, to, limit: clampLimit(limit, 500), offset: Math.max(0, offset | 0), page }
 
-  const items = await sequelize.query(
+  const rows = await sequelize.query(
     `
     SELECT e.id::text                 AS id,
            e.payload->>'question'     AS question,
            e.payload->>'language'     AS language,
            c.page::text               AS page,
-           e.created_at               AS "createdAt"
+           e.created_at               AS "createdAt",
+           count(*) OVER ()::int      AS "_total"
     FROM events e
     LEFT JOIN conversations c ON c.id = e.conversation_id
     WHERE e.type = 'no_match'
@@ -383,19 +384,23 @@ async function unmatchedQuestions ({ from, to, limit = 100, offset = 0, page = n
     { type: QueryTypes.SELECT, replacements }
   )
 
-  const total = one(
-    await sequelize.query(
-      `
-      SELECT count(*)::int AS total
-      FROM events e
-      LEFT JOIN conversations c ON c.id = e.conversation_id
-      WHERE e.type = 'no_match'
-        AND e.created_at BETWEEN :from AND :to
-        AND (:page::text IS NULL OR c.page::text = :page::text)
-      `,
-      { type: QueryTypes.SELECT, replacements }
-    )
-  ).total
+  const total = rows.length > 0
+    ? rows[0]._total
+    : one(
+        await sequelize.query(
+          `
+          SELECT count(*)::int AS total
+          FROM events e
+          LEFT JOIN conversations c ON c.id = e.conversation_id
+          WHERE e.type = 'no_match'
+            AND e.created_at BETWEEN :from AND :to
+            AND (:page::text IS NULL OR c.page::text = :page::text)
+          `,
+          { type: QueryTypes.SELECT, replacements }
+        )
+      ).total
+
+  const items = rows.map(({ _total, ...item }) => item)
 
   return { items, total }
 }
@@ -411,7 +416,7 @@ async function unmatchedQuestions ({ from, to, limit = 100, offset = 0, page = n
 async function conversationList ({ from, to, limit = 25, offset = 0, page = null }) {
   const replacements = { from, to, limit: clampLimit(limit, 200), offset: Math.max(0, offset | 0), page }
 
-  const items = await sequelize.query(
+  const rows = await sequelize.query(
     `
     SELECT c.id,
            c.page::text        AS page,
@@ -423,7 +428,8 @@ async function conversationList ({ from, to, limit = 25, offset = 0, page = null
              SELECT 1 FROM messages m
              JOIN message_feedback mf ON mf.message_id = m.id
              WHERE m.conversation_id = c.id AND m.role = 'assistant' AND mf.rating = -1
-           ) AS "hasNegativeFeedback"
+           ) AS "hasNegativeFeedback",
+           count(*) OVER ()::int AS "_total"
     FROM conversations c
     WHERE c.created_at BETWEEN :from AND :to
       AND (:page::text IS NULL OR c.page::text = :page::text)
@@ -433,17 +439,21 @@ async function conversationList ({ from, to, limit = 25, offset = 0, page = null
     { type: QueryTypes.SELECT, replacements }
   )
 
-  const total = one(
-    await sequelize.query(
-      `
-      SELECT count(*)::int AS total
-      FROM conversations c
-      WHERE c.created_at BETWEEN :from AND :to
-        AND (:page::text IS NULL OR c.page::text = :page::text)
-      `,
-      { type: QueryTypes.SELECT, replacements }
-    )
-  ).total
+  const total = rows.length > 0
+    ? rows[0]._total
+    : one(
+        await sequelize.query(
+          `
+          SELECT count(*)::int AS total
+          FROM conversations c
+          WHERE c.created_at BETWEEN :from AND :to
+            AND (:page::text IS NULL OR c.page::text = :page::text)
+          `,
+          { type: QueryTypes.SELECT, replacements }
+        )
+      ).total
+
+  const items = rows.map(({ _total, ...item }) => item)
 
   return { items, total }
 }
