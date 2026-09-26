@@ -33,7 +33,7 @@ Non-secret variables live in `.env.prod` / `.env.localMac` (both committed — p
 |---|---|---|
 | `PORT` | consumed by `fastify start -P app.js` (fastify-cli); also read by `frontend/vite.config.js` to build the proxy target | port the Fastify server listens on |
 | `CORS_ORIGIN` | `backend/plugins/cors.js:12` | single allowed origin for CORS checks |
-| `OLLAMA_BASE_URL` | `backend/services/ollama.service.js:3` | Ollama host reachable from the backend container (`localhost` in prod, `host.docker.internal` on local Mac) |
+| `OLLAMA_BASE_URL` | `backend/services/ollama.service.js:3` | Ollama host reachable from the backend container — `localhost` (real Ollama) in prod; on local Mac, the prod GPU via the `/ollama` test proxy (`https://42gpt.42ai.net/ollama`) instead of a local Ollama |
 | `OLLAMA_GENERATION_MODEL` | `backend/services/ollama.service.js:4` | LLM model name for answer generation |
 | `OLLAMA_EMBEDDING_MODEL` | `backend/services/ollama.service.js:5` | embedding model name for retrieval |
 | `POSTGRES_HOST` / `POSTGRES_PORT` | `backend/db/config.js` | Postgres address — `postgres` / `5432` (bridge, local Mac) vs `localhost` / `5442` (loopback, prod `network_mode: host`) |

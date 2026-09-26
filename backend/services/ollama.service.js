@@ -3,6 +3,12 @@
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL
 const OLLAMA_GENERATION_MODEL = process.env.OLLAMA_GENERATION_MODEL
 const OLLAMA_EMBEDDING_MODEL = process.env.OLLAMA_EMBEDDING_MODEL
+// Sent on every Ollama call so OLLAMA_BASE_URL can point at the /ollama test
+// proxy (routes/ollama.js) on local Mac, without any other code change. Unused
+// header when OLLAMA_BASE_URL is real Ollama (prod) — harmless there, and a
+// no-op object when the key is unset.
+const OLLAMA_PROXY_KEY = process.env.OLLAMA_PROXY_KEY
+const PROXY_KEY_HEADER = OLLAMA_PROXY_KEY ? { 'x-ollama-key': OLLAMA_PROXY_KEY } : {}
 
 // The model's Modelfile sets no num_ctx, so without this the window is
 // whatever the host's Ollama defaults to (16 384 on Ollama 0.20.3 here,
@@ -55,7 +61,7 @@ async function generateAnswer(prompt, options = {}, { onToken, signal } = {}) {
 
   const response = await ollamaFetch(`${OLLAMA_BASE_URL}/api/generate`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...PROXY_KEY_HEADER },
     body: JSON.stringify({
       model: OLLAMA_GENERATION_MODEL,
       prompt,
@@ -115,7 +121,7 @@ async function generateAnswer(prompt, options = {}, { onToken, signal } = {}) {
 async function generateEmbedding(text) {
   const response = await ollamaFetch(`${OLLAMA_BASE_URL}/api/embeddings`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...PROXY_KEY_HEADER },
     body: JSON.stringify({
       model: OLLAMA_EMBEDDING_MODEL,
       prompt: text
